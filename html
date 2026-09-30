@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Осада Тёмной Крепости</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;background:#101522;color:white;font-family:Arial}
+canvas{display:block}
+#ui{
+ position:fixed;top:10px;left:10px;right:10px;
+ display:flex;justify-content:space-between;
+ pointer-events:none;font-size:18px
+}
+#start,#restart{
+ position:fixed;left:50%;top:50%;
+ transform:translate(-50%,-50%);
+ padding:18px 35px;font-size:22px;
+ border:0;border-radius:12px;
+ background:#b66a35;color:white;
+ cursor:pointer;z-index:5
+}
+#restart{display:none}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="ui">
+ <span>🏰 Замок: <b id="hp">100</b></span>
+ <span>🌊 Волна: <b id="wave">1</b>/30</span>
+ <span>🪙 Золото: <b id="gold">0</b></span>
+</div>
+
+<button id="start">Начать осаду</button>
+<button id="restart">Начать заново</button>
+
+<script>
+const c=document.getElementById("game");
+const x=c.getContext("2d");
+
+function resize(){
+ c.width=innerWidth;
+ c.height=innerHeight;
+}
+resize();
+addEventListener("resize",resize);
+
+let running=false;
+let wave=1;
+let hp=100;
+let gold=0;
+
+let player={
+ x:innerWidth/2,
+ y:innerHeight-150,
+ speed:7
+};
+
+let enemies=[];
+let arrows=[];
+let keys={};
+
+document.addEventListener("keydown",e=>{
+ keys[e.key]=true;
+});
+
+document.addEventListener("keyup",e=>{
+ keys[e.key]=false;
+});
+
+/* ЗАПУСК */
+document.getElementById("start").addEventListener("click",()=>{
+ startGame();
+});
+
+function startGame(){
+ running=true;
+ document.getElementById("start").style.display="none";
+ wave=1;
+ hp=100;
+ gold=0;
+ enemies=[];
+ arrows=[];
+ spawnWave();
+}
+
+/* ВОЛНА */
+function spawnWave(){
+
+ enemies=[];
+
+ let amount=5+wave*2;
+
+ for(let i=0;i<amount;i++){
+
+  enemies.push({
+   x:50+Math.random()*(innerWidth-100),
+   y:-Math.random()*500,
+   hp:20+wave*5,
+   speed:1+wave*.04
+  });
+
+ }
+}
+
+/* СТРЕЛЬБА */
+c.addEventListener("click",e=>{
+
+ if(!running)return;
+
+ arrows.push({
+  x:player.x,
+  y:player.y,
+  tx:e.clientX,
+  ty:e.clientY
+ });
+
+});
+
+/* ОБНОВЛЕНИЕ */
+
+function update(){
+
+ if(!running)return;
+
+ if(keys["ArrowLeft"])
+  player.x-=player.speed;
+
+ if(keys["ArrowRight"])
+  player.x+=player.speed;
+
+ player.x=Math.max(30,Math.min(innerWidth-30,player.x));
+
+ /* стрелы */
+
+ for(let a of arrows){
+
+  let dx=a.tx-a.x;
+  let dy=a.ty-a.y;
+  let d=Math.hypot(dx,dy);
+
+  if(d<15){
+   a.dead=true;
+  }else{
+   a.x+=dx/d*12;
+   a.y+=dy/d*12;
+  }
+
+  for(let e of enemies){
+
+   if(Math.hypot(a.x-e.x,a.y-e.y)<25){
+
+    e.hp-=20;
+    a.dead=true;
+
+    if(e.hp<=0){
+     e.dead=true;
+     gold+=10;
+    }
+
+   }
+
+  }
+
+ }
+
+ arrows=arrows.filter(a=>!a.dead);
+
+ /* орки */
+
+ for(let e of enemies){
+
+  e.y+=e.speed;
+
+  if(e.y>innerHeight-120){
+
+   e.dead=true;
+   hp-=10;
+
+  }
+
+ }
+
+ enemies=enemies.filter(e=>!e.dead);
+
+ /* следующая волна */
+
+ if(enemies.length===0){
+
+  wave++;
+
+  if(wave>30){
+   running=false;
+   alert("🏆 Победа! Ты защитил крепость!");
+   return;
+  }
+
+  spawnWave();
+
+ }
+
+ document.getElementById("hp").textContent=hp;
+ document.getElementById("wave").textContent=wave;
+ document.getElementById("gold").textContent=gold;
+
+ if(hp<=0){
+  running=false;
+  document.getElementById("restart").style.display="block";
+ }
+
+}
+
+/* РИСОВАНИЕ */
+
+function draw(){
+
+ x.clearRect(0,0,innerWidth,innerHeight);
+
+ /* небо */
+
+ let g=x.createLinearGradient(0,0,0,innerHeight);
+ g.addColorStop(0,"#080d1c");
+ g.addColorStop(1,"#273047");
+
+ x.fillStyle=g;
+ x.fillRect(0,0,innerWidth,innerHeight);
+
+ /* луна */
+
+ x.fillStyle="#eee8c9";
+ x.beginPath();
+ x.arc(innerWidth-120,100,45,0,Math.PI*2);
+ x.fill();
+
+ /* замок */
+
+ x.fillStyle="#34363d";
+ x.fillRect(0,innerHeight-120,innerWidth,120);
+
+ /* башни */
+
+ x.fillRect(50,innerHeight-220,100,220);
+ x.fillRect(innerWidth-150,innerHeight-220,100,220);
+
+ /* факелы */
+
+ x.fillStyle="#ff9b45";
+ x.beginPath();
+ x.arc(100,innerHeight-170,12,0,Math.PI*2);
+ x.fill();
+
+ x.beginPath();
+ x.arc(innerWidth-100,innerHeight-170,12,0,Math.PI*2);
+ x.fill();
+
+ /* лучник */
+
+ x.fillStyle="#795548";
+ x.beginPath();
+ x.arc(player.x,player.y-20,15,0,Math.PI*2);
+ x.fill();
+
+ x.fillStyle="#20232b";
+ x.fillRect(player.x-15,player.y,30,45);
+
+ /* орки */
+
+ for(let e of enemies){
+
+  x.fillStyle="#527044";
+
+  x.beginPath();
+  x.arc(e.x,e.y,20,0,Math.PI*2);
+  x.fill();
+
+  x.fillStyle="#ffcc55";
+  x.fillRect(e.x-10,e.y-4,6,5);
+  x.fillRect(e.x+5,e.y-4,6,5);
+
+  /* HP */
+
+  x.fillStyle="#222";
+  x.fillRect(e.x-20,e.y-30,40,5);
+
+  x.fillStyle="#d9534f";
+  x.fillRect(e.x-20,e.y-30,40*(e.hp/(20+wave*5)),5);
+
+ }
+
+ /* стрелы */
+
+ x.strokeStyle="#e5c17a";
+ x.lineWidth=4;
+
+ for(let a of arrows){
+
+  x.beginPath();
+  x.moveTo(a.x,a.y);
+  x.lineTo(a.x-(a.tx-a.x)*.05,a.y-(a.ty-a.y)*.05);
+  x.stroke();
+
+ }
+
+}
+
+function loop(){
+
+ update();
+ draw();
+
+ requestAnimationFrame(loop);
+
+}
+
+document.getElementById("restart").onclick=()=>{
+ document.getElementById("restart").style.display="none";
+ startGame();
+};
+
+loop();
+</script>
+
+</body>
+</html>
