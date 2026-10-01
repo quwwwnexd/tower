@@ -2,293 +2,793 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Осада Тёмной Крепости</title>
 
 <style>
 *{
     box-sizing:border-box;
+    margin:0;
+    padding:0;
     user-select:none;
     -webkit-user-select:none;
 }
 
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#070a10;
+body{
+    background:#080b12;
+    color:white;
     font-family:Arial,sans-serif;
-    touch-action:none;
+    overflow:hidden;
 }
 
-canvas{
-    display:block;
-    width:100%;
+#game{
+    position:relative;
+    width:100vw;
+    height:100vh;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at 50% 10%,#283451 0%,#10182a 38%,#070b13 100%);
+}
+
+/* ЛУНА */
+
+.moon{
+    position:absolute;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#e8e4ca;
+    box-shadow:0 0 35px rgba(240,235,190,.35);
+    top:55px;
+    right:9%;
+    opacity:.8;
+}
+
+/* ЛЕС */
+
+.forest{
+    position:absolute;
+    left:0;
+    right:0;
+    top:29%;
+    bottom:0;
+    overflow:hidden;
+    background:
+        linear-gradient(#1a3825,#102719 60%,#0a1810);
+}
+
+.ground{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 15% 30%,#294a29 0 3px,transparent 4px),
+        radial-gradient(circle at 40% 70%,#3c592c 0 4px,transparent 5px),
+        radial-gradient(circle at 72% 35%,#253f24 0 5px,transparent 6px),
+        radial-gradient(circle at 88% 75%,#344d29 0 3px,transparent 4px);
+}
+
+/* ДЕРЕВЬЯ */
+
+.tree{
+    position:absolute;
+    width:90px;
+    height:150px;
+}
+
+.tree .trunk{
+    position:absolute;
+    bottom:0;
+    left:38px;
+    width:18px;
+    height:75px;
+    background:#39271b;
+    border-radius:8px;
+}
+
+.tree .crown{
+    position:absolute;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#183b22;
+    box-shadow:
+        20px 15px 0 #21482a,
+        -18px 25px 0 #16341f,
+        5px -12px 0 #285431;
+}
+
+.tree.t1{left:2%;top:5%;transform:scale(.8)}
+.tree.t2{left:17%;top:38%;transform:scale(.65)}
+.tree.t3{left:31%;top:8%;transform:scale(.95)}
+.tree.t4{left:48%;top:45%;transform:scale(.7)}
+.tree.t5{left:63%;top:10%;transform:scale(.85)}
+.tree.t6{left:80%;top:37%;transform:scale(.75)}
+.tree.t7{right:-2%;top:5%;transform:scale(1.05)}
+
+.path{
+    position:absolute;
+    height:42px;
+    background:#66533c;
+    border-radius:50%;
+    opacity:.75;
+    transform:rotate(-8deg);
+}
+
+.path.p1{
+    width:55%;
+    left:0;
+    top:73%;
+}
+
+.path.p2{
+    width:50%;
+    right:0;
+    top:48%;
+    transform:rotate(10deg);
+}
+
+.path.p3{
+    width:40%;
+    left:28%;
+    top:35%;
+    transform:rotate(3deg);
+}
+
+/* КРЕПОСТНАЯ СТЕНА */
+
+.wall{
+    position:absolute;
+    z-index:20;
+    left:0;
+    right:0;
+    top:20%;
+    height:15%;
+    min-height:115px;
+}
+
+/* основное тело */
+
+.wall-body{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    height:78%;
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(0,0,0,.13) 0 2px,
+            transparent 2px 31px
+        ),
+        repeating-linear-gradient(
+            90deg,
+            transparent 0 70px,
+            rgba(0,0,0,.13) 70px 73px,
+            transparent 73px 145px
+        ),
+        linear-gradient(#858b8c,#555b5d);
+    border-top:5px solid #a8ada9;
+    box-shadow:
+        inset 0 7px 0 rgba(255,255,255,.12),
+        0 12px 25px rgba(0,0,0,.6);
+}
+
+/* верхняя площадка стены */
+
+.wall-top{
+    position:absolute;
+    left:0;
+    right:0;
+    top:15%;
+    height:18%;
+    background:linear-gradient(#9ca1a0,#64696b);
+    border-top:4px solid #c0c3bd;
+    border-bottom:4px solid #414648;
+}
+
+/* ЗУБЦЫ */
+
+.crenellations{
+    position:absolute;
+    z-index:30;
+    top:0;
+    left:0;
+    right:0;
+    height:45%;
+    display:flex;
+    justify-content:space-around;
+    align-items:flex-start;
+}
+
+.crenel{
+    width:6.5%;
     height:100%;
+    min-width:35px;
+    background:
+        linear-gradient(90deg,#707677,#a2a6a3 50%,#64696a);
+    border:
+        3px solid #44494b;
+    border-top:5px solid #c0c3be;
+    box-shadow:
+        inset 3px 0 rgba(255,255,255,.08),
+        4px 5px 5px rgba(0,0,0,.3);
 }
 
-#hud{
-    position:fixed;
+.gap{
+    width:4%;
+}
+
+/* БОЕВАЯ ПЛОЩАДКА */
+
+.battlement-floor{
+    position:absolute;
+    z-index:24;
+    left:0;
+    right:0;
+    top:32%;
+    height:13%;
+    background:linear-gradient(#777c7d,#505657);
+    border-top:3px solid #b5b8b2;
+    border-bottom:3px solid #3b4041;
+}
+
+/* ЛУЧНИК */
+
+.archer{
+    position:absolute;
+    z-index:26;
+
+    /* стоит ЗА зубцами */
+    bottom:18%;
+    left:50%;
+
+    width:62px;
+    height:125px;
+
+    transform:translateX(-50%);
+}
+
+/* голова */
+
+.archer-head{
+    position:absolute;
+    left:18px;
+    top:0;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#c58c62;
+    border:3px solid #38271e;
+}
+
+/* капюшон */
+
+.archer-hood{
+    position:absolute;
+    left:11px;
+    top:-7px;
+    width:52px;
+    height:31px;
+    border-radius:50% 50% 35% 35%;
+    background:#202936;
+    border:3px solid #10151e;
+}
+
+/* тело */
+
+.archer-body{
+    position:absolute;
+    left:14px;
+    top:34px;
+    width:45px;
+    height:65px;
+    border-radius:12px 12px 6px 6px;
+    background:linear-gradient(90deg,#263644,#415363,#202d39);
+    border:3px solid #111820;
+}
+
+/* ноги */
+
+.leg{
+    position:absolute;
+    top:91px;
+    width:15px;
+    height:35px;
+    background:#20252b;
+    border:3px solid #101419;
+}
+
+.leg.left{left:17px}
+.leg.right{right:12px}
+
+/* лук */
+
+.bow{
+    position:absolute;
+    right:-20px;
+    top:42px;
+    width:48px;
+    height:68px;
+    border-right:5px solid #9b683e;
+    border-radius:50%;
+}
+
+.bow-string{
+    position:absolute;
+    right:4px;
+    top:2px;
+    width:2px;
+    height:64px;
+    background:#d8d0b8;
+    transform:rotate(-10deg);
+}
+
+/* АРБАЛЕТНАЯ / СТРЕЛА */
+
+.arrow{
+    position:absolute;
+    z-index:28;
+    width:25px;
+    height:3px;
+    background:#d9d0ad;
+    transform-origin:left center;
+}
+
+.arrow:after{
+    content:"";
+    position:absolute;
+    right:-5px;
+    top:-3px;
+    border-left:7px solid #d9d0ad;
+    border-top:4px solid transparent;
+    border-bottom:4px solid transparent;
+}
+
+/* UI */
+
+#ui{
+    position:absolute;
+    z-index:100;
     top:12px;
     left:12px;
     right:12px;
-    z-index:20;
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
     pointer-events:none;
 }
 
+.panel{
+    pointer-events:auto;
+    background:rgba(9,13,21,.82);
+    border:1px solid #555e6e;
+    border-radius:12px;
+    padding:10px 14px;
+    box-shadow:0 5px 20px rgba(0,0,0,.35);
+    backdrop-filter:blur(5px);
+}
+
 .stats{
     display:flex;
-    gap:7px;
-    flex-wrap:wrap;
-}
-
-.stat{
-    padding:8px 11px;
-    background:#0d1320eF;
-    border:2px solid #505866;
-    border-radius:10px;
-    color:#eee;
+    gap:16px;
     font-size:14px;
-    font-weight:bold;
-    box-shadow:0 5px 20px #0008;
 }
 
-.stat span{
-    color:#e4b75d;
+.gold{
+    color:#e6c45b;
+}
+
+.hp{
+    color:#e56a64;
 }
 
 #pause{
-    pointer-events:auto;
-    width:45px;
-    height:42px;
-    border-radius:11px;
-    border:2px solid #596170;
-    background:#111927eF;
-    color:#fff;
-    font-size:19px;
+    border:0;
+    background:#242d3a;
+    color:white;
+    padding:9px 14px;
+    border-radius:8px;
+    font-size:16px;
 }
 
-#message{
-    position:fixed;
-    z-index:25;
+/* сообщения */
+
+#waveMessage{
+    position:absolute;
+    z-index:120;
     left:50%;
-    top:12%;
-    transform:translateX(-50%);
-    padding:10px 20px;
-    background:#0c1320ee;
-    border:2px solid #706a5d;
+    top:44%;
+    transform:translate(-50%,-50%);
+    background:rgba(8,10,16,.9);
+    border:1px solid #707987;
+    padding:18px 28px;
     border-radius:12px;
-    color:#eee;
-    font-size:21px;
-    font-weight:bold;
+    font-size:23px;
     opacity:0;
-    transition:.2s;
+    transition:.35s;
     pointer-events:none;
-    white-space:nowrap;
 }
 
-#message.show{
+#waveMessage.show{
     opacity:1;
 }
 
-#controls{
-    position:fixed;
+/* враги */
+
+.enemy{
+    position:absolute;
+    z-index:15;
+    width:46px;
+    height:62px;
+}
+
+.enemy-body{
+    position:absolute;
+    left:9px;
+    top:18px;
+    width:30px;
+    height:35px;
+    background:#507341;
+    border:3px solid #182217;
+    border-radius:12px 12px 7px 7px;
+}
+
+.enemy-head{
+    position:absolute;
+    left:7px;
+    top:0;
+    width:34px;
+    height:29px;
+    border-radius:45% 45% 35% 35%;
+    background:#648c4b;
+    border:3px solid #182217;
+}
+
+.enemy-eye{
+    position:absolute;
+    width:5px;
+    height:5px;
+    background:#15150f;
+    top:10px;
+}
+
+.enemy-eye.a{left:8px}
+.enemy-eye.b{right:8px}
+
+.enemy-hp{
+    position:absolute;
     left:0;
     right:0;
-    bottom:14px;
-    z-index:21;
+    top:-10px;
+    height:5px;
+    background:#271919;
+}
+
+.enemy-hp-inner{
+    height:100%;
+    background:#d35a51;
+}
+
+.enemy.fast .enemy-body{
+    background:#596a8c;
+}
+
+.enemy.armored .enemy-body{
+    background:#64676d;
+}
+
+.enemy.elite .enemy-body{
+    background:#713f50;
+}
+
+.enemy.boss{
+    width:90px;
+    height:120px;
+    transform-origin:center bottom;
+}
+
+.enemy.boss .enemy-head{
+    width:60px;
+    height:52px;
+    left:15px;
+    background:#815333;
+}
+
+.enemy.boss .enemy-body{
+    width:65px;
+    height:70px;
+    left:13px;
+    top:40px;
+    background:#713d32;
+}
+
+/* кнопки телефона */
+
+.mobile-controls{
+    position:absolute;
+    z-index:150;
+    bottom:20px;
+    left:20px;
+    right:20px;
     display:flex;
     justify-content:space-between;
-    padding:0 16px;
     pointer-events:none;
 }
 
-.control{
-    width:72px;
-    height:60px;
-    border-radius:16px;
-    border:2px solid #686f7c;
-    background:#111927e8;
-    color:white;
-    font-size:28px;
+.mobile-controls button{
     pointer-events:auto;
+    width:70px;
+    height:70px;
+    border-radius:18px;
+    border:2px solid #69727c;
+    background:rgba(12,17,25,.85);
+    color:white;
+    font-size:30px;
+    touch-action:none;
 }
 
-#shop{
-    position:fixed;
-    z-index:22;
-    left:50%;
-    bottom:12px;
-    transform:translateX(-50%);
-    display:none;
-    gap:6px;
-    flex-wrap:wrap;
-    justify-content:center;
-    width:min(720px,96vw);
+.shoot{
+    position:absolute;
+    right:20px;
+    bottom:20px;
+    z-index:150;
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    border:2px solid #d1ad55;
+    background:rgba(74,48,19,.9);
+    color:#ffe19a;
+    font-size:25px;
+    pointer-events:auto;
+    touch-action:none;
 }
 
-.upgrade{
-    border:1px solid #686f7c;
-    border-radius:10px;
-    padding:7px 10px;
-    background:#101725ee;
-    color:#eee;
-    font-size:11px;
-    font-weight:bold;
-}
+/* экран меню */
 
-.upgrade b,
-.upgrade span{
-    color:#e3b55d;
-}
-
-#screen{
-    position:fixed;
+#menu{
+    position:absolute;
     inset:0;
-    z-index:100;
+    z-index:300;
     display:flex;
     justify-content:center;
     align-items:center;
-    padding:20px;
-    background:#060912ee;
+    background:
+        radial-gradient(circle,#1d293c,#070a11 75%);
 }
 
-.card{
-    width:min(700px,94vw);
-    padding:30px;
-    border-radius:22px;
-    border:2px solid #59616f;
-    background:#101725f7;
+.menu-box{
     text-align:center;
-    box-shadow:0 20px 90px #000d;
+    padding:35px;
+    width:min(90%,500px);
 }
 
-.card h1{
-    margin:0 0 14px;
-    color:#eee;
-    font-size:clamp(30px,7vw,55px);
+.title{
+    font-size:clamp(32px,7vw,64px);
+    letter-spacing:4px;
+    margin-bottom:10px;
+    color:#e6dfc5;
+    text-shadow:0 4px 15px #000;
 }
 
-.card p{
-    color:#c5c9d0;
-    line-height:1.5;
+.subtitle{
+    color:#9da6b2;
+    margin-bottom:30px;
 }
 
 .start{
-    margin-top:10px;
-    padding:14px 28px;
-    border:0;
-    border-radius:13px;
-    background:#a75d35;
-    color:white;
-    font-size:18px;
-    font-weight:bold;
+    border:1px solid #9d8147;
+    background:linear-gradient(#665329,#392d18);
+    color:#f5e3aa;
+    padding:15px 35px;
+    border-radius:10px;
+    font-size:19px;
+    cursor:pointer;
 }
 
-.small{
-    margin-top:13px;
-    color:#89919f;
-    font-size:12px;
+.hidden{
+    display:none!important;
+}
+
+/* конец */
+
+#endScreen{
+    position:absolute;
+    z-index:500;
+    inset:0;
+    background:rgba(4,6,10,.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.endBox{
+    background:#101722;
+    border:1px solid #626d7c;
+    padding:35px;
+    border-radius:15px;
+}
+
+.endBox h1{
+    font-size:40px;
+    margin-bottom:15px;
+}
+
+.endBox button{
+    margin-top:25px;
+    padding:12px 28px;
+    border:0;
+    border-radius:8px;
+    background:#594923;
+    color:white;
+    font-size:17px;
+}
+
+/* адаптация */
+
+@media(max-width:700px){
+
+    .wall{
+        top:23%;
+        height:18%;
+    }
+
+    .forest{
+        top:34%;
+    }
+
+    .archer{
+        transform:translateX(-50%) scale(.8);
+        transform-origin:bottom center;
+    }
+
+    .stats{
+        gap:8px;
+        font-size:11px;
+    }
+
+    .panel{
+        padding:8px;
+    }
+
+    .moon{
+        width:55px;
+        height:55px;
+        top:75px;
+    }
+
+    .crenel{
+        min-width:24px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="game"></canvas>
+<div id="game">
 
-<div id="hud">
+    <div class="moon"></div>
 
-    <div class="stats">
+    <!-- ЛЕС -->
+    <div class="forest">
+        <div class="ground"></div>
 
-        <div class="stat">
-            🏰 <span id="hp">100/100</span>
+        <div class="path p1"></div>
+        <div class="path p2"></div>
+        <div class="path p3"></div>
+
+        <div class="tree t1"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t2"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t3"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t4"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t5"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t6"><div class="crown"></div><div class="trunk"></div></div>
+        <div class="tree t7"><div class="crown"></div><div class="trunk"></div></div>
+    </div>
+
+    <!-- ТОЛЬКО СТЕНА ЗАМКА -->
+    <div class="wall">
+
+        <div class="wall-body"></div>
+
+        <div class="wall-top"></div>
+
+        <!-- ЛУЧНИК НА ПЛОЩАДКЕ ЗА ЗУБЦАМИ -->
+        <div class="archer">
+
+            <div class="archer-hood"></div>
+            <div class="archer-head"></div>
+
+            <div class="archer-body"></div>
+
+            <div class="leg left"></div>
+            <div class="leg right"></div>
+
+            <div class="bow">
+                <div class="bow-string"></div>
+            </div>
+
         </div>
 
-        <div class="stat">
-            🌊 <span id="wave">1</span>/30
+        <!-- ЗУБЦЫ ИДУТ ПЕРЕД ЛУЧНИКОМ -->
+        <div class="crenellations">
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div><div class="gap"></div>
+            <div class="crenel"></div>
         </div>
 
-        <div class="stat">
-            👹 <span id="enemies">0</span>
+        <div class="battlement-floor"></div>
+
+    </div>
+
+    <!-- UI -->
+
+    <div id="ui">
+
+        <div class="panel stats">
+            <span>🏰 Волна <b id="wave">1</b>/30</span>
+            <span class="hp">❤ <b id="castleHp">1000</b></span>
+            <span>👹 <b id="enemyCount">0</b></span>
+            <span class="gold">◆ <b id="gold">0</b></span>
         </div>
 
-        <div class="stat">
-            🪙 <span id="gold">0</span>
+        <button id="pause">Ⅱ</button>
+
+    </div>
+
+    <div id="waveMessage">
+        Волна приближается…
+    </div>
+
+    <!-- МОБИЛЬНОЕ УПРАВЛЕНИЕ -->
+
+    <div class="mobile-controls">
+        <button id="left">←</button>
+        <button id="right">→</button>
+    </div>
+
+    <button class="shoot" id="shoot">🏹</button>
+
+    <!-- МЕНЮ -->
+
+    <div id="menu">
+
+        <div class="menu-box">
+
+            <div class="title">ОСАДА</div>
+
+            <div class="subtitle">
+                Тёмная крепость
+            </div>
+
+            <button class="start" id="start">
+                Начать осаду
+            </button>
+
         </div>
 
     </div>
 
-    <button id="pause">Ⅱ</button>
+    <!-- КОНЕЦ -->
 
-</div>
+    <div id="endScreen" class="hidden">
 
-<div id="message"></div>
+        <div class="endBox">
 
-<div id="controls">
+            <h1 id="endTitle">Замок пал</h1>
 
-    <button class="control" id="left">◀</button>
-    <button class="control" id="right">▶</button>
+            <p id="endText"></p>
 
-</div>
+            <button onclick="location.reload()">
+                Начать заново
+            </button>
 
-<div id="shop">
-
-    <button class="upgrade" data-up="damage">
-        🏹 Урон <b id="damageLv">1</b><br>
-        🪙 <span id="damageCost">35</span>
-    </button>
-
-    <button class="upgrade" data-up="rate">
-        ⚡ Скорость <b id="rateLv">1</b><br>
-        🪙 <span id="rateCost">45</span>
-    </button>
-
-    <button class="upgrade" data-up="castle">
-        🏰 Замок <b id="castleLv">1</b><br>
-        🪙 <span id="castleCost">60</span>
-    </button>
-
-    <button class="upgrade" data-up="move">
-        👟 Движение <b id="moveLv">1</b><br>
-        🪙 <span id="moveCost">45</span>
-    </button>
-
-    <button class="upgrade" data-up="pierce">
-        🎯 Пробитие <b id="pierceLv">0</b><br>
-        🪙 <span id="pierceCost">90</span>
-    </button>
-
-</div>
-
-<div id="screen">
-
-    <div class="card">
-
-        <h1>Осада Тёмной Крепости</h1>
-
-        <p>
-            Ночь опустилась на королевство.
-            На крепостной стене стоит последний лучник.
-            Внизу, среди деревьев, появляется орочья армия.
-        </p>
-
-        <p>
-            <b>← →</b> — движение по стене<br>
-            <b>Клик / тап</b> — выпустить стрелу
-        </p>
-
-        <button class="start" id="start">
-            НАЧАТЬ ОСАДУ
-        </button>
-
-        <div class="small">
-            Dark Fantasy • Medieval Defense • 30 волн
         </div>
 
     </div>
@@ -297,3427 +797,735 @@ canvas{
 
 <script>
 
-/* =====================================================
-   ОСНОВА
-===================================================== */
+const game = document.getElementById("game");
 
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+const waveText = document.getElementById("wave");
+const hpText = document.getElementById("castleHp");
+const enemyText = document.getElementById("enemyCount");
+const goldText = document.getElementById("gold");
 
-let W=innerWidth;
-let H=innerHeight;
+const menu = document.getElementById("menu");
+const startButton = document.getElementById("start");
+const pauseButton = document.getElementById("pause");
 
-const DPR=Math.min(devicePixelRatio||1,2);
+const message = document.getElementById("waveMessage");
 
-function resize(){
+const endScreen = document.getElementById("endScreen");
+const endTitle = document.getElementById("endTitle");
+const endText = document.getElementById("endText");
 
-    W=innerWidth;
-    H=innerHeight;
+const archer = document.querySelector(".archer");
 
-    canvas.width=W*DPR;
-    canvas.height=H*DPR;
+let running = false;
+let paused = false;
 
-    canvas.style.width=W+"px";
-    canvas.style.height=H+"px";
+let wave = 0;
+let gold = 0;
+let castleHp = 1000;
 
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-}
+let enemies = [];
+let arrows = [];
 
-addEventListener("resize",resize);
-resize();
+let archerX = 50;
 
-const $=id=>document.getElementById(id);
-
-
-/* =====================================================
-   КАРТА
-===================================================== */
+let lastShot = 0;
 
 /*
-    Важная новая композиция:
-
-    ┌─────────────────────────────────┐
-    │         КРЕПОСТЬ                │
-    │  башня       лучник       башня │
-    │══════════ КАМЕННАЯ СТЕНА ══════│
-    │                                 │
-    │         ЛЕС / ПОЛЕ              │
-    │     👹       👹       👹        │
-    │       👹     👹     👹          │
-    │          👹 👹 👹              │
-    │                                 │
-    └─────────────────────────────────┘
+    ВАЖНО:
+    Стрельба намеренно замедлена.
+    750 мс = примерно 1.3 выстрела/сек.
 */
+const shootCooldown = 750;
 
-function wallTop(){
-    return Math.max(170,H*.30);
-}
+let upgrades = {
+    damage:1,
+    fireRate:1,
+    castle:1,
+    speed:1,
+    pierce:0
+};
 
-function wallDeck(){
-    return wallTop()+62;
-}
-
-function wallAttackLine(){
-    return wallDeck()+5;
-}
-
-function forestTop(){
-    return wallDeck()+8;
-}
-
-function archerY(){
-    return wallTop()+17;
-}
-
-function groundBottom(){
-    return H;
-}
-
-
-/* =====================================================
-   ИГРА
-===================================================== */
-
-let game;
-
-function resetGame(){
-
-    game={
-
-        running:false,
-        paused:false,
-
-        wave:0,
-
-        intermission:true,
-        timer:2.5,
-
-        castleHP:100,
-        castleMax:100,
-
-        gold:0,
-
-        player:{
-            x:W/2,
-            cooldown:0,
-            draw:0
-        },
-
-        enemies:[],
-        arrows:[],
-        particles:[],
-
-        spawn:[],
-        spawnTimer:0,
-
-        upgrades:{
-            damage:1,
-            rate:1,
-            castle:1,
-            move:1,
-            pierce:0
-        }
-    };
-}
-
-resetGame();
-
-
-/* =====================================================
-   ТИПЫ ВРАГОВ
-===================================================== */
-
-const enemyTypes={
-
-    grunt:{
-        hp:35,
-        speed:25,
-        damage:7,
-        reward:8,
-        size:1
+const enemyTypes = {
+    normal:{
+        hp:60,
+        speed:18,
+        damage:25,
+        reward:10
     },
 
-    brute:{
-        hp:95,
-        speed:16,
-        damage:14,
-        reward:16,
-        size:1.18
+    tough:{
+        hp:120,
+        speed:15,
+        damage:35,
+        reward:18
     },
 
-    runner:{
-        hp:48,
-        speed:43,
-        damage:9,
-        reward:12,
-        size:.82
+    fast:{
+        hp:55,
+        speed:32,
+        damage:22,
+        reward:14
     },
 
     armored:{
-        hp:145,
-        speed:18,
-        damage:19,
-        reward:23,
-        size:1.08,
-        armor:.30
+        hp:220,
+        speed:11,
+        damage:50,
+        reward:30
     },
 
     elite:{
-        hp:245,
-        speed:21,
-        damage:28,
-        reward:36,
-        size:1.28
+        hp:400,
+        speed:17,
+        damage:70,
+        reward:55
     },
 
     boss:{
-        hp:1900,
-        speed:11,
-        damage:55,
-        reward:300,
-        size:2.25,
-        boss:true
+        hp:3000,
+        speed:8,
+        damage:200,
+        reward:500
     }
-
 };
 
+/* ================================
+        СТАРТ
+================================ */
 
-/* =====================================================
-   ВОЛНЫ
-===================================================== */
+startButton.onclick = startGame;
 
-function createWave(number){
+function startGame(){
 
-    const list=[];
+    menu.classList.add("hidden");
 
-    let amount=7+Math.floor(number*1.55);
+    running = true;
 
-    for(let i=0;i<amount;i++){
+    showWaveMessage("Волна 1 приближается…");
 
-        const r=Math.random();
-
-        let type="grunt";
-
-        if(number>=6 && r<.28)
-            type="brute";
-
-        if(number>=11 && r<.22)
-            type="runner";
-
-        if(number>=11 && r>.72 && r<.88)
-            type="armored";
-
-        if(number>=16 && r<.25)
-            type="elite";
-
-        if(number>=21){
-
-            if(r<.25)
-                type="elite";
-
-            else if(r<.48)
-                type="armored";
-
-            else if(r<.65)
-                type="runner";
-
-            else if(r<.82)
-                type="brute";
-
-            else
-                type="grunt";
-        }
-
-        if(number>=26){
-
-            if(r<.35)
-                type="elite";
-
-            else if(r<.60)
-                type="armored";
-
-            else if(r<.78)
-                type="brute";
-
-            else
-                type="runner";
-        }
-
-        list.push(type);
-    }
-
-    if(number===30)
-        list.push("boss");
-
-    return list;
+    setTimeout(()=>{
+        startWave();
+    },1800);
 }
 
+/* ================================
+        ВОЛНЫ
+================================ */
 
 function startWave(){
 
-    game.wave++;
+    if(!running) return;
 
-    game.spawn=createWave(game.wave);
+    wave++;
 
-    game.spawnTimer=.4;
-
-    game.intermission=false;
-
-    $("wave").textContent=game.wave;
-
-    $("shop").style.display="none";
-
-    if(game.wave===30)
-        message("⚔ ФИНАЛЬНАЯ ОСАДА!",2400);
-
-    else
-        message("🌊 Волна "+game.wave+" приближается!",1800);
-}
-
-
-function waveFinished(){
-
-    if(game.wave>=30){
+    if(wave > 30){
 
         victory();
 
         return;
     }
 
-    game.intermission=true;
-
-    game.timer=4;
-
-    $("shop").style.display="flex";
-
-    message(
-        "🏹 Передышка — укрепи оборону",
-        2600
-    );
-}
-
-
-/* =====================================================
-   МАРШРУТЫ
-===================================================== */
-
-/*
-   Орки появляются ВНИЗУ.
-
-   Затем движутся по одному из трёх
-   лесных маршрутов вверх.
-
-   0 = левый
-   1 = центральный
-   2 = правый
-*/
-
-function getRoute(){
-
-    const route=Math.floor(Math.random()*3);
-
-    const center=W/2;
-
-    if(route===0){
-
-        return [
-            {
-                x:W*.18+
-                   Math.random()*W*.10,
-                y:H+30
-            },
-            {
-                x:W*.22,
-                y:H*.78
-            },
-            {
-                x:W*.28,
-                y:H*.61
-            },
-            {
-                x:W*.34,
-                y:wallAttackLine()
-            }
-        ];
-    }
-
-
-    if(route===1){
-
-        return [
-            {
-                x:center+
-                   (Math.random()-.5)*W*.08,
-                y:H+30
-            },
-            {
-                x:center-W*.06,
-                y:H*.77
-            },
-            {
-                x:center+W*.04,
-                y:H*.60
-            },
-            {
-                x:center,
-                y:wallAttackLine()
-            }
-        ];
-    }
-
-
-    return [
-        {
-            x:W*.82-
-               Math.random()*W*.10,
-            y:H+30
-        },
-        {
-            x:W*.77,
-            y:H*.78
-        },
-        {
-            x:W*.70,
-            y:H*.61
-        },
-        {
-            x:W*.64,
-            y:wallAttackLine()
-        }
-    ];
-}
-
-
-/* =====================================================
-   СОЗДАНИЕ ВРАГА
-===================================================== */
-
-function spawnEnemy(){
-
-    const type=game.spawn.shift();
-
-    const base=enemyTypes[type];
-
-    const route=getRoute();
-
-    const start=route[0];
-
-    const scale=
-        1+(game.wave-1)*.075;
-
-
-    const enemy={
-
-        type:type,
-
-        x:start.x,
-
-        y:start.y,
-
-        route:route,
-
-        waypoint:1,
-
-        hp:base.hp*scale,
-
-        maxHP:base.hp*scale,
-
-        speed:
-            base.speed*
-            (1+(game.wave-1)*.008),
-
-        damage:
-            base.damage*
-            (1+(game.wave-1)*.035),
-
-        reward:base.reward,
-
-        size:base.size,
-
-        hit:0,
-
-        death:0,
-
-        attack:0,
-
-        phase:Math.random()*10
-    };
-
-
-    game.enemies.push(enemy);
-}
-
-
-/* =====================================================
-   СООБЩЕНИЯ
-===================================================== */
-
-let messageTimer;
-
-function message(text,time=1600){
-
-    const el=$("message");
-
-    el.textContent=text;
-
-    el.classList.add("show");
-
-    clearTimeout(messageTimer);
-
-    messageTimer=setTimeout(
-        ()=>el.classList.remove("show"),
-        time
-    );
-}
-
-
-/* =====================================================
-   СТРЕЛЬБА
-===================================================== */
-
-function shoot(targetX,targetY){
-
-    if(!game.running)
-        return;
-
-    if(game.paused)
-        return;
-
-    if(game.intermission)
-        return;
-
-    if(game.player.cooldown>0)
-        return;
-
-
-    const p=game.player;
-
-    const startX=p.x;
-
-    const startY=archerY()+4;
-
-
-    const dx=targetX-startX;
-
-    const dy=targetY-startY;
-
-    const distance=Math.hypot(dx,dy)||1;
-
-
-    /*
-       Базовая скорость стрельбы:
-       1 стрела каждые 0.85 секунды.
-
-       Улучшения уменьшают задержку
-       постепенно, но она никогда
-       не становится меньше 0.30 сек.
-    */
-
-    p.cooldown=
-        Math.max(
-            .30,
-            .85-
-            (game.upgrades.rate-1)*.07
-        );
-
-
-    p.draw=.22;
-
-
-    game.arrows.push({
-
-        x:startX,
-
-        y:startY,
-
-        vx:dx/distance*680,
-
-        vy:dy/distance*680,
-
-        life:1.8,
-
-        damage:
-            18+
-            (game.upgrades.damage-1)*9,
-
-        pierce:game.upgrades.pierce,
-
-        hit:[]
-    });
-}
-
-
-/* =====================================================
-   УРОН
-===================================================== */
-
-function damageEnemy(enemy,arrow){
-
-    const data=enemyTypes[enemy.type];
-
-    let damage=arrow.damage;
-
-    if(data.armor)
-        damage*=1-data.armor;
-
-    enemy.hp-=damage;
-
-    enemy.hit=.12;
-
-    particleBurst(
-        enemy.x,
-        enemy.y,
-        7
+    waveText.textContent = wave;
+
+    showWaveMessage(
+        wave === 30
+        ? "ФИНАЛЬНАЯ ОСАДА"
+        : "Волна " + wave + " приближается…"
     );
 
+    let count = 5 + Math.floor(wave * 1.6);
 
-    if(enemy.hp<=0){
-
-        enemy.death=.35;
-
-        game.gold+=enemy.reward;
-
-        particleBurst(
-            enemy.x,
-            enemy.y,
-            18
-        );
-    }
-}
-
-
-/* =====================================================
-   ЧАСТИЦЫ
-===================================================== */
-
-function particleBurst(x,y,count){
+    let delay = 1000;
 
     for(let i=0;i<count;i++){
 
-        game.particles.push({
+        setTimeout(()=>{
 
-            x:x,
-
-            y:y,
-
-            vx:(Math.random()-.5)*150,
-
-            vy:(Math.random()-.8)*150,
-
-            life:.25+
-                Math.random()*.4
-        });
-    }
-}
-
-
-/* =====================================================
-   UPDATE
-===================================================== */
-
-function update(dt){
-
-    if(!game.running)
-        return;
-
-    if(game.paused)
-        return;
-
-
-    /* ---------------------------------
-       ДВИЖЕНИЕ ЛУЧНИКА
-    --------------------------------- */
-
-    let direction=0;
-
-    if(keys.left)
-        direction--;
-
-    if(keys.right)
-        direction++;
-
-
-    game.player.x+=
-        direction*
-        (
-            145+
-            (game.upgrades.move-1)*25
-        )*
-        dt;
-
-
-    /*
-       Лучник может ходить только
-       по центральной боевой площадке.
-    */
-
-    game.player.x=
-        Math.max(
-            W*.37+28,
-            Math.min(
-                W*.63-28,
-                game.player.x
-            )
-        );
-
-
-    game.player.cooldown=
-        Math.max(
-            0,
-            game.player.cooldown-dt
-        );
-
-
-    game.player.draw=
-        Math.max(
-            0,
-            game.player.draw-dt
-        );
-
-
-    /* ---------------------------------
-       ПЕРЕРЫВ МЕЖДУ ВОЛНАМИ
-    --------------------------------- */
-
-    if(game.intermission){
-
-        game.timer-=dt;
-
-        if(game.timer<=0)
-            startWave();
-
-    }else{
-
-        if(game.spawn.length>0){
-
-            game.spawnTimer-=dt;
-
-            if(game.spawnTimer<=0){
-
+            if(running){
                 spawnEnemy();
-
-                game.spawnTimer=
-                    Math.max(
-                        .35,
-                        .72-game.wave*.008
-                    );
-            }
-        }
-
-
-        if(
-            game.spawn.length===0 &&
-            game.enemies.length===0
-        ){
-
-            waveFinished();
-        }
-    }
-
-
-    /* ---------------------------------
-       СТРЕЛЫ
-    --------------------------------- */
-
-    for(const arrow of game.arrows){
-
-        arrow.x+=arrow.vx*dt;
-
-        arrow.y+=arrow.vy*dt;
-
-        arrow.life-=dt;
-
-
-        for(const enemy of game.enemies){
-
-            if(enemy.death>0)
-                continue;
-
-            if(arrow.hit.includes(enemy))
-                continue;
-
-
-            const distance=
-                Math.hypot(
-                    arrow.x-enemy.x,
-                    arrow.y-enemy.y
-                );
-
-
-            if(
-                distance<
-                22+
-                enemy.size*15
-            ){
-
-                arrow.hit.push(enemy);
-
-                damageEnemy(
-                    enemy,
-                    arrow
-                );
-
-
-                if(
-                    arrow.hit.length>
-                    game.upgrades.pierce+1
-                ){
-
-                    arrow.life=0;
-                }
-            }
-        }
-    }
-
-
-    game.arrows=
-        game.arrows.filter(
-            arrow=>
-                arrow.life>0 &&
-                arrow.x>-100 &&
-                arrow.x<W+100 &&
-                arrow.y>-100 &&
-                arrow.y<H+100
-        );
-
-
-    /* ---------------------------------
-       ОРКИ
-    --------------------------------- */
-
-    for(const enemy of game.enemies){
-
-        enemy.phase+=dt*6;
-
-        enemy.hit=
-            Math.max(
-                0,
-                enemy.hit-dt
-            );
-
-
-        if(enemy.death>0){
-
-            enemy.death-=dt;
-
-            continue;
-        }
-
-
-        /*
-           Движение по маршруту.
-        */
-
-        if(enemy.waypoint<enemy.route.length){
-
-            const target=
-                enemy.route[enemy.waypoint];
-
-            const dx=
-                target.x-enemy.x;
-
-            const dy=
-                target.y-enemy.y;
-
-            const distance=
-                Math.hypot(dx,dy);
-
-
-            if(distance<4){
-
-                enemy.waypoint++;
-
-            }else{
-
-                enemy.x+=
-                    dx/distance*
-                    enemy.speed*
-                    dt;
-
-                enemy.y+=
-                    dy/distance*
-                    enemy.speed*
-                    dt;
             }
 
-        }else{
+        },delay);
 
-            /*
-               Орк физически дошёл до стены.
-               Только теперь он начинает её атаковать.
-            */
+        delay += Math.max(350,850-wave*12);
+    }
 
-            enemy.attack-=dt;
+    if(wave === 30){
 
-            if(enemy.attack<=0){
+        setTimeout(()=>{
 
-                game.castleHP-=enemy.damage;
-
-                enemy.attack=.9;
-
-                particleBurst(
-                    enemy.x,
-                    wallAttackLine(),
-                    8
-                );
+            if(running){
+                spawnEnemy("boss");
             }
-        }
-    }
 
-
-    /* ---------------------------------
-       СМЕРТЬ ОРКОВ
-    --------------------------------- */
-
-    game.enemies=
-        game.enemies.filter(
-            enemy=>
-                enemy.death>0 ||
-                enemy.hp>0
-        );
-
-
-    for(
-        let i=game.enemies.length-1;
-        i>=0;
-        i--
-    ){
-
-        if(
-            game.enemies[i].death<=0 &&
-            game.enemies[i].hp<=0
-        ){
-
-            game.enemies.splice(i,1);
-        }
-    }
-
-
-    /* ---------------------------------
-       ЧАСТИЦЫ
-    --------------------------------- */
-
-    for(const p of game.particles){
-
-        p.x+=p.vx*dt;
-
-        p.y+=p.vy*dt;
-
-        p.vy+=80*dt;
-
-        p.life-=dt;
-    }
-
-
-    game.particles=
-        game.particles.filter(
-            p=>p.life>0
-        );
-
-
-    if(game.castleHP<=0)
-        defeat();
-
-
-    updateHUD();
-}
-
-
-/* =====================================================
-   HUD
-===================================================== */
-
-function updateHUD(){
-
-    $("hp").textContent=
-        Math.max(
-            0,
-            Math.ceil(game.castleHP)
-        )+
-        "/"+
-        game.castleMax;
-
-
-    $("wave").textContent=
-        Math.max(
-            1,
-            game.wave
-        );
-
-
-    $("enemies").textContent=
-        game.enemies.filter(
-            e=>e.death<=0
-        ).length;
-
-
-    $("gold").textContent=
-        game.gold;
-
-
-    for(
-        const type of
-        [
-            "damage",
-            "rate",
-            "castle",
-            "move",
-            "pierce"
-        ]
-    ){
-
-        $(type+"Lv").textContent=
-            game.upgrades[type];
-
-        $(type+"Cost").textContent=
-            upgradeCost(type);
+        },delay+1000);
     }
 }
 
+/* ================================
+        ТИП ВРАГА
+================================ */
 
-/* =====================================================
-   УЛУЧШЕНИЯ
-===================================================== */
+function getEnemyType(){
 
-function upgradeCost(type){
+    if(wave <= 5)
+        return "normal";
 
-    let base;
+    if(wave <= 10)
+        return Math.random()<.25 ? "tough":"normal";
 
-    if(type==="damage")
-        base=35;
+    if(wave <= 15){
 
-    else if(type==="rate")
-        base=45;
+        const r=Math.random();
 
-    else if(type==="castle")
-        base=60;
+        if(r<.35) return "fast";
+        if(r<.65) return "armored";
 
-    else if(type==="move")
-        base=45;
+        return "tough";
+    }
 
-    else
-        base=90;
+    if(wave <= 20){
 
+        const r=Math.random();
 
-    return Math.floor(
-        base*
-        Math.pow(
-            1.55,
-            Math.max(
-                0,
-                game.upgrades[type]-
-                (type==="pierce"?0:1)
-            )
-        )
-    );
+        if(r<.35) return "elite";
+        if(r<.65) return "armored";
+
+        return "fast";
+    }
+
+    if(wave <= 25){
+
+        const types=["fast","armored","elite","tough"];
+
+        return types[Math.floor(Math.random()*types.length)];
+    }
+
+    const types=["armored","elite","elite","fast"];
+
+    return types[Math.floor(Math.random()*types.length)];
 }
 
+/* ================================
+        СОЗДАНИЕ ОРКА
+================================ */
 
-document
-.querySelectorAll(".upgrade")
-.forEach(button=>{
+function spawnEnemy(forceType=null){
 
-    button.onclick=()=>{
+    const type = forceType || getEnemyType();
 
-        const type=
-            button.dataset.up;
+    const data = enemyTypes[type];
 
-        if(!game.intermission)
-            return;
+    const el = document.createElement("div");
 
-        if(
-            type==="pierce" &&
-            game.upgrades.pierce>=3
-        )
-            return;
-
-
-        const cost=
-            upgradeCost(type);
-
-
-        if(game.gold<cost)
-            return;
-
-
-        game.gold-=cost;
-
-        game.upgrades[type]++;
-
-
-        if(type==="castle"){
-
-            game.castleMax+=25;
-
-            game.castleHP+=25;
-        }
-
-
-        message(
-            "✨ Улучшение куплено!",
-            800
-        );
-
-        updateHUD();
-    };
-});
-
-
-/* =====================================================
-   РИСОВАНИЕ
-===================================================== */
-
-function draw(){
-
-    ctx.clearRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    drawSky();
-
-    drawMountains();
-
-    drawFarForest();
-
-    drawBattlefield();
-
-    drawPaths();
-
-    drawTrees();
-
-    drawShrubs();
-
-    drawRocks();
-
-    drawCastle();
-
-    drawArrows();
-
-    for(const enemy of game.enemies)
-        drawEnemy(enemy);
-
-    drawArcher();
-
-    drawParticles();
-
-    drawVignette();
-}
-
-
-/* =====================================================
-   НЕБО
-===================================================== */
-
-function drawSky(){
-
-    const gradient=
-        ctx.createLinearGradient(
-            0,
-            0,
-            0,
-            wallTop()
-        );
-
-    gradient.addColorStop(
-        0,
-        "#070b19"
-    );
-
-    gradient.addColorStop(
-        .65,
-        "#11182a"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#1d2431"
-    );
-
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        wallTop()
-    );
-
-
-    /* звёзды */
-
-    for(let i=0;i<80;i++){
-
-        const x=(i*137)%W;
-
-        const y=(i*71)%(wallTop()*.72);
-
-        ctx.fillStyle=
-            i%7===0?
-            "#e1d6ae":
-            "#7f8995";
-
-        ctx.fillRect(
-            x,
-            y,
-            i%7===0?2:1,
-            i%7===0?2:1
-        );
-    }
-
-
-    /* луна */
-
-    const moonX=W*.80;
-
-    const moonY=wallTop()*.40;
-
-    const moonR=
-        Math.min(W,H)*.055;
-
-
-    ctx.fillStyle="#e5dfc4";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        moonX,
-        moonY,
-        moonR,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle="#11172a";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        moonX+moonR*.30,
-        moonY-moonR*.25,
-        moonR,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-}
-
-
-/* =====================================================
-   ГОРЫ
-===================================================== */
-
-function drawMountains(){
-
-    ctx.fillStyle="#0b111b";
-
-    ctx.beginPath();
-
-    ctx.moveTo(0,wallTop()+5);
-
-    for(
-        let x=0;
-        x<=W;
-        x+=65
-    ){
-
-        const h=
-            45+
-            ((x*17)%80);
-
-        ctx.lineTo(
-            x,
-            wallTop()-h
-        );
-    }
-
-    ctx.lineTo(W,wallTop()+30);
-
-    ctx.lineTo(0,wallTop()+30);
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-    /* лунные вершины */
-
-    ctx.strokeStyle="#293242";
-
-    ctx.lineWidth=2;
-
-    ctx.beginPath();
-
-    for(
-        let x=0;
-        x<=W;
-        x+=65
-    ){
-
-        const h=
-            45+
-            ((x*17)%80);
-
-        ctx.lineTo(
-            x,
-            wallTop()-h
-        );
-    }
-
-    ctx.stroke();
-}
-
-
-/* =====================================================
-   ДАЛЬНИЙ ЛЕС
-===================================================== */
-
-function drawFarForest(){
-
-    ctx.fillStyle="#17231b";
-
-    ctx.fillRect(
-        0,
-        forestTop(),
-        W,
-        H-forestTop()
-    );
-
+    el.className="enemy "+type;
 
     /*
-       дальняя линия деревьев
+        Орки появляются ТОЛЬКО ВНИЗУ ЛЕСА.
     */
 
-    for(
-        let x=-20;
-        x<W+40;
-        x+=24
-    ){
+    const startX = 10 + Math.random()*80;
 
-        const h=
-            45+
-            ((x*13)%55);
+    const startY =
+        68 +
+        Math.random()*25;
 
+    el.style.left=startX+"%";
+    el.style.top=startY+"%";
 
-        ctx.fillStyle="#111b17";
+    el.innerHTML=`
 
-        ctx.beginPath();
+        <div class="enemy-hp">
+            <div class="enemy-hp-inner"></div>
+        </div>
 
-        ctx.moveTo(
-            x,
-            forestTop()+40
-        );
+        <div class="enemy-head">
+            <div class="enemy-eye a"></div>
+            <div class="enemy-eye b"></div>
+        </div>
 
-        ctx.lineTo(
-            x+12,
-            forestTop()+40-h
-        );
+        <div class="enemy-body"></div>
 
-        ctx.lineTo(
-            x+25,
-            forestTop()+40
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-    }
-}
-
-
-/* =====================================================
-   ПОЛЕ
-===================================================== */
-
-function drawBattlefield(){
-
-    ctx.fillStyle="#31452b";
-
-    ctx.fillRect(
-        0,
-        forestTop(),
-        W,
-        H-forestTop()
-    );
-
-
-    /* светлая центральная поляна */
-
-    const gradient=
-        ctx.createLinearGradient(
-            0,
-            forestTop(),
-            0,
-            H
-        );
-
-    gradient.addColorStop(
-        0,
-        "#425d35"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#263821"
-    );
-
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,
-        forestTop(),
-        W,
-        H-forestTop()
-    );
-
-
-    /* мелкие участки земли */
-
-    for(let i=0;i<75;i++){
-
-        const x=(i*97)%W;
-
-        const y=
-            forestTop()+20+
-            ((i*59)%(H-forestTop()-30));
-
-
-        ctx.fillStyle=
-            i%3===0?
-            "#536a3c":
-            "#394d2d";
-
-
-        ctx.fillRect(
-            x,
-            y,
-            7+(i%4)*2,
-            3
-        );
-    }
-}
-
-
-/* =====================================================
-   ДОРОГИ
-===================================================== */
-
-function drawPaths(){
-
-    /*
-       Три широких маршрута.
-    */
-
-    drawPath([
-        [W*.23,H],
-        [W*.25,H*.78],
-        [W*.31,H*.61],
-        [W*.34,wallAttackLine()]
-    ]);
-
-    drawPath([
-        [W*.50,H],
-        [W*.46,H*.78],
-        [W*.52,H*.61],
-        [W*.50,wallAttackLine()]
-    ]);
-
-    drawPath([
-        [W*.77,H],
-        [W*.75,H*.78],
-        [W*.69,H*.61],
-        [W*.64,wallAttackLine()]
-    ]);
-}
-
-
-function drawPath(points){
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        points[0][0],
-        points[0][1]
-    );
-
-
-    for(
-        let i=1;
-        i<points.length;
-        i++
-    ){
-
-        ctx.lineTo(
-            points[i][0],
-            points[i][1]
-        );
-    }
-
-
-    ctx.lineWidth=
-        Math.max(
-            40,
-            W*.045
-        );
-
-    ctx.lineCap="round";
-
-    ctx.strokeStyle="#6d573e";
-
-    ctx.stroke();
-
-
-    ctx.lineWidth=3;
-
-    ctx.strokeStyle="#80694b";
-
-    ctx.stroke();
-}
-
-
-/* =====================================================
-   ДЕРЕВЬЯ
-===================================================== */
-
-function drawTrees(){
-
-    const positions=[];
-
-    /*
-       Боковые лесные массивы
-    */
-
-    for(let i=0;i<24;i++){
-
-        positions.push({
-            x:
-                i%2===0?
-                (i*83)%(
-                    W*.32
-                ):
-                W-
-                ((i*91)%(
-                    W*.32
-                )),
-
-            y:
-                forestTop()+35+
-                ((i*67)%(H-forestTop()-50)),
-
-            s:
-                .75+
-                (i%4)*.12
-        });
-    }
-
-
-    for(const tree of positions)
-        drawTree(
-            tree.x,
-            tree.y,
-            tree.s
-        );
-}
-
-
-function drawTree(x,y,s){
-
-    /* тень */
-
-    ctx.fillStyle="#18221988";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        x,
-        y+25*s,
-        28*s,
-        10*s,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* ствол */
-
-    ctx.fillStyle="#4c3526";
-
-    ctx.fillRect(
-        x-6*s,
-        y,
-        12*s,
-        34*s
-    );
-
-
-    /* ветки */
-
-    ctx.strokeStyle="#39281f";
-
-    ctx.lineWidth=5*s;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x,
-        y+18*s
-    );
-
-    ctx.lineTo(
-        x-18*s,
-        y-3*s
-    );
-
-    ctx.moveTo(
-        x,
-        y+14*s
-    );
-
-    ctx.lineTo(
-        x+18*s,
-        y-8*s
-    );
-
-    ctx.stroke();
-
-
-    /* крона */
-
-    ctx.fillStyle="#1e3928";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x,
-        y-7*s,
-        25*s,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle="#294a31";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x-12*s,
-        y-14*s,
-        17*s,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle="#345938";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x+12*s,
-        y-10*s,
-        16*s,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /* тёмные участки */
-
-    ctx.fillStyle="#162b21";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x+8*s,
-        y+2*s,
-        14*s,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-}
-
-
-/* =====================================================
-   КУСТЫ
-===================================================== */
-
-function drawShrubs(){
-
-    for(let i=0;i<38;i++){
-
-        const side=
-            i%2===0;
-
-        const x=
-            side?
-            (i*67)%(W*.37):
-            W-(i*71)%(W*.37);
-
-        const y=
-            forestTop()+25+
-            ((i*47)%(H-forestTop()-40));
-
-
-        ctx.fillStyle=
-            i%3===0?
-            "#253f29":
-            "#1d3525";
-
-
-        ctx.beginPath();
-
-        ctx.arc(
-            x,
-            y,
-            8+(i%4)*2,
-            0,
-            Math.PI*2
-        );
-
-        ctx.arc(
-            x+9,
-            y+3,
-            7+(i%3),
-            0,
-            Math.PI*2
-        );
-
-        ctx.arc(
-            x-9,
-            y+4,
-            7,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
-}
-
-
-/* =====================================================
-   КАМНИ
-===================================================== */
-
-function drawRocks(){
-
-    for(let i=0;i<25;i++){
-
-        const x=
-            (i*113)%W;
-
-        const y=
-            forestTop()+40+
-            ((i*73)%(H-forestTop()-60));
-
-
-        ctx.fillStyle="#4c5148";
-
-        ctx.beginPath();
-
-        ctx.ellipse(
-            x,
-            y,
-            8+(i%4)*2,
-            5+(i%3),
-            -.2,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#686b5d";
-
-        ctx.fillRect(
-            x-3,
-            y-3,
-            6,
-            2
-        );
-    }
-}
-
-
-/* =====================================================
-   КРЕПОСТЬ
-===================================================== */
-
-function drawCastle(){
-
-    const top=wallTop();
-
-    const deck=wallDeck();
-
-
-    /*
-       ТЁМНАЯ ПОДЛОЖКА
-       за стеной.
-    */
-
-    ctx.fillStyle="#171b22";
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        top+18
-    );
-
-
-    /*
-       Внутренняя часть замка
-    */
-
-    ctx.fillStyle="#292d34";
-
-    ctx.fillRect(
-        W*.12,
-        top-82,
-        W*.76,
-        83
-    );
-
-
-    /*
-       центральный замок
-    */
-
-    ctx.fillStyle="#363b43";
-
-    ctx.fillRect(
-        W*.30,
-        top-105,
-        W*.40,
-        105
-    );
-
-
-    /*
-       окна замка
-    */
-
-    for(
-        let i=0;
-        i<7;
-        i++
-    ){
-
-        const x=
-            W*.34+
-            i*W*.052;
-
-
-        ctx.fillStyle="#171b20";
-
-        ctx.fillRect(
-            x,
-            top-76,
-            20,
-            38
-        );
-
-
-        ctx.fillStyle="#d88743";
-
-        ctx.fillRect(
-            x+3,
-            top-72,
-            14,
-            30
-        );
-
-
-        ctx.fillStyle="#ffd37b";
-
-        ctx.fillRect(
-            x+6,
-            top-69,
-            8,
-            23
-        );
-    }
-
-
-    /*
-       ДВЕ БОКОВЫЕ БАШНИ
-    */
-
-    drawFortressTower(
-        W*.075,
-        top
-    );
-
-    drawFortressTower(
-        W*.825,
-        top
-    );
-
-
-    /*
-       ОСНОВНОЙ БОЕВОЙ ПАРАПЕТ
-    */
-
-    drawMainWall(
-        top,
-        deck
-    );
-
-
-    /*
-       ЦЕНТРАЛЬНАЯ БАШНЯ
-       с лучником
-    */
-
-    drawArcherTower(
-        W*.36,
-        top,
-        W*.28
-    );
-}
-
-
-/* =====================================================
-   ОСНОВНАЯ СТЕНА
-===================================================== */
-
-function drawMainWall(top,deck){
-
-    /*
-       Толстая каменная стена.
-    */
-
-    ctx.fillStyle="#555a60";
-
-    ctx.fillRect(
-        0,
-        top,
-        W,
-        62
-    );
-
-
-    /*
-       Нижняя тёмная полоса
-    */
-
-    ctx.fillStyle="#343940";
-
-    ctx.fillRect(
-        0,
-        top+45,
-        W,
-        17
-    );
-
-
-    /*
-       Крупная каменная кладка
-    */
-
-    for(
-        let row=0;
-        row<3;
-        row++
-    ){
-
-        const y=
-            top+
-            row*20;
-
-
-        const offset=
-            row%2?
-            -28:
-            0;
-
-
-        for(
-            let x=offset;
-            x<W;
-            x+=56
-        ){
-
-            ctx.strokeStyle="#363b42";
-
-            ctx.lineWidth=2;
-
-            ctx.strokeRect(
-                x,
-                y,
-                56,
-                20
-            );
-
-
-            ctx.strokeStyle="#666b70";
-
-            ctx.lineWidth=1;
-
-            ctx.strokeRect(
-                x+2,
-                y+2,
-                52,
-                16
-            );
-        }
-    }
-
-
-    /*
-       Верхняя дорожка стены
-    */
-
-    ctx.fillStyle="#646a70";
-
-    ctx.fillRect(
-        0,
-        top-8,
-        W,
-        10
-    );
-
-
-    /*
-       ЗУБЦЫ
-    */
-
-    for(
-        let x=0;
-        x<W;
-        x+=54
-    ){
-
-        ctx.fillStyle="#62686e";
-
-        ctx.fillRect(
-            x,
-            top-32,
-            34,
-            25
-        );
-
-
-        ctx.fillStyle="#41464d";
-
-        ctx.fillRect(
-            x+4,
-            top-28,
-            26,
-            4
-        );
-
-
-        /*
-           вертикальный скол
-        */
-
-        ctx.fillStyle="#777b7e";
-
-        ctx.fillRect(
-            x+7,
-            top-25,
-            2,
-            14
-        );
-    }
-
-
-    /*
-       Бойницы
-    */
-
-    for(
-        let x=25;
-        x<W;
-        x+=108
-    ){
-
-        ctx.fillStyle="#20252b";
-
-        ctx.fillRect(
-            x,
-            top+14,
-            10,
-            24
-        );
-
-
-        ctx.fillStyle="#777a7d";
-
-        ctx.fillRect(
-            x+2,
-            top+15,
-            2,
-            21
-        );
-    }
-}
-
-
-/* =====================================================
-   БОКОВЫЕ БАШНИ
-===================================================== */
-
-function drawFortressTower(x,top){
-
-    const width=W*.105;
-
-    /*
-       корпус
-    */
-
-    ctx.fillStyle="#4d5259";
-
-    ctx.fillRect(
-        x,
-        top-112,
-        width,
-        174
-    );
-
-
-    /*
-       каменная кладка
-    */
-
-    for(
-        let y=top-105;
-        y<top+55;
-        y+=18
-    ){
-
-        for(
-            let xx=x;
-            xx<x+width;
-            xx+=30
-        ){
-
-            ctx.strokeStyle="#363b42";
-
-            ctx.strokeRect(
-                xx,
-                y,
-                30,
-                18
-            );
-        }
-    }
-
-
-    /*
-       верх башни
-    */
-
-    ctx.fillStyle="#60666c";
-
-    ctx.fillRect(
-        x-5,
-        top-123,
-        width+10,
-        15
-    );
-
-
-    /*
-       зубцы башни
-    */
-
-    for(
-        let xx=x-3;
-        xx<x+width;
-        xx+=25
-    ){
-
-        ctx.fillStyle="#676d72";
-
-        ctx.fillRect(
-            xx,
-            top-145,
-            19,
-            23
-        );
-    }
-
-
-    /*
-       деревянный балкон
-    */
-
-    ctx.fillStyle="#543b30";
-
-    ctx.fillRect(
-        x+width*.18,
-        top-69,
-        width*.64,
-        45
-    );
-
-
-    ctx.strokeStyle="#30221e";
-
-    ctx.lineWidth=2;
-
-    for(
-        let xx=x+width*.18;
-        xx<x+width*.82;
-        xx+=10
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            xx,
-            top-69
-        );
-
-        ctx.lineTo(
-            xx,
-            top-24
-        );
-
-        ctx.stroke();
-    }
-
-
-    /*
-       окно
-    */
-
-    ctx.fillStyle="#171b20";
-
-    ctx.fillRect(
-        x+width*.37,
-        top-99,
-        width*.26,
-        24
-    );
-
-
-    ctx.fillStyle="#e09a4c";
-
-    ctx.fillRect(
-        x+width*.42,
-        top-95,
-        width*.16,
-        16
-    );
-}
-
-
-/* =====================================================
-   ЦЕНТРАЛЬНАЯ БАШНЯ
-===================================================== */
-
-function drawArcherTower(x,top,width){
-
-    /*
-       Высокая центральная башня.
-    */
-
-    ctx.fillStyle="#4e535a";
-
-    ctx.fillRect(
-        x,
-        top-122,
-        width,
-        122
-    );
-
-
-    /*
-       каменные блоки
-    */
-
-    for(
-        let y=top-114;
-        y<top;
-        y+=18
-    ){
-
-        const offset=
-            ((y/18)%2)*18;
-
-
-        for(
-            let xx=x-offset;
-            xx<x+width;
-            xx+=36
-        ){
-
-            ctx.strokeStyle="#343941";
-
-            ctx.lineWidth=2;
-
-            ctx.strokeRect(
-                xx,
-                y,
-                36,
-                18
-            );
-        }
-    }
-
-
-    /*
-       площадка
-    */
-
-    ctx.fillStyle="#656a70";
-
-    ctx.fillRect(
-        x-8,
-        top-132,
-        width+16,
-        11
-    );
-
-
-    /*
-       зубцы центральной башни
-    */
-
-    for(
-        let xx=x-5;
-        xx<x+width;
-        xx+=39
-    ){
-
-        ctx.fillStyle="#696f74";
-
-        ctx.fillRect(
-            xx,
-            top-157,
-            28,
-            26
-        );
-
-
-        ctx.fillStyle="#444950";
-
-        ctx.fillRect(
-            xx+4,
-            top-152,
-            20,
-            5
-        );
-    }
-
-
-    /*
-       деревянная часть площадки,
-       непосредственно под лучником
-    */
-
-    ctx.fillStyle="#573b2e";
-
-    ctx.fillRect(
-        x+7,
-        top-28,
-        width-14,
-        28
-    );
-
-
-    ctx.strokeStyle="#36241f";
-
-    ctx.lineWidth=2;
-
-    for(
-        let xx=x+12;
-        xx<x+width-8;
-        xx+=14
-    ){
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            xx,
-            top-28
-        );
-
-        ctx.lineTo(
-            xx,
-            top
-        );
-
-        ctx.stroke();
-    }
-
-
-    /*
-       флаги
-    */
-
-    drawFlag(
-        x+width*.22,
-        top-153
-    );
-
-    drawFlag(
-        x+width*.78,
-        top-153
-    );
-}
-
-
-function drawFlag(x,y){
-
-    ctx.strokeStyle="#342a24";
-
-    ctx.lineWidth=3;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x,
-        y
-    );
-
-    ctx.lineTo(
-        x,
-        y+34
-    );
-
-    ctx.stroke();
-
-
-    ctx.fillStyle="#9a493e";
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x,
-        y+3
-    );
-
-    ctx.lineTo(
-        x+22,
-        y+9
-    );
-
-    ctx.lineTo(
-        x,
-        y+17
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-}
-
-
-/* =====================================================
-   ЛУЧНИК
-===================================================== */
-
-function drawArcher(){
-
-    const x=game.player.x;
-
-    const y=archerY();
-
-
-    ctx.save();
-
-    ctx.translate(
-        x,
-        y
-    );
-
-
-    /*
-       тень
-    */
-
-    ctx.fillStyle="#15171988";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        40,
-        18,
-        5,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-       плащ
-    */
-
-    ctx.fillStyle="#202936";
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -17,
-        35
-    );
-
-    ctx.lineTo(
-        17,
-        35
-    );
-
-    ctx.lineTo(
-        12,
-        -5
-    );
-
-    ctx.lineTo(
-        -12,
-        -5
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-    /*
-       броня
-    */
-
-    ctx.fillStyle="#654838";
-
-    ctx.fillRect(
-        -11,
-        -5,
-        22,
-        27
-    );
-
-
-    /*
-       пояс
-    */
-
-    ctx.fillStyle="#b38a50";
-
-    ctx.fillRect(
-        -11,
-        17,
-        22,
-        4
-    );
-
-
-    /*
-       голова
-    */
-
-    ctx.fillStyle="#bd835f";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        -18,
-        11,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-       капюшон
-    */
-
-    ctx.fillStyle="#151c28";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        -21,
-        15,
-        Math.PI,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-       ноги
-    */
-
-    ctx.fillStyle="#1b212b";
-
-    ctx.fillRect(
-        -11,
-        32,
-        8,
-        14
-    );
-
-    ctx.fillRect(
-        3,
-        32,
-        8,
-        14
-    );
-
-
-    /*
-       лук
-    */
-
-    ctx.strokeStyle="#c58d4e";
-
-    ctx.lineWidth=3;
-
-    ctx.beginPath();
-
-    ctx.arc(
-        19,
-        1,
-        25,
-        -1.1,
-        1.1
-    );
-
-    ctx.stroke();
-
-
-    /*
-       натяжение тетивы
-    */
-
-    const pull=
-        game.player.draw>0?
-        12:
-        3;
-
-
-    ctx.strokeStyle="#ddd6c6";
-
-    ctx.lineWidth=1.5;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        8,
-        -22
-    );
-
-    ctx.lineTo(
-        8+pull,
-        1
-    );
-
-    ctx.lineTo(
-        8,
-        22
-    );
-
-    ctx.stroke();
-
-
-    if(game.player.draw>0){
-
-        ctx.strokeStyle="#d7b26e";
-
-        ctx.lineWidth=2;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            8+pull,
-            1
-        );
-
-        ctx.lineTo(
-            39,
-            1
-        );
-
-        ctx.stroke();
-    }
-
-
-    ctx.restore();
-}
-
-
-/* =====================================================
-   ОРКИ
-===================================================== */
-
-function drawEnemy(e){
-
-    const size=
-        18*
-        e.size;
-
-
-    ctx.save();
-
-    ctx.translate(
-        e.x,
-        e.y+
-        Math.sin(e.phase)*2
-    );
-
-
-    /*
-       тень
-    */
-
-    ctx.fillStyle="#10170e99";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        size*.95,
-        size*1.05,
-        size*.30,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    let color="#4f7046";
-
-    if(e.type==="runner")
-        color="#87503c";
-
-    if(e.type==="brute")
-        color="#684331";
-
-    if(e.type==="armored")
-        color="#60676a";
-
-    if(e.type==="elite")
-        color="#673d4d";
-
-    if(e.type==="boss")
-        color="#75452f";
-
-
-    if(e.hit>0)
-        color="#eee5d2";
-
-
-    /*
-       тело
-    */
-
-    ctx.fillStyle=color;
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        7,
-        size*.72,
-        size,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-       голова
-    */
-
-    ctx.beginPath();
-
-    ctx.arc(
-        0,
-        -size*.55,
-        size*.65,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    /*
-       уши
-    */
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -size*.45,
-        -size*.55
-    );
-
-    ctx.lineTo(
-        -size*1.15,
-        -size*.95
-    );
-
-    ctx.lineTo(
-        -size*.78,
-        -size*.20
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        size*.45,
-        -size*.55
-    );
-
-    ctx.lineTo(
-        size*1.15,
-        -size*.95
-    );
-
-    ctx.lineTo(
-        size*.78,
-        -size*.20
-    );
-
-    ctx.closePath();
-
-    ctx.fill();
-
-
-    /*
-       глаза
-    */
-
-    ctx.fillStyle="#e9ae4b";
-
-    ctx.fillRect(
-        -size*.38,
-        -size*.65,
-        6,
-        5
-    );
-
-    ctx.fillRect(
-        size*.12,
-        -size*.65,
-        6,
-        5
-    );
-
-
-    /*
-       зубы
-    */
-
-    ctx.fillStyle="#ddd1ad";
-
-    ctx.fillRect(
-        -7,
-        -size*.20,
-        5,
-        7
-    );
-
-    ctx.fillRect(
-        2,
-        -size*.20,
-        5,
-        7
-    );
-
-
-    /*
-       броня
-    */
-
-    if(
-        e.type==="armored" ||
-        e.type==="elite" ||
-        e.type==="boss"
-    ){
-
-        ctx.fillStyle=
-            e.type==="boss"?
-            "#443e3a":
-            "#484e52";
-
-        ctx.fillRect(
-            -size*.65,
-            -2,
-            size*1.3,
-            size*.8
-        );
-
-
-        ctx.fillStyle="#7a7e7d";
-
-        ctx.fillRect(
-            -size*.65,
-            0,
-            size*1.3,
-            5
-        );
-    }
-
-
-    /*
-       оружие
-    */
-
-    ctx.strokeStyle="#5d432d";
-
-    ctx.lineWidth=
-        Math.max(
-            2,
-            size*.13
-        );
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        size*.45,
-        size*.15
-    );
-
-    ctx.lineTo(
-        size*1.5,
-        size*1.05
-    );
-
-    ctx.stroke();
-
-
-    /*
-       здоровье
-    */
-
-    const barWidth=
-        Math.max(
-            30,
-            size*2.2
-        );
-
-
-    const ratio=
-        Math.max(
-            0,
-            e.hp/e.maxHP
-        );
-
-
-    ctx.fillStyle="#17191d";
-
-    ctx.fillRect(
-        -barWidth/2,
-        -size*1.45,
-        barWidth,
-        5
-    );
-
-
-    ctx.fillStyle="#c54e49";
-
-    ctx.fillRect(
-        -barWidth/2,
-        -size*1.45,
-        barWidth*ratio,
-        5
-    );
-
-
-    if(e.type==="boss"){
-
-        ctx.fillStyle="#e1b762";
-
-        ctx.font="bold 12px Arial";
-
-        ctx.textAlign="center";
-
-        ctx.fillText(
-            "ВОЖДЬ",
-            0,
-            -size*1.7
-        );
-    }
-
-
-    ctx.restore();
-}
-
-
-/* =====================================================
-   СТРЕЛЫ
-===================================================== */
-
-function drawArrows(){
-
-    for(const arrow of game.arrows){
-
-        const angle=
-            Math.atan2(
-                arrow.vy,
-                arrow.vx
-            );
-
-
-        ctx.save();
-
-        ctx.translate(
-            arrow.x,
-            arrow.y
-        );
-
-        ctx.rotate(angle);
-
-
-        ctx.strokeStyle="#d5b673";
-
-        ctx.lineWidth=3;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -16,
-            0
-        );
-
-        ctx.lineTo(
-            13,
-            0
-        );
-
-        ctx.stroke();
-
-
-        ctx.fillStyle="#dedbd0";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            15,
-            0
-        );
-
-        ctx.lineTo(
-            5,
-            -4
-        );
-
-        ctx.lineTo(
-            5,
-            4
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-
-
-        ctx.strokeStyle="#914f39";
-
-        ctx.lineWidth=2;
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -13,
-            0
-        );
-
-        ctx.lineTo(
-            -18,
-            -4
-        );
-
-        ctx.moveTo(
-            -13,
-            0
-        );
-
-        ctx.lineTo(
-            -18,
-            4
-        );
-
-        ctx.stroke();
-
-
-        ctx.restore();
-    }
-}
-
-
-/* =====================================================
-   ЧАСТИЦЫ
-===================================================== */
-
-function drawParticles(){
-
-    for(const p of game.particles){
-
-        ctx.globalAlpha=
-            Math.max(
-                0,
-                p.life*2
-            );
-
-        ctx.fillStyle="#e2b969";
-
-        ctx.fillRect(
-            p.x,
-            p.y,
-            3,
-            3
-        );
-    }
-
-    ctx.globalAlpha=1;
-}
-
-
-/* =====================================================
-   ВИНЬЕТКА
-===================================================== */
-
-function drawVignette(){
-
-    const gradient=
-        ctx.createRadialGradient(
-            W/2,
-            H*.55,
-            H*.12,
-            W/2,
-            H*.55,
-            Math.max(W,H)*.75
-        );
-
-
-    gradient.addColorStop(
-        .70,
-        "transparent"
-    );
-
-    gradient.addColorStop(
-        1,
-        "#000b"
-    );
-
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-}
-
-
-/* =====================================================
-   START
-===================================================== */
-
-function startGame(){
-
-    resetGame();
-
-    game.running=true;
-
-    $("screen").style.display="none";
-
-    startWave();
-
-    updateHUD();
-}
-
-$("start").onclick=startGame;
-
-
-/* =====================================================
-   PAUSE
-===================================================== */
-
-$("pause").onclick=()=>{
-
-    if(!game.running)
-        return;
-
-    game.paused=
-        !game.paused;
-
-    $("pause").textContent=
-        game.paused?
-        "▶":
-        "Ⅱ";
-
-    message(
-        game.paused?
-        "⏸ Пауза":
-        "▶ Продолжаем",
-        700
-    );
-};
-
-
-/* =====================================================
-   КЛАВИАТУРА
-===================================================== */
-
-const keys={
-    left:false,
-    right:false
-};
-
-
-addEventListener(
-    "keydown",
-    e=>{
-
-        if(
-            e.key==="ArrowLeft" ||
-            e.key.toLowerCase()==="a"
-        )
-            keys.left=true;
-
-
-        if(
-            e.key==="ArrowRight" ||
-            e.key.toLowerCase()==="d"
-        )
-            keys.right=true;
-
-
-        if(e.key===" ")
-            game.paused=!game.paused;
-    }
-);
-
-
-addEventListener(
-    "keyup",
-    e=>{
-
-        if(
-            e.key==="ArrowLeft" ||
-            e.key.toLowerCase()==="a"
-        )
-            keys.left=false;
-
-
-        if(
-            e.key==="ArrowRight" ||
-            e.key.toLowerCase()==="d"
-        )
-            keys.right=false;
-    }
-);
-
-
-/* =====================================================
-   МОБИЛЬНЫЕ КНОПКИ
-===================================================== */
-
-function holdButton(element,key){
-
-    const down=e=>{
-
-        e.preventDefault();
-
-        keys[key]=true;
-    };
-
-
-    const up=e=>{
-
-        e.preventDefault();
-
-        keys[key]=false;
-    };
-
-
-    element.addEventListener(
-        "pointerdown",
-        down
-    );
-
-    element.addEventListener(
-        "pointerup",
-        up
-    );
-
-    element.addEventListener(
-        "pointercancel",
-        up
-    );
-
-    element.addEventListener(
-        "pointerleave",
-        up
-    );
-}
-
-
-holdButton(
-    $("left"),
-    "left"
-);
-
-holdButton(
-    $("right"),
-    "right"
-);
-
-
-/* =====================================================
-   МЫШЬ / ТАЧ
-===================================================== */
-
-canvas.addEventListener(
-    "pointerdown",
-    e=>{
-
-        if(
-            e.pointerType==="mouse" &&
-            e.button!==0
-        )
-            return;
-
-        shoot(
-            e.clientX,
-            e.clientY
-        );
-    }
-);
-
-
-/* =====================================================
-   ПОБЕДА
-===================================================== */
-
-function victory(){
-
-    game.running=false;
-
-    $("screen").style.display="flex";
-
-    document.querySelector(".card").innerHTML=`
-
-        <h1>🏆 ПОБЕДА</h1>
-
-        <p>
-            Все 30 волн отбиты.
-            Орочий вождь повержен.
-            Тёмная крепость выстояла.
-        </p>
-
-        <p>
-            🪙 Золото:
-            <b>${game.gold}</b>
-        </p>
-
-        <button class="start" id="again">
-            ИГРАТЬ СНОВА
-        </button>
     `;
 
-    $("again").onclick=startGame;
+    game.appendChild(el);
+
+    const enemy={
+        el,
+        type,
+        hp:data.hp*(1+wave*.08),
+        maxHp:data.hp*(1+wave*.08),
+        speed:data.speed*(1+wave*.018),
+        damage:data.damage*(1+wave*.025),
+        reward:data.reward,
+        x:startX,
+        y:startY,
+        dead:false
+    };
+
+    enemies.push(enemy);
+
+    updateEnemyUI();
 }
 
+/* ================================
+        ДВИЖЕНИЕ
+================================ */
 
-/* =====================================================
-   ПОРАЖЕНИЕ
-===================================================== */
-
-function defeat(){
-
-    game.running=false;
-
-    $("screen").style.display="flex";
-
-    document.querySelector(".card").innerHTML=`
-
-        <h1>☠ ЗАМОК ПАЛ</h1>
-
-        <p>
-            Орды орков достигли стен
-            и разрушили оборону крепости.
-        </p>
-
-        <p>
-            Волна:
-            <b>${game.wave}</b>
-        </p>
-
-        <button class="start" id="again">
-            НАЧАТЬ ЗАНОВО
-        </button>
-    `;
-
-    $("again").onclick=startGame;
-}
-
-
-/* =====================================================
-   GAME LOOP
-===================================================== */
-
-let lastTime=0;
+let lastTime=performance.now();
 
 function loop(time){
 
-    const dt=
-        Math.min(
-            .035,
-            (time-lastTime)/1000 || 0
-        );
+    const dt=(time-lastTime)/1000;
 
     lastTime=time;
 
-    update(dt);
+    if(running && !paused){
 
-    draw();
+        updateEnemies(dt);
+        updateArrows(dt);
+        updateArcher();
+
+    }
 
     requestAnimationFrame(loop);
 }
 
-
 requestAnimationFrame(loop);
+
+function updateEnemies(dt){
+
+    for(let i=enemies.length-1;i>=0;i--){
+
+        const e=enemies[i];
+
+        if(e.dead) continue;
+
+        /*
+            Движение строго вверх:
+            лес → стена
+        */
+
+        e.y -= e.speed*dt/100;
+
+        /*
+            Стена находится примерно на 34%.
+            Орк физически доходит до неё.
+        */
+
+        if(e.y <= 35){
+
+            damageCastle(e);
+
+            removeEnemy(i);
+
+            continue;
+        }
+
+        e.el.style.left=e.x+"%";
+        e.el.style.top=e.y+"%";
+
+        const hp=e.el.querySelector(".enemy-hp-inner");
+
+        hp.style.width=
+            Math.max(0,e.hp/e.maxHp*100)+"%";
+    }
+
+    updateEnemyUI();
+}
+
+/* ================================
+        УРОН ЗАМКУ
+================================ */
+
+function damageCastle(enemy){
+
+    castleHp -= enemy.damage;
+
+    if(castleHp<0)
+        castleHp=0;
+
+    hpText.textContent=Math.floor(castleHp);
+
+    if(castleHp<=0){
+
+        defeat();
+
+    }
+}
+
+/* ================================
+        УДАЛЕНИЕ
+================================ */
+
+function removeEnemy(index){
+
+    const e=enemies[index];
+
+    if(!e) return;
+
+    e.dead=true;
+
+    e.el.remove();
+
+    enemies.splice(index,1);
+
+    updateEnemyUI();
+
+    /*
+        Если врагов больше нет —
+        следующая волна через несколько секунд.
+    */
+
+    if(enemies.length===0 && running){
+
+        setTimeout(()=>{
+
+            if(
+                running &&
+                !paused &&
+                enemies.length===0
+            ){
+
+                startWave();
+
+            }
+
+        },3500);
+    }
+}
+
+/* ================================
+        СТРЕЛЬБА
+================================ */
+
+function shoot(){
+
+    if(!running || paused) return;
+
+    const now=Date.now();
+
+    const cooldown=
+        shootCooldown /
+        upgrades.fireRate;
+
+    if(now-lastShot<cooldown)
+        return;
+
+    lastShot=now;
+
+    /*
+        Находим ближайшего орка.
+    */
+
+    let target=null;
+    let bestDistance=Infinity;
+
+    for(const e of enemies){
+
+        if(e.dead) continue;
+
+        const distance=
+            Math.abs(e.x-archerX)+
+            Math.abs(e.y-28);
+
+        if(distance<bestDistance){
+
+            bestDistance=distance;
+            target=e;
+        }
+    }
+
+    if(!target) return;
+
+    createArrow(target);
+}
+
+/* ================================
+        СТРЕЛА
+================================ */
+
+function createArrow(target){
+
+    const arrow=document.createElement("div");
+
+    arrow.className="arrow";
+
+    game.appendChild(arrow);
+
+    const startX=archerX;
+    const startY=27;
+
+    arrow.style.left=startX+"%";
+    arrow.style.top=startY+"%";
+
+    const a={
+        el:arrow,
+        x:startX,
+        y:startY,
+        target,
+        speed:1.6,
+        damage:35*upgrades.damage,
+        pierce:upgrades.pierce,
+        hit:false
+    };
+
+    arrows.push(a);
+}
+
+function updateArrows(dt){
+
+    for(let i=arrows.length-1;i>=0;i--){
+
+        const a=arrows[i];
+
+        if(!a.target || a.target.dead){
+
+            a.el.remove();
+            arrows.splice(i,1);
+
+            continue;
+        }
+
+        const tx=a.target.x;
+        const ty=a.target.y;
+
+        const dx=tx-a.x;
+        const dy=ty-a.y;
+
+        const distance=Math.sqrt(dx*dx+dy*dy);
+
+        const angle=Math.atan2(dy,dx);
+
+        a.x +=
+            Math.cos(angle)*
+            a.speed*
+            dt*100;
+
+        a.y +=
+            Math.sin(angle)*
+            a.speed*
+            dt*100;
+
+        a.el.style.left=a.x+"%";
+        a.el.style.top=a.y+"%";
+
+        a.el.style.transform=
+            `rotate(${angle}rad)`;
+
+        if(distance<3){
+
+            hitEnemy(a.target,a);
+
+            a.el.remove();
+            arrows.splice(i,1);
+        }
+    }
+}
+
+/* ================================
+        ПОПАДАНИЕ
+================================ */
+
+function hitEnemy(enemy,arrow){
+
+    if(!enemy || enemy.dead)
+        return;
+
+    enemy.hp-=arrow.damage;
+
+    enemy.el.style.filter=
+        "brightness(2)";
+
+    setTimeout(()=>{
+
+        if(enemy.el)
+            enemy.el.style.filter="";
+
+    },90);
+
+    if(enemy.hp<=0){
+
+        gold+=enemy.reward;
+
+        goldText.textContent=gold;
+
+        const index=enemies.indexOf(enemy);
+
+        if(index!==-1)
+            removeEnemy(index);
+    }
+}
+
+/* ================================
+        ЛУЧНИК
+================================ */
+
+function updateArcher(){
+
+    archer.style.left=archerX+"%";
+}
+
+function moveLeft(){
+
+    if(!running || paused)
+        return;
+
+    archerX-=1.5;
+
+    if(archerX<7)
+        archerX=7;
+
+    updateArcher();
+}
+
+function moveRight(){
+
+    if(!running || paused)
+        return;
+
+    archerX+=1.5;
+
+    if(archerX>93)
+        archerX=93;
+
+    updateArcher();
+}
+
+/* клавиатура */
+
+document.addEventListener("keydown",e=>{
+
+    if(e.key==="ArrowLeft")
+        moveLeft();
+
+    if(e.key==="ArrowRight")
+        moveRight();
+
+    if(e.code==="Space")
+        shoot();
+
+});
+
+/* кнопки */
+
+document.getElementById("left").addEventListener(
+    "pointerdown",
+    e=>{
+        e.preventDefault();
+        moveLeft();
+    }
+);
+
+document.getElementById("right").addEventListener(
+    "pointerdown",
+    e=>{
+        e.preventDefault();
+        moveRight();
+    }
+);
+
+document.getElementById("shoot").addEventListener(
+    "pointerdown",
+    e=>{
+        e.preventDefault();
+        shoot();
+    }
+);
+
+/* клик по игровому полю */
+
+game.addEventListener("pointerdown",e=>{
+
+    if(
+        e.target.closest("button") ||
+        e.target.closest("#menu")
+    ) return;
+
+    if(running)
+        shoot();
+
+});
+
+/* ================================
+        ПАУЗА
+================================ */
+
+pauseButton.onclick=()=>{
+
+    if(!running)
+        return;
+
+    paused=!paused;
+
+    pauseButton.textContent=
+        paused ? "▶" : "Ⅱ";
+};
+
+/* ================================
+        UI
+================================ */
+
+function updateEnemyUI(){
+
+    enemyText.textContent=enemies.length;
+}
+
+/* ================================
+        СООБЩЕНИЕ
+================================ */
+
+function showWaveMessage(text){
+
+    message.textContent=text;
+
+    message.classList.add("show");
+
+    setTimeout(()=>{
+
+        message.classList.remove("show");
+
+    },1800);
+}
+
+/* ================================
+        ПОРАЖЕНИЕ
+================================ */
+
+function defeat(){
+
+    running=false;
+
+    endTitle.textContent="Замок пал";
+
+    endText.textContent=
+        "Орды орков прорвались к стенам. Волна "+wave+".";
+
+    endScreen.classList.remove("hidden");
+}
+
+/* ================================
+        ПОБЕДА
+================================ */
+
+function victory(){
+
+    running=false;
+
+    endTitle.textContent="Победа!";
+
+    endText.textContent=
+        "Ты выдержал все 30 волн и защитил Тёмную крепость.";
+
+    endScreen.classList.remove("hidden");
+}
+
+/* ================================
+        ЗАПУСК
+================================ */
+
+updateArcher();
+updateEnemyUI();
 
 </script>
 
