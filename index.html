@@ -2,23 +2,28 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>Castle of Ash</title>
+<title>The Last Wall</title>
 
 <style>
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #080b09;
-    font-family: Georgia, serif;
+    background: #050609;
+    color: #ddd2bd;
+    font-family: Georgia, "Times New Roman", serif;
 }
 
 body {
@@ -26,511 +31,2413 @@ body {
 }
 
 canvas {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    cursor: crosshair;
 }
 
-/* =========================
-   МЕНЮ
-========================= */
+button {
+    font-family: inherit;
+}
 
-#menu {
+#ui {
     position: fixed;
-    z-index: 100;
     inset: 0;
+    pointer-events: none;
+}
 
+.topbar {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(920px, calc(100vw - 28px));
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 13px;
+    background:
+        linear-gradient(#191711e8, #0d0d0be8);
+    border: 1px solid #65553a;
+    border-radius: 5px;
+    box-shadow:
+        0 4px 20px #000b,
+        inset 0 0 0 1px #2e291f;
+    pointer-events: none;
+}
+
+.stat {
+    min-width: 110px;
+}
+
+.stat-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: #9c9078;
+}
+
+.stat-value {
+    font-size: 17px;
+    color: #e3d7bb;
+}
+
+#castleBar {
+    width: 190px;
+    height: 8px;
+    margin-top: 5px;
+    background: #080808;
+    border: 1px solid #554b3b;
+}
+
+#castleFill {
+    width: 100%;
+    height: 100%;
+    background: #8b7752;
+    transition: width .15s linear;
+}
+
+#menu,
+#pauseScreen,
+#waveScreen,
+#gameOver {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(45,55,45,0.25),
-            rgba(0,0,0,0.95)
-        );
+    pointer-events: auto;
 }
 
-.menuBox {
-    width: min(520px, 88vw);
-    padding: 42px 30px;
-
+.overlay {
+    width: min(560px, calc(100vw - 30px));
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 34px;
     text-align: center;
-
-    background: rgba(13,16,14,0.96);
-
-    border: 2px solid #70664d;
-
+    background:
+        radial-gradient(circle at 50% 0%, #332c20cc, transparent 55%),
+        linear-gradient(#11110feF, #080908f5);
+    border: 1px solid #746044;
     box-shadow:
-        0 0 40px rgba(0,0,0,0.9);
+        0 20px 80px #000e,
+        inset 0 0 0 2px #242018;
+    border-radius: 7px;
 }
 
-.menuTitle {
-    color: #d8c79a;
-    font-size: clamp(32px, 7vw, 52px);
+.title {
+    font-size: clamp(38px, 8vw, 72px);
+    letter-spacing: 7px;
+    color: #ded1b4;
+    text-shadow:
+        0 3px 0 #292319,
+        0 0 25px #c89c54aa;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: #887b63;
     letter-spacing: 4px;
-    margin-bottom: 18px;
+    font-size: 12px;
+    margin-bottom: 30px;
 }
 
-.menuText {
-    color: #aaa99e;
-    line-height: 1.6;
+.menu-text {
+    color: #a79b85;
+    line-height: 1.65;
+    font-size: 14px;
+    margin: 16px 0 24px;
+}
+
+.menu-button {
+    width: 100%;
+    max-width: 320px;
+    margin: 6px auto;
+    padding: 13px 20px;
+    color: #d9c9a9;
+    background:
+        linear-gradient(#2a251c, #13130f);
+    border: 1px solid #69583e;
+    box-shadow: inset 0 0 0 1px #161510;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    font-size: 14px;
+}
+
+.menu-button:hover,
+.menu-button:active {
+    background: linear-gradient(#413728, #1d1a14);
+    border-color: #a48659;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.help {
+    text-align: left;
+    color: #b5aa96;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.help strong {
+    color: #d7c6a5;
+}
+
+#mobileControls {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.touchButton {
+    position: absolute;
+    bottom: 22px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 1px solid #806c4d;
+    background: #171510bb;
+    color: #d8c9aa;
+    font-size: 28px;
+    pointer-events: auto;
+    backdrop-filter: blur(3px);
+}
+
+#leftBtn { left: 20px; }
+#rightBtn { left: 102px; }
+
+#fireBtn {
+    right: 24px;
+    width: 92px;
+    height: 92px;
     font-size: 16px;
-    margin-bottom: 25px;
+    letter-spacing: 1px;
+    border-color: #a37d48;
 }
 
-.startButton {
-    border: 2px solid #857957;
-    background: #25271f;
-    color: #e3d7b8;
+#pauseBtn {
+    position: absolute;
+    top: 82px;
+    right: 15px;
+    pointer-events: auto;
+    width: 42px;
+    height: 34px;
+    color: #b9ab91;
+    background: #12120fbb;
+    border: 1px solid #554a37;
+    border-radius: 4px;
+}
 
-    padding: 15px 38px;
+#upgradePanel {
+    text-align: left;
+}
 
-    font-size: 19px;
-    font-family: Georgia, serif;
+.upgrade-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 10px;
+    background: #0d0d0bd9;
+    border: 1px solid #332d23;
+}
 
+.upgrade-info {
+    flex: 1;
+}
+
+.upgrade-name {
+    color: #d2c3a6;
+    font-size: 14px;
+}
+
+.upgrade-desc {
+    color: #766d5d;
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.upgrade-level {
+    color: #aa9367;
+    font-size: 12px;
+}
+
+.upgrade-buy {
+    padding: 8px 10px;
+    color: #d4c39f;
+    background: #282218;
+    border: 1px solid #68573d;
     cursor: pointer;
 }
 
-.startButton:hover {
-    background: #35372c;
-}
-
-/* =========================
-   HUD
-========================= */
-
-#hud {
-    display: none;
-
-    position: fixed;
-    z-index: 50;
-
-    top: 12px;
-    left: 12px;
-    right: 12px;
-
-    justify-content: space-between;
-    gap: 8px;
-
+#tutorial {
+    position: absolute;
+    left: 50%;
+    bottom: 23%;
+    transform: translateX(-50%);
+    padding: 11px 18px;
+    color: #cfc1a5;
+    background: #0b0b09d9;
+    border: 1px solid #66553b;
+    font-size: 13px;
+    letter-spacing: 1px;
     pointer-events: none;
+    opacity: 1;
+    transition: opacity .7s;
 }
 
-.hudBox {
-    background: rgba(7,9,8,0.78);
+@media (max-width: 650px) {
+    .topbar {
+        top: 7px;
+        width: calc(100vw - 12px);
+        padding: 7px;
+    }
 
-    border: 1px solid rgba(180,160,110,0.5);
+    .stat {
+        min-width: auto;
+    }
 
-    color: #ddd3b6;
+    .stat-label {
+        font-size: 8px;
+    }
 
-    padding: 9px 14px;
+    .stat-value {
+        font-size: 13px;
+    }
 
-    font-size: 15px;
-}
+    #castleBar {
+        width: 100px;
+    }
 
-/* =========================
-   УПРАВЛЕНИЕ
-========================= */
+    .overlay {
+        padding: 23px 17px;
+    }
 
-#controls {
-    display: none;
-
-    position: fixed;
-
-    z-index: 60;
-
-    left: 20px;
-    right: 20px;
-    bottom: 18px;
-
-    justify-content: space-between;
-
-    pointer-events: none;
-}
-
-.controlButton {
-    pointer-events: auto;
-
-    width: 76px;
-    height: 60px;
-
-    border: 1px solid #74694d;
-
-    background: rgba(20,23,20,0.82);
-
-    color: #ddd2ad;
-
-    font-size: 28px;
-
-    touch-action: none;
-}
-
-/* =========================
-   GAME OVER
-========================= */
-
-#gameOver {
-    display: none;
-
-    position: fixed;
-    z-index: 100;
-    inset: 0;
-
-    align-items: center;
-    justify-content: center;
-
-    background: rgba(0,0,0,0.82);
-}
-
-.gameOverBox {
-    width: min(450px, 88vw);
-
-    padding: 35px;
-
-    text-align: center;
-
-    background: #101411;
-
-    border: 2px solid #655a43;
-}
-
-.gameOverTitle {
-    color: #c9bc92;
-    font-size: 38px;
-    margin-bottom: 15px;
-}
-
-.gameOverText {
-    color: #aaa;
-    margin-bottom: 15px;
+    .title {
+        letter-spacing: 4px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="gameCanvas"></canvas>
+<canvas id="game"></canvas>
 
-<div id="menu">
+<div id="ui">
 
-    <div class="menuBox">
-
-        <div class="menuTitle">
-            CASTLE OF ASH
+    <div class="topbar hidden" id="gameUI">
+        <div class="stat">
+            <div class="stat-label">WAVE</div>
+            <div class="stat-value" id="waveText">1</div>
         </div>
 
-        <div class="menuText">
-            Тёмный лес проснулся.<br>
-            Орды орков идут к древней крепости.<br><br>
-            Ты — последний лучник на стене.
+        <div class="stat">
+            <div class="stat-label">CASTLE</div>
+            <div class="stat-value" id="castleText">1000 / 1000</div>
+            <div id="castleBar">
+                <div id="castleFill"></div>
+            </div>
         </div>
 
-        <button
-            class="startButton"
-            onclick="startGame()"
-        >
-            НАЧАТЬ ИГРУ
-        </button>
-
-    </div>
-
-</div>
-
-<div id="hud">
-
-    <div class="hudBox">
-        🏰 Стена:
-        <span id="wallHP">100</span>/100
-    </div>
-
-    <div class="hudBox">
-        🌊 Волна:
-        <span id="waveNumber">1</span>
-    </div>
-
-    <div class="hudBox">
-        💰 Золото:
-        <span id="goldAmount">0</span>
-    </div>
-
-</div>
-
-<div id="controls">
-
-    <button
-        id="leftButton"
-        class="controlButton"
-    >
-        ◀
-    </button>
-
-    <button
-        id="rightButton"
-        class="controlButton"
-    >
-        ▶
-    </button>
-
-</div>
-
-<div id="gameOver">
-
-    <div class="gameOverBox">
-
-        <div class="gameOverTitle">
-            ЗАМОК ПАЛ
+        <div class="stat">
+            <div class="stat-label">ORCS LEFT</div>
+            <div class="stat-value" id="orcsText">0</div>
         </div>
 
-        <div class="gameOverText">
-            Орды леса прорвались к крепости.
+        <div class="stat">
+            <div class="stat-label">GOLD</div>
+            <div class="stat-value" id="goldText">0</div>
         </div>
 
-        <button
-            class="startButton"
-            onclick="restartGame()"
-        >
-            НАЧАТЬ ЗАНОВО
-        </button>
+        <div class="stat">
+            <div class="stat-label">SCORE</div>
+            <div class="stat-value" id="scoreText">0</div>
+        </div>
+    </div>
 
+    <button id="pauseBtn" class="hidden">Ⅱ</button>
+
+    <div id="mobileControls" class="hidden">
+        <button class="touchButton" id="leftBtn">‹</button>
+        <button class="touchButton" id="rightBtn">›</button>
+        <button class="touchButton" id="fireBtn">FIRE</button>
+    </div>
+
+    <div id="tutorial">
+        ← → MOVE &nbsp; • &nbsp; MOUSE AIM &nbsp; • &nbsp; CLICK FIRE
+    </div>
+
+    <div id="menu">
+        <div class="overlay">
+            <div class="title">THE LAST WALL</div>
+            <div class="subtitle">DARK FANTASY CASTLE DEFENSE</div>
+
+            <div class="menu-text">
+                Последняя стена древнего королевства стоит между замком
+                и армией, вышедшей из тёмного леса.<br><br>
+                Ты — последний лучник на стене.
+                Целься сам. Каждый выстрел имеет значение.
+            </div>
+
+            <button class="menu-button" id="playBtn">PLAY</button>
+            <button class="menu-button" id="upgradesBtn">UPGRADES</button>
+            <button class="menu-button" id="howBtn">HOW TO PLAY</button>
+            <button class="menu-button" id="settingsBtn">SOUND: ON</button>
+        </div>
+    </div>
+
+    <div id="waveScreen" class="hidden">
+        <div class="overlay">
+            <div class="title" style="font-size:42px">WAVE CLEARED</div>
+            <div class="subtitle">THE WALL STILL STANDS</div>
+
+            <div id="waveStats" class="menu-text"></div>
+
+            <button class="menu-button" id="nextWaveBtn">NEXT WAVE</button>
+            <button class="menu-button" id="waveUpgradeBtn">UPGRADES</button>
+        </div>
+    </div>
+
+    <div id="gameOver" class="hidden">
+        <div class="overlay">
+            <div class="title" style="font-size:42px">THE WALL HAS FALLEN</div>
+            <div class="subtitle">THE KINGDOM IS LOST</div>
+
+            <div id="defeatStats" class="menu-text"></div>
+
+            <button class="menu-button" id="retryBtn">TRY AGAIN</button>
+            <button class="menu-button" id="defeatMenuBtn">MAIN MENU</button>
+        </div>
+    </div>
+
+    <div id="pauseScreen" class="hidden">
+        <div class="overlay">
+            <div class="title" style="font-size:48px">PAUSED</div>
+            <div class="subtitle">THE NIGHT IS WAITING</div>
+            <button class="menu-button" id="resumeBtn">RESUME</button>
+            <button class="menu-button" id="pauseMenuBtn">MAIN MENU</button>
+        </div>
+    </div>
+
+    <div id="upgradePanel" class="hidden">
+        <div class="overlay">
+            <div class="title" style="font-size:42px">ARMORY</div>
+            <div class="subtitle">FORGE THE LAST DEFENSE</div>
+
+            <div id="upgradeGold"
+                 style="text-align:center;margin-bottom:15px;color:#bca06a">
+            </div>
+
+            <div id="upgradeRows"></div>
+
+            <button class="menu-button" id="closeUpgradeBtn">
+                BACK
+            </button>
+        </div>
+    </div>
+
+    <div id="howPanel" class="hidden">
+        <div class="overlay">
+            <div class="title" style="font-size:40px">HOW TO PLAY</div>
+            <div class="subtitle">HOLD THE WALL</div>
+
+            <div class="help">
+                <strong>← →</strong> — двигаться по стене<br>
+                <strong>МЫШЬ</strong> — вручную наводить прицел<br>
+                <strong>ЛКМ</strong> — выпустить стрелу<br>
+                <strong>SPACE</strong> — выстрел<br><br>
+
+                На планшете или телефоне используй сенсорные
+                кнопки движения и FIRE. Прицел следует за касанием
+                экрана.<br><br>
+
+                Орки начинают атаковать только после того,
+                как достигают основания стены.<br><br>
+
+                Уничтожай врагов до этого момента и трать золото
+                между волнами на улучшение лука и крепости.
+            </div>
+
+            <button class="menu-button" id="closeHowBtn">BACK</button>
+        </div>
     </div>
 
 </div>
 
 <script>
+"use strict";
 
-/* ==================================================
-   CANVAS
-================================================== */
+/* =========================================================
+   THE LAST WALL
+   Самодостаточная Dark Fantasy Castle Defense
+   ========================================================= */
 
-var canvas =
-    document.getElementById("gameCanvas");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-var ctx =
-    canvas.getContext("2d");
+let W = 1280;
+let H = 720;
+let DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-var W = 0;
-var H = 0;
-
-
-/* ==================================================
-   РАЗМЕР ЭКРАНА
-================================================== */
-
-function resizeCanvas() {
-
+function resize() {
     W = window.innerWidth;
     H = window.innerHeight;
 
-    canvas.width = W;
-    canvas.height = H;
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 
-window.addEventListener(
-    "resize",
-    resizeCanvas
-);
-
-resizeCanvas();
+window.addEventListener("resize", resize);
+resize();
 
 
-/* ==================================================
-   ПОЗИЦИЯ СТЕНЫ
-================================================== */
+/* =========================================================
+   SAVE DATA
+   ========================================================= */
 
-/*
-   Стена теперь выше.
+const SAVE_KEY = "theLastWallSave_v1";
 
-   Это визуально увеличивает
-   расстояние между замком
-   и орками.
+const defaultSave = {
+    bestWave: 0,
+    gold: 0,
+    sound: true,
+    tutorialSeen: false,
 
-   При этом лес занимает
-   большую часть игровой зоны.
-*/
+    upgrades: {
+        bow: 0,
+        draw: 0,
+        arrows: 0,
+        wall: 0
+    },
 
-function getWallY() {
-
-    return H * 0.34;
-}
-
-
-/*
-   Высота стены немного меньше,
-   чтобы камера ощущалась дальше.
-*/
-
-function getWallHeight() {
-
-    return Math.max(
-        92,
-        H * 0.105
-    );
-}
-
-
-/*
-   Настоящая точка,
-   до которой должны дойти орки.
-
-   Это НИЖНЯЯ часть стены,
-   а не позиция лучника.
-*/
-
-function getWallAttackY() {
-
-    return getWallY() +
-           getWallHeight() +
-           8;
-}
-
-
-/* ==================================================
-   ИГРА
-================================================== */
-
-var gameRunning = false;
-
-var wallHP = 100;
-
-var gold = 0;
-
-var wave = 1;
-
-
-var player = {
-
-    x: 0,
-
-    speed: 350,
-
-    cooldown: 0,
-
-    fireRate: 0.38,
-
-    damage: 30
-
+    totalKills: 0,
+    totalShots: 0,
+    totalHits: 0
 };
 
+let save;
 
-var enemies = [];
+function loadSave() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
 
-var arrows = [];
+        if (!raw) {
+            save = structuredClone(defaultSave);
+            return;
+        }
 
-var particles = [];
+        save = Object.assign(
+            structuredClone(defaultSave),
+            JSON.parse(raw)
+        );
 
-var trees = [];
+        save.upgrades = Object.assign(
+            structuredClone(defaultSave.upgrades),
+            save.upgrades || {}
+        );
 
-var rain = [];
+    } catch {
+        save = structuredClone(defaultSave);
+    }
+}
 
+function saveGame() {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+}
 
-var leftPressed = false;
-
-var rightPressed = false;
-
-
-var lastTime = 0;
-
-var waveSpawned = 0;
-
-var enemiesPerWave = 6;
-
-var spawnTimer = 0;
-
-var nextWaveTimer = 0;
-
-var lightningTimer = 5;
-
-var lightningTime = 0;
-
-
-/* ==================================================
-   МИР
-================================================== */
-
-function createWorld() {
-
-    trees = [];
-
-    rain = [];
-
-    var wallY =
-        getWallY();
+loadSave();
 
 
-    /*
-       Больше деревьев,
-       но они будут визуально
-       распределены по сторонам
-       дороги.
-    */
+/* =========================================================
+   UTILITIES
+   ========================================================= */
 
-    for (
-        var i = 0;
-        i < 110;
-        i++
-    ) {
+const TAU = Math.PI * 2;
 
-        trees.push({
+function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+}
 
-            x:
-                Math.random() * W,
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
 
-            y:
-                wallY +
-                105 +
-                Math.random() *
-                Math.max(
-                    100,
-                    H - wallY - 125
-                ),
+function rand(min, max) {
+    return min + Math.random() * (max - min);
+}
 
-            size:
-                22 +
-                Math.random() * 42
+function dist(a, b) {
+    return Math.hypot(a.x - b.x, a.y - b.y);
+}
 
-        });
+function weightedRandom(arr) {
+    const total = arr.reduce((s, x) => s + x.weight, 0);
+    let r = Math.random() * total;
 
+    for (const x of arr) {
+        r -= x.weight;
+        if (r <= 0) return x.type;
     }
 
-
-    for (
-        var r = 0;
-        r < 180;
-        r++
-    ) {
-
-        rain.push({
-
-            x:
-                Math.random() * W,
-
-            y:
-                Math.random() * H,
-
-            speed:
-                400 +
-                Math.random() * 300,
-
-            length:
-                8 +
-                Math.random() * 12
-
-        });
-
-    }
-
+    return arr[0].type;
 }
 
 
-/* ==================================================
-   ФОН
-================================================== */
+/* =========================================================
+   AUDIO MANAGER
+   ========================================================= */
 
-function drawBackground() {
+class AudioManager {
 
-    var gradient =
+    constructor() {
+        this.ctx = null;
+        this.enabled = save.sound;
+    }
+
+    init() {
+        if (!this.ctx) {
+            try {
+                this.ctx = new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+            } catch {}
+        }
+
+        if (this.ctx?.state === "suspended") {
+            this.ctx.resume();
+        }
+    }
+
+    tone(freq, duration, type = "sine", volume = 0.04, endFreq = freq) {
+        if (!this.enabled || !this.ctx) return;
+
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(
+            Math.max(20, endFreq),
+            this.ctx.currentTime + duration
+        );
+
+        gain.gain.setValueAtTime(0.0001, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(
+            volume,
+            this.ctx.currentTime + 0.01
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            this.ctx.currentTime + duration
+        );
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration + 0.02);
+    }
+
+    shoot() {
+        this.tone(220, 0.08, "triangle", 0.045, 100);
+        setTimeout(() => {
+            this.tone(600, 0.13, "sine", 0.018, 300);
+        }, 25);
+    }
+
+    hit() {
+        this.tone(110, 0.12, "square", 0.035, 55);
+    }
+
+    death() {
+        this.tone(95, 0.3, "sawtooth", 0.025, 35);
+    }
+
+    wallHit(strength = 1) {
+        this.tone(
+            65,
+            0.18,
+            "square",
+            0.025 * strength,
+            38
+        );
+    }
+
+    waveClear() {
+        this.tone(330, 0.12, "triangle", 0.035, 440);
+        setTimeout(() => {
+            this.tone(440, 0.18, "triangle", 0.035, 660);
+        }, 120);
+    }
+
+    click() {
+        this.tone(240, 0.05, "triangle", 0.025, 320);
+    }
+}
+
+const audio = new AudioManager();
+
+
+/* =========================================================
+   PARTICLES
+   ========================================================= */
+
+class Particle {
+
+    constructor(x, y, color, size = 3, life = 0.6) {
+        this.x = x;
+        this.y = y;
+        this.vx = rand(-40, 40);
+        this.vy = rand(-80, 15);
+        this.gravity = rand(40, 100);
+        this.size = rand(size * .5, size);
+        this.life = life;
+        this.maxLife = life;
+        this.color = color;
+    }
+
+    update(dt) {
+        this.life -= dt;
+
+        this.vy += this.gravity * dt;
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+
+        return this.life > 0;
+    }
+
+    draw() {
+        const a = clamp(this.life / this.maxLife, 0, 1);
+
+        ctx.globalAlpha = a;
+
+        ctx.fillStyle = this.color;
+        ctx.fillRect(
+            this.x,
+            this.y,
+            this.size,
+            this.size
+        );
+
+        ctx.globalAlpha = 1;
+    }
+}
+
+
+/* =========================================================
+   FLOATING DAMAGE TEXT
+   ========================================================= */
+
+class FloatingText {
+
+    constructor(x, y, text, color = "#d8c08a") {
+        this.x = x;
+        this.y = y;
+        this.text = text;
+        this.color = color;
+        this.life = 0.75;
+    }
+
+    update(dt) {
+        this.life -= dt;
+        this.y -= 28 * dt;
+        return this.life > 0;
+    }
+
+    draw() {
+        ctx.globalAlpha = clamp(this.life / .75, 0, 1);
+
+        ctx.font = "bold 14px Georgia";
+        ctx.textAlign = "center";
+        ctx.fillStyle = this.color;
+        ctx.fillText(this.text, this.x, this.y);
+
+        ctx.globalAlpha = 1;
+    }
+}
+
+
+/* =========================================================
+   CASTLE
+   ========================================================= */
+
+class Castle {
+
+    constructor() {
+        this.maxHP =
+            1000 +
+            save.upgrades.wall * 180;
+
+        this.hp = this.maxHP;
+
+        this.damageFlash = 0;
+        this.shake = 0;
+    }
+
+    reset() {
+        this.maxHP =
+            1000 +
+            save.upgrades.wall * 180;
+
+        this.hp = this.maxHP;
+        this.damageFlash = 0;
+        this.shake = 0;
+    }
+
+    damage(amount) {
+        this.hp = Math.max(0, this.hp - amount);
+
+        this.damageFlash = 0.16;
+        this.shake = Math.min(
+            8,
+            this.shake + amount * 0.12
+        );
+
+        audio.wallHit(amount > 15 ? 1 : .65);
+
+        for (let i = 0; i < 5; i++) {
+            game.particles.push(
+                new Particle(
+                    wallGeometry().x + rand(-100, 100),
+                    wallGeometry().y - rand(0, 20),
+                    "#837b6a",
+                    3,
+                    .45
+                )
+            );
+        }
+
+        if (this.hp <= 0) {
+            game.defeat();
+        }
+    }
+
+    repair() {
+        const amount = Math.floor(this.maxHP * .22);
+        this.hp = Math.min(this.maxHP, this.hp + amount);
+    }
+
+    update(dt) {
+        this.damageFlash = Math.max(
+            0,
+            this.damageFlash - dt
+        );
+
+        this.shake *= Math.pow(.04, dt);
+
+        if (this.shake < .1) {
+            this.shake = 0;
+        }
+    }
+
+    draw() {
+
+        const g = wallGeometry();
+
+        ctx.save();
+
+        ctx.translate(
+            rand(-this.shake, this.shake),
+            rand(-this.shake, this.shake)
+        );
+
+        drawCastleBackground();
+        drawMainWall(g);
+
+        ctx.restore();
+
+        if (this.damageFlash > 0) {
+            ctx.fillStyle =
+                `rgba(170,70,40,${this.damageFlash * .25})`;
+
+            ctx.fillRect(0, 0, W, H);
+        }
+    }
+}
+
+function wallGeometry() {
+
+    const wallHeight = Math.max(90, H * .18);
+    const wallY = H - wallHeight;
+
+    return {
+        x: 0,
+        y: wallY,
+        w: W,
+        h: wallHeight,
+        top: wallY
+    };
+}
+
+
+/* =========================================================
+   PLAYER / ARCHER
+   ========================================================= */
+
+class Archer {
+
+    constructor() {
+        this.x = W * .5;
+        this.speed = 300;
+
+        this.aimX = W * .5;
+        this.aimY = H * .38;
+
+        this.drawTime = 0;
+        this.cooldown = 0;
+
+        this.anim = 0;
+        this.direction = 1;
+    }
+
+    reset() {
+        this.x = W * .5;
+        this.aimX = W * .5;
+        this.aimY = H * .38;
+        this.cooldown = 0;
+        this.drawTime = 0;
+    }
+
+    update(dt) {
+
+        const left = input.keys.ArrowLeft ||
+                     input.keys.a;
+
+        const right = input.keys.ArrowRight ||
+                      input.keys.d;
+
+        if (left) {
+            this.x -= this.speed * dt;
+            this.direction = -1;
+        }
+
+        if (right) {
+            this.x += this.speed * dt;
+            this.direction = 1;
+        }
+
+        const g = wallGeometry();
+
+        this.x = clamp(
+            this.x,
+            80,
+            W - 80
+        );
+
+        this.cooldown = Math.max(
+            0,
+            this.cooldown - dt
+        );
+
+        this.anim += dt;
+
+        if (input.pointerActive) {
+            this.aimX = input.pointerX;
+            this.aimY = input.pointerY;
+        }
+
+        this.aimY = clamp(
+            this.aimY,
+            80,
+            g.top - 40
+        );
+    }
+
+    fire() {
+
+        if (this.cooldown > 0) return;
+
+        if (game.state !== "playing") return;
+
+        const bowX = this.x;
+        const bowY = wallGeometry().top - 105;
+
+        const dx = this.aimX - bowX;
+        const dy = this.aimY - bowY;
+
+        const length = Math.hypot(dx, dy);
+
+        if (length < 15) return;
+
+        const nx = dx / length;
+        const ny = dy / length;
+
+        const drawSpeed =
+            0.42 -
+            save.upgrades.draw * 0.035;
+
+        this.cooldown = Math.max(
+            .13,
+            drawSpeed
+        );
+
+        const power =
+            700 +
+            save.upgrades.bow * 60;
+
+        game.arrows.push(
+            new Arrow(
+                bowX + nx * 20,
+                bowY + ny * 20,
+                nx * power,
+                ny * power
+            )
+        );
+
+        save.totalShots++;
+        saveGame();
+
+        audio.shoot();
+    }
+
+    draw() {
+
+        const g = wallGeometry();
+
+        const feetY = g.top - 4;
+
+        /*
+         * КРИТИЧЕСКАЯ ГЕОМЕТРИЯ:
+         *
+         * Лучник находится НА ВНУТРЕННЕЙ ПЛОЩАДКЕ стены.
+         * Зубцы рисуются перед ним отдельным слоем.
+         * Поэтому ноги физически не попадают внутрь камня.
+         */
+
+        const bodyY = feetY - 100;
+
+        ctx.save();
+        ctx.translate(this.x, bodyY);
+
+        const aimAngle =
+            Math.atan2(
+                this.aimY - (bodyY + 30),
+                this.aimX - this.x
+            );
+
+        const facing =
+            Math.cos(aimAngle) >= 0 ? 1 : -1;
+
+        this.direction = facing;
+
+        /* плащ */
+        ctx.fillStyle = "#17181a";
+        ctx.beginPath();
+        ctx.moveTo(-17, 22);
+        ctx.lineTo(-25, 83);
+        ctx.lineTo(10, 88);
+        ctx.lineTo(19, 28);
+        ctx.closePath();
+        ctx.fill();
+
+        /* ноги */
+        ctx.fillStyle = "#252422";
+
+        ctx.fillRect(-13, 68, 9, 28);
+        ctx.fillRect(5, 68, 9, 28);
+
+        /* сапоги */
+        ctx.fillStyle = "#12100e";
+
+        ctx.fillRect(-16, 90, 13, 7);
+        ctx.fillRect(4, 90, 14, 7);
+
+        /* тело */
+        ctx.fillStyle = "#2a2925";
+
+        ctx.beginPath();
+        ctx.moveTo(-18, 10);
+        ctx.lineTo(-15, 68);
+        ctx.lineTo(16, 68);
+        ctx.lineTo(19, 10);
+        ctx.closePath();
+        ctx.fill();
+
+        /* ремень */
+        ctx.strokeStyle = "#766044";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(-17, 43);
+        ctx.lineTo(17, 43);
+        ctx.stroke();
+
+        /* голова */
+        ctx.fillStyle = "#9a735b";
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 15, 0, TAU);
+        ctx.fill();
+
+        /* капюшон */
+        ctx.fillStyle = "#121414";
+
+        ctx.beginPath();
+        ctx.arc(0, -3, 19, Math.PI, TAU);
+        ctx.lineTo(18, 5);
+        ctx.lineTo(-18, 5);
+        ctx.closePath();
+        ctx.fill();
+
+        /* лицо в тени */
+        ctx.fillStyle = "#4a3b31";
+        ctx.fillRect(
+            facing > 0 ? 5 : -11,
+            0,
+            8,
+            4
+        );
+
+        /* колчан */
+        ctx.fillStyle = "#4d3828";
+        ctx.save();
+        ctx.rotate(-.15);
+        ctx.fillRect(17, 18, 10, 38);
+        ctx.restore();
+
+        /* лук */
+        ctx.save();
+
+        ctx.translate(0, 29);
+        ctx.rotate(aimAngle);
+
+        ctx.strokeStyle = "#795331";
+        ctx.lineWidth = 4;
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 28, -1.15, 1.15);
+        ctx.stroke();
+
+        /* тетива */
+        ctx.strokeStyle = "#c0b398";
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.moveTo(10, -25);
+        ctx.lineTo(-6, 0);
+        ctx.lineTo(10, 25);
+        ctx.stroke();
+
+        /* стрела в натяжении */
+        ctx.strokeStyle = "#b7a88a";
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(-7, 0);
+        ctx.lineTo(35, 0);
+        ctx.stroke();
+
+        ctx.fillStyle = "#c8bda8";
+        ctx.beginPath();
+        ctx.moveTo(37, 0);
+        ctx.lineTo(30, -3);
+        ctx.lineTo(30, 3);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+
+        ctx.restore();
+
+        /*
+         * ЗУБЦЫ РИСУЮТСЯ ПОСЛЕ ЛУЧНИКА.
+         * Они находятся перед нижней частью персонажа.
+         */
+        drawForegroundCrenellations();
+    }
+}
+
+
+/* =========================================================
+   ARROW
+   ========================================================= */
+
+class Arrow {
+
+    constructor(x, y, vx, vy) {
+
+        this.x = x;
+        this.y = y;
+
+        this.vx = vx;
+        this.vy = vy;
+
+        this.gravity = 380;
+
+        this.life = 5;
+
+        this.angle = Math.atan2(vy, vx);
+
+        this.trail = [];
+    }
+
+    update(dt) {
+
+        this.trail.push({
+            x: this.x,
+            y: this.y
+        });
+
+        if (this.trail.length > 5) {
+            this.trail.shift();
+        }
+
+        this.vy += this.gravity * dt;
+
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+
+        this.angle =
+            Math.atan2(
+                this.vy,
+                this.vx
+            );
+
+        this.life -= dt;
+
+        /*
+         * Проверяем столкновение со всеми живыми орками.
+         * Никакого автоприцеливания здесь нет —
+         * стрела летит строго по направлению,
+         * выбранному игроком.
+         */
+        for (const orc of game.orcs) {
+
+            if (orc.dead) continue;
+
+            const hitRadius =
+                orc.radius + 7;
+
+            const dx =
+                this.x - orc.x;
+
+            const dy =
+                this.y - orc.y;
+
+            if (
+                dx * dx +
+                dy * dy <
+                hitRadius * hitRadius
+            ) {
+                orc.takeDamage(
+                    game.damage
+                );
+
+                save.totalHits++;
+
+                this.life = 0;
+
+                for (let i = 0; i < 5; i++) {
+                    game.particles.push(
+                        new Particle(
+                            this.x,
+                            this.y,
+                            "#c4b58f",
+                            2.5,
+                            .25
+                        )
+                    );
+                }
+
+                audio.hit();
+
+                return false;
+            }
+        }
+
+        return (
+            this.life > 0 &&
+            this.x > -100 &&
+            this.x < W + 100 &&
+            this.y < H + 100 &&
+            this.y > -100
+        );
+    }
+
+    draw() {
+
+        ctx.save();
+
+        for (let i = 0; i < this.trail.length; i++) {
+            const p = this.trail[i];
+
+            ctx.globalAlpha =
+                (i + 1) /
+                this.trail.length *
+                .13;
+
+            ctx.fillStyle = "#c4b99f";
+
+            ctx.fillRect(
+                p.x,
+                p.y,
+                10,
+                2
+            );
+        }
+
+        ctx.globalAlpha = 1;
+
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        ctx.strokeStyle = "#b9a57e";
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(-20, 0);
+        ctx.lineTo(12, 0);
+        ctx.stroke();
+
+        ctx.fillStyle = "#aaa08d";
+
+        ctx.beginPath();
+        ctx.moveTo(15, 0);
+        ctx.lineTo(8, -4);
+        ctx.lineTo(8, 4);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = "#796044";
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(-19, -4);
+        ctx.lineTo(-12, 0);
+        ctx.lineTo(-19, 4);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+}
+
+
+/* =========================================================
+   ORCS
+   ========================================================= */
+
+const ORC_TYPES = {
+
+    normal: {
+        name: "Orc",
+        hp: 70,
+        speed: 28,
+        damage: 8,
+        radius: 18,
+        color: "#59624c",
+        reward: 12
+    },
+
+    fast: {
+        name: "Runner",
+        hp: 42,
+        speed: 52,
+        damage: 5,
+        radius: 15,
+        color: "#6b674e",
+        reward: 14
+    },
+
+    heavy: {
+        name: "Heavy Orc",
+        hp: 180,
+        speed: 17,
+        damage: 18,
+        radius: 24,
+        color: "#4a5143",
+        reward: 28
+    },
+
+    warrior: {
+        name: "Warrior",
+        hp: 115,
+        speed: 26,
+        damage: 12,
+        radius: 20,
+        color: "#4c5149",
+        reward: 20
+    },
+
+    siege: {
+        name: "Siege Orc",
+        hp: 250,
+        speed: 13,
+        damage: 32,
+        radius: 27,
+        color: "#41473b",
+        reward: 40
+    }
+};
+
+class Orc {
+
+    constructor(type, spawnX, spawnY, pathOffset = 0) {
+
+        const data = ORC_TYPES[type];
+
+        this.type = type;
+        this.name = data.name;
+
+        this.x = spawnX;
+        this.y = spawnY;
+
+        this.maxHP = data.hp;
+        this.hp = data.hp;
+
+        this.speed = data.speed;
+        this.damage = data.damage;
+
+        this.radius = data.radius;
+
+        this.color = data.color;
+        this.reward = data.reward;
+
+        this.dead = false;
+        this.atWall = false;
+
+        this.attackTimer = rand(.1, .8);
+
+        this.walkTime = rand(0, 10);
+        this.pathOffset = pathOffset;
+
+        this.hitFlash = 0;
+        this.deathTimer = 0;
+    }
+
+    get targetY() {
+        return H - Math.max(100, H * .20) - 10;
+    }
+
+    update(dt) {
+
+        this.hitFlash =
+            Math.max(
+                0,
+                this.hitFlash - dt
+            );
+
+        if (this.dead) {
+
+            this.deathTimer -= dt;
+            this.y += 35 * dt;
+
+            return this.deathTimer > 0;
+        }
+
+        this.walkTime += dt;
+
+        /*
+         * Путь:
+         * дальний лес → дорога → площадь →
+         * основание стены.
+         */
+        if (!this.atWall) {
+
+            const targetY = this.targetY;
+
+            const dy = targetY - this.y;
+
+            /*
+             * Движение в основном вперёд,
+             * но с небольшой извилистой дорогой.
+             */
+            const desiredX =
+                W * .5 +
+                Math.sin(
+                    this.walkTime * .55 +
+                    this.pathOffset
+                ) *
+                Math.min(90, W * .08);
+
+            const dx = desiredX - this.x;
+
+            const len = Math.hypot(dx, dy);
+
+            if (len > 1) {
+
+                const nx = dx / len;
+                const ny = dy / len;
+
+                this.x +=
+                    nx *
+                    this.speed *
+                    dt;
+
+                this.y +=
+                    ny *
+                    this.speed *
+                    dt;
+            }
+
+            if (this.y >= targetY) {
+
+                this.y = targetY;
+
+                this.atWall = true;
+
+                /*
+                 * Несколько орков могут стоять
+                 * у стены одновременно.
+                 */
+            }
+
+        } else {
+
+            this.attackTimer -= dt;
+
+            if (this.attackTimer <= 0) {
+
+                this.attackTimer =
+                    .9 +
+                    rand(0, .25);
+
+                game.castle.damage(
+                    this.damage
+                );
+
+                game.wallImpacts.push({
+                    x: this.x,
+                    y: this.y,
+                    life: .35
+                });
+            }
+        }
+
+        return true;
+    }
+
+    takeDamage(amount) {
+
+        if (this.dead) return;
+
+        this.hp -= amount;
+        this.hitFlash = .12;
+
+        game.floatingTexts.push(
+            new FloatingText(
+                this.x,
+                this.y - this.radius - 8,
+                "-" + amount
+            )
+        );
+
+        if (this.hp <= 0) {
+
+            this.dead = true;
+            this.deathTimer = .45;
+
+            game.score +=
+                100 +
+                this.reward * 3;
+
+            game.gold += this.reward;
+
+            save.totalKills++;
+
+            for (let i = 0; i < 8; i++) {
+
+                game.particles.push(
+                    new Particle(
+                        this.x,
+                        this.y,
+                        this.color,
+                        4,
+                        .55
+                    )
+                );
+            }
+
+            audio.death();
+        }
+    }
+
+    draw() {
+
+        ctx.save();
+
+        const bob =
+            Math.sin(this.walkTime * 8) *
+            (this.atWall ? 1 : 2);
+
+        ctx.translate(
+            this.x,
+            this.y + bob
+        );
+
+        if (this.dead) {
+            ctx.rotate(
+                (1 - this.deathTimer / .45) *
+                Math.PI * .5
+            );
+            ctx.globalAlpha =
+                this.deathTimer / .45;
+        }
+
+        const s = this.radius / 18;
+
+        ctx.scale(s, s);
+
+        /* shadow */
+        ctx.fillStyle = "#0008";
+        ctx.beginPath();
+        ctx.ellipse(
+            0,
+            20,
+            19,
+            6,
+            0,
+            0,
+            TAU
+        );
+        ctx.fill();
+
+        /* legs */
+        ctx.fillStyle = "#242721";
+        ctx.fillRect(-10, 7, 7, 16);
+        ctx.fillRect(3, 7, 7, 16);
+
+        /* body */
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.ellipse(
+            0,
+            -2,
+            15,
+            22,
+            0,
+            0,
+            TAU
+        );
+        ctx.fill();
+
+        /* shoulders */
+        ctx.fillStyle = "#383c34";
+
+        ctx.beginPath();
+        ctx.arc(-14, -4, 8, 0, TAU);
+        ctx.arc(14, -4, 8, 0, TAU);
+        ctx.fill();
+
+        /* head */
+        ctx.fillStyle =
+            this.hitFlash > 0
+                ? "#b49b78"
+                : "#67705b";
+
+        ctx.beginPath();
+        ctx.arc(0, -25, 13, 0, TAU);
+        ctx.fill();
+
+        /* ears */
+        ctx.beginPath();
+        ctx.moveTo(-10, -29);
+        ctx.lineTo(-20, -35);
+        ctx.lineTo(-12, -20);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(10, -29);
+        ctx.lineTo(20, -35);
+        ctx.lineTo(12, -20);
+        ctx.fill();
+
+        /* tusks */
+        ctx.fillStyle = "#d1c5a8";
+
+        ctx.beginPath();
+        ctx.moveTo(-6, -17);
+        ctx.lineTo(-3, -11);
+        ctx.lineTo(-1, -17);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(6, -17);
+        ctx.lineTo(3, -11);
+        ctx.lineTo(1, -17);
+        ctx.fill();
+
+        /* eyes */
+        ctx.fillStyle = "#1d1711";
+
+        ctx.fillRect(-7, -28, 4, 3);
+        ctx.fillRect(3, -28, 4, 3);
+
+        /* weapon */
+        ctx.strokeStyle = "#6e5336";
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.moveTo(14, 2);
+        ctx.lineTo(26, -16);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#aaa18d";
+        ctx.lineWidth = 4;
+
+        ctx.beginPath();
+        ctx.moveTo(24, -19);
+        ctx.lineTo(31, -13);
+        ctx.stroke();
+
+        if (this.type === "heavy" ||
+            this.type === "siege") {
+
+            ctx.strokeStyle = "#514939";
+            ctx.lineWidth = 5;
+
+            ctx.beginPath();
+            ctx.arc(
+                0,
+                -5,
+                20,
+                Math.PI,
+                TAU
+            );
+            ctx.stroke();
+        }
+
+        ctx.restore();
+
+        /* HP bar */
+
+        if (!this.dead && this.hp < this.maxHP) {
+
+            const width =
+                Math.max(
+                    28,
+                    this.radius * 2.1
+                );
+
+            const ratio =
+                clamp(
+                    this.hp / this.maxHP,
+                    0,
+                    1
+                );
+
+            ctx.fillStyle = "#0b0b09";
+            ctx.fillRect(
+                this.x - width / 2,
+                this.y - this.radius - 16,
+                width,
+                4
+            );
+
+            ctx.fillStyle = "#77694e";
+            ctx.fillRect(
+                this.x - width / 2,
+                this.y - this.radius - 16,
+                width * ratio,
+                4
+            );
+        }
+    }
+}
+
+
+/* =========================================================
+   WAVE MANAGER
+   ========================================================= */
+
+class WaveManager {
+
+    constructor() {
+        this.wave = 1;
+        this.spawnRemaining = 0;
+        this.spawnTimer = 0;
+        this.spawnInterval = .9;
+        this.active = false;
+    }
+
+    startWave(wave) {
+
+        this.wave = wave;
+
+        this.spawnRemaining =
+            5 +
+            Math.floor(wave * 3.2);
+
+        this.spawnInterval =
+            Math.max(
+                .34,
+                .95 - wave * .025
+            );
+
+        this.spawnTimer = .2;
+        this.active = true;
+    }
+
+    getAvailableTypes() {
+
+        const types = [
+            { type: "normal", weight: 70 }
+        ];
+
+        if (this.wave >= 2) {
+            types.push({
+                type: "fast",
+                weight: 18
+            });
+        }
+
+        if (this.wave >= 3) {
+            types.push({
+                type: "warrior",
+                weight: 17
+            });
+        }
+
+        if (this.wave >= 5) {
+            types.push({
+                type: "heavy",
+                weight: 14
+            });
+        }
+
+        if (this.wave >= 8) {
+            types.push({
+                type: "siege",
+                weight: 8
+            });
+        }
+
+        return types;
+    }
+
+    update(dt) {
+
+        if (!this.active) return;
+
+        if (this.spawnRemaining > 0) {
+
+            this.spawnTimer -= dt;
+
+            if (this.spawnTimer <= 0) {
+
+                this.spawnTimer =
+                    this.spawnInterval *
+                    rand(.7, 1.2);
+
+                this.spawnRemaining--;
+
+                this.spawnOrc();
+            }
+        }
+
+        const living =
+            game.orcs.some(
+                o => !o.dead
+            );
+
+        if (
+            this.spawnRemaining <= 0 &&
+            !living
+        ) {
+            this.active = false;
+
+            game.waveCleared();
+        }
+    }
+
+    spawnOrc() {
+
+        /*
+         * Орки появляются ДАЛЕКО.
+         * Нижняя часть canvas — замок.
+         * Лес находится выше.
+         */
+        const spawnY =
+            H * .19 +
+            rand(-15, 35);
+
+        const center =
+            W * .5;
+
+        const spread =
+            Math.min(
+                W * .25,
+                330
+            );
+
+        const spawnX =
+            center +
+            rand(-spread, spread);
+
+        const type =
+            weightedRandom(
+                this.getAvailableTypes()
+            );
+
+        game.orcs.push(
+            new Orc(
+                type,
+                spawnX,
+                spawnY,
+                rand(0, TAU)
+            )
+        );
+    }
+}
+
+
+/* =========================================================
+   INPUT MANAGER
+   ========================================================= */
+
+class InputManager {
+
+    constructor() {
+
+        this.keys = {};
+
+        this.pointerX = W * .5;
+        this.pointerY = H * .4;
+
+        this.pointerActive = false;
+
+        window.addEventListener(
+            "keydown",
+            e => {
+
+                this.keys[e.key] = true;
+
+                if (
+                    e.key === " " ||
+                    e.code === "Space"
+                ) {
+                    e.preventDefault();
+                    game.archer.fire();
+                }
+
+                if (e.key === "Escape") {
+                    game.togglePause();
+                }
+            }
+        );
+
+        window.addEventListener(
+            "keyup",
+            e => {
+                this.keys[e.key] = false;
+            }
+        );
+
+        canvas.addEventListener(
+            "pointermove",
+            e => {
+                this.updatePointer(e);
+            }
+        );
+
+        canvas.addEventListener(
+            "pointerdown",
+            e => {
+
+                this.updatePointer(e);
+
+                this.pointerActive = true;
+
+                if (
+                    e.pointerType !== "touch"
+                ) {
+                    game.archer.fire();
+                }
+            }
+        );
+
+        canvas.addEventListener(
+            "pointerup",
+            e => {
+
+                if (e.pointerType === "touch") {
+                    this.pointerActive = false;
+                }
+            }
+        );
+
+        canvas.addEventListener(
+            "pointercancel",
+            () => {
+                this.pointerActive = false;
+            }
+        );
+    }
+
+    updatePointer(e) {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        this.pointerX =
+            e.clientX - rect.left;
+
+        this.pointerY =
+            e.clientY - rect.top;
+    }
+}
+
+const input = new InputManager();
+
+
+/* =========================================================
+   GAME
+   ========================================================= */
+
+class Game {
+
+    constructor() {
+
+        this.state = "menu";
+
+        this.castle = new Castle();
+        this.archer = new Archer();
+        this.waveManager = new WaveManager();
+
+        this.orcs = [];
+        this.arrows = [];
+
+        this.particles = [];
+        this.floatingTexts = [];
+        this.wallImpacts = [];
+
+        this.score = 0;
+        this.gold = save.gold;
+
+        this.killsThisWave = 0;
+        this.shotsAtWaveStart = 0;
+        this.hitsAtWaveStart = 0;
+
+        this.lastTime = performance.now();
+
+        this.damage =
+            38 +
+            save.upgrades.bow * 9 +
+            save.upgrades.arrows * 7;
+
+        this.loop = this.loop.bind(this);
+
+        requestAnimationFrame(this.loop);
+    }
+
+    start() {
+
+        audio.init();
+
+        this.state = "playing";
+
+        this.orcs = [];
+        this.arrows = [];
+
+        this.particles = [];
+        this.floatingTexts = [];
+
+        this.score = 0;
+
+        this.castle.reset();
+        this.archer.reset();
+
+        this.waveManager.startWave(1);
+
+        this.updateUI();
+
+        showOnly("gameUI");
+
+        document
+            .getElementById("pauseBtn")
+            .classList.remove("hidden");
+
+        if (!save.tutorialSeen) {
+
+            document
+                .getElementById("tutorial")
+                .classList.remove("hidden");
+
+            setTimeout(() => {
+
+                document
+                    .getElementById("tutorial")
+                    .style.opacity = "0";
+
+                setTimeout(() => {
+
+                    document
+                        .getElementById("tutorial")
+                        .classList.add("hidden");
+
+                    save.tutorialSeen = true;
+                    saveGame();
+
+                }, 800);
+
+            }, 4500);
+        }
+    }
+
+    resetForRetry() {
+
+        this.state = "playing";
+
+        this.orcs = [];
+        this.arrows = [];
+        this.particles = [];
+        this.floatingTexts = [];
+        this.wallImpacts = [];
+
+        this.castle.reset();
+        this.archer.reset();
+
+        this.score = 0;
+
+        this.waveManager.startWave(1);
+
+        showOnly("gameUI");
+    }
+
+    defeat() {
+
+        if (this.state === "gameover") return;
+
+        this.state = "gameover";
+
+        if (
+            this.waveManager.wave >
+            save.bestWave
+        ) {
+            save.bestWave =
+                this.waveManager.wave;
+        }
+
+        save.gold = this.gold;
+
+        saveGame();
+
+        document.getElementById(
+            "defeatStats"
+        ).innerHTML = `
+            <b>REACHED WAVE:</b>
+            ${this.waveManager.wave}<br><br>
+            <b>ORCS SLAIN:</b>
+            ${save.totalKills}<br><br>
+            <b>ACCURACY:</b>
+            ${this.getAccuracy()}%<br><br>
+            <b>GOLD:</b>
+            ${this.gold}
+        `;
+
+        document
+            .getElementById("gameOver")
+            .classList.remove("hidden");
+
+        document
+            .getElementById("pauseBtn")
+            .classList.add("hidden");
+    }
+
+    waveCleared() {
+
+        if (this.state !== "playing") return;
+
+        this.state = "waveClear";
+
+        audio.waveClear();
+
+        const wave =
+            this.waveManager.wave;
+
+        const reward =
+            50 +
+            wave * 12;
+
+        this.gold += reward;
+
+        save.gold = this.gold;
+
+        if (wave > save.bestWave) {
+            save.bestWave = wave;
+        }
+
+        saveGame();
+
+        const shots =
+            save.totalShots -
+            this.shotsAtWaveStart;
+
+        const hits =
+            save.totalHits -
+            this.hitsAtWaveStart;
+
+        const accuracy =
+            shots > 0
+                ? Math.round(hits / shots * 100)
+                : 0;
+
+        document.getElementById(
+            "waveStats"
+        ).innerHTML = `
+            ORCS SLAIN:
+            ${this.countKillsInWave()}<br><br>
+
+            ACCURACY:
+            ${accuracy}%<br><br>
+
+            GOLD EARNED:
+            +${reward}<br><br>
+
+            CASTLE:
+            ${Math.ceil(this.castle.hp)}
+            /
+            ${this.castle.maxHP}
+        `;
+
+        document
+            .getElementById("waveScreen")
+            .classList.remove("hidden");
+    }
+
+    countKillsInWave() {
+        return this.orcs.filter(
+            o => o.dead
+        ).length;
+    }
+
+    getAccuracy() {
+
+        if (save.totalShots <= 0) {
+            return 0;
+        }
+
+        return Math.round(
+            save.totalHits /
+            save.totalShots *
+            100
+        );
+    }
+
+    nextWave() {
+
+        this.state = "playing";
+
+        const next =
+            this.waveManager.wave + 1;
+
+        this.waveManager.startWave(next);
+
+        this.castle.hp = Math.min(
+            this.castle.maxHP,
+            this.castle.hp +
+            this.castle.maxHP * .08
+        );
+
+        this.shotsAtWaveStart =
+            save.totalShots;
+
+        this.hitsAtWaveStart =
+            save.totalHits;
+
+        document
+            .getElementById("waveScreen")
+            .classList.add("hidden");
+
+        this.updateUI();
+    }
+
+    togglePause() {
+
+        if (
+            this.state === "playing"
+        ) {
+            this.state = "paused";
+
+            document
+                .getElementById("pauseScreen")
+                .classList.remove("hidden");
+
+        } else if (
+            this.state === "paused"
+        ) {
+            this.state = "playing";
+
+            document
+                .getElementById("pauseScreen")
+                .classList.add("hidden");
+        }
+    }
+
+    update(dt) {
+
+        if (this.state !== "playing") {
+            this.castle.update(dt);
+            return;
+        }
+
+        this.castle.update(dt);
+        this.archer.update(dt);
+        this.waveManager.update(dt);
+
+        /* arrows */
+
+        this.arrows =
+            this.arrows.filter(
+                arrow => arrow.update(dt)
+            );
+
+        /* orcs */
+
+        this.orcs =
+            this.orcs.filter(
+                orc => orc.update(dt)
+            );
+
+        /* particles */
+
+        this.particles =
+            this.particles.filter(
+                p => p.update(dt)
+            );
+
+        /* floating text */
+
+        this.floatingTexts =
+            this.floatingTexts.filter(
+                t => t.update(dt)
+            );
+
+        /* wall impacts */
+
+        for (const impact of this.wallImpacts) {
+            impact.life -= dt;
+        }
+
+        this.wallImpacts =
+            this.wallImpacts.filter(
+                i => i.life > 0
+            );
+
+        this.updateUI();
+    }
+
+    updateUI() {
+
+        document.getElementById(
+            "waveText"
+        ).textContent =
+            this.waveManager.wave;
+
+        document.getElementById(
+            "castleText"
+        ).textContent =
+            `${Math.ceil(this.castle.hp)} / ${this.castle.maxHP}`;
+
+        document.getElementById(
+            "castleFill"
+        ).style.width =
+            `${clamp(
+                this.castle.hp /
+                this.castle.maxHP *
+                100,
+                0,
+                100
+            )}%`;
+
+        document.getElementById(
+            "orcsText"
+        ).textContent =
+            this.orcs.filter(
+                o => !o.dead
+            ).length +
+            this.waveManager.spawnRemaining;
+
+        document.getElementById(
+            "goldText"
+        ).textContent =
+            this.gold;
+
+        document.getElementById(
+            "scoreText"
+        ).textContent =
+            this.score;
+    }
+
+    draw() {
+
+        drawSky();
+
+        this.castle.draw();
+
+        drawBattlefield();
+
+        /*
+         * Дальние объекты сначала.
+         * Орки — после дороги.
+         * Лучник — поверх стены.
+         */
+
+        for (const orc of this.orcs) {
+            orc.draw();
+        }
+
+        for (const arrow of this.arrows) {
+            arrow.draw();
+        }
+
+        this.archer.draw();
+
+        drawAim();
+
+        for (const p of this.particles) {
+            p.draw();
+        }
+
+        for (const text of this.floatingTexts) {
+            text.draw();
+        }
+
+        drawWallImpacts();
+
+        drawVignette();
+    }
+
+    loop(time) {
+
+        let dt =
+            (time - this.lastTime) /
+            1000;
+
+        this.lastTime = time;
+
+        dt = Math.min(dt, .033);
+
+        this.update(dt);
+        this.draw();
+
+        requestAnimationFrame(
+            this.loop
+        );
+    }
+}
+
+const game = new Game();
+
+
+/* =========================================================
+   RENDERER — SKY
+   ========================================================= */
+
+function drawSky() {
+
+    const gradient =
         ctx.createLinearGradient(
             0,
             0,
@@ -540,21 +2447,25 @@ function drawBackground() {
 
     gradient.addColorStop(
         0,
-        "#111719"
+        "#070b12"
     );
 
     gradient.addColorStop(
-        0.34,
-        "#18211f"
+        .42,
+        "#111820"
+    );
+
+    gradient.addColorStop(
+        .72,
+        "#171b1a"
     );
 
     gradient.addColorStop(
         1,
-        "#070b08"
+        "#0c0c0b"
     );
 
-    ctx.fillStyle =
-        gradient;
+    ctx.fillStyle = gradient;
 
     ctx.fillRect(
         0,
@@ -563,1833 +2474,1396 @@ function drawBackground() {
         H
     );
 
+    /* moon */
 
-    /* ЛУНА */
+    const moonX = W * .77;
+    const moonY = H * .17;
+    const moonR = Math.min(55, W * .045);
 
-    ctx.beginPath();
-
-    ctx.arc(
-        W * 0.82,
-        H * 0.09,
-        31,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle =
-        "#d5d2b5";
-
-    ctx.shadowBlur = 25;
-
-    ctx.shadowColor =
-        "#aaa98c";
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-}
-
-
-/* ==================================================
-   ДОРОГА
-================================================== */
-
-function drawRoad() {
-
-    var wallY =
-        getWallY();
-
-
-    /*
-       Широкая дорога идёт
-       от самого низа карты
-       непосредственно к стене.
-    */
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        W * 0.32,
-        H
-    );
-
-    ctx.bezierCurveTo(
-        W * 0.43,
-        H * 0.84,
-        W * 0.44,
-        H * 0.61,
-        W * 0.49,
-        wallY + 45
-    );
-
-    ctx.lineTo(
-        W * 0.63,
-        wallY + 45
-    );
-
-    ctx.bezierCurveTo(
-        W * 0.56,
-        H * 0.62,
-        W * 0.68,
-        H * 0.84,
-        W * 0.69,
-        H
-    );
-
-    ctx.closePath();
-
-    ctx.fillStyle =
-        "#252a21";
-
-    ctx.fill();
-
-
-    /*
-       Более светлая середина дороги.
-    */
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        W * 0.43,
-        H
-    );
-
-    ctx.bezierCurveTo(
-        W * 0.51,
-        H * 0.83,
-        W * 0.49,
-        H * 0.63,
-        W * 0.53,
-        wallY + 52
-    );
-
-    ctx.lineTo(
-        W * 0.59,
-        wallY + 52
-    );
-
-    ctx.bezierCurveTo(
-        W * 0.55,
-        H * 0.63,
-        W * 0.62,
-        H * 0.83,
-        W * 0.63,
-        H
-    );
-
-    ctx.closePath();
-
-    ctx.fillStyle =
-        "#303329";
-
-    ctx.fill();
-
-}
-
-
-/* ==================================================
-   ЛЕС
-================================================== */
-
-function drawForest() {
-
-    var wallY =
-        getWallY();
-
-    var wallH =
-        getWallHeight();
-
-
-    ctx.fillStyle =
-        "#0a100c";
-
-    ctx.fillRect(
-        0,
-        wallY + wallH * 0.3,
-        W,
-        H
-    );
-
-
-    drawRoad();
-
-
-    /*
-       Деревья.
-       Они не являются частью
-       дороги — дорога рисуется
-       раньше деревьев, поэтому
-       дополнительно исключаем
-       область непосредственно
-       вокруг центрального пути.
-    */
-
-    for (
-        var i = 0;
-        i < trees.length;
-        i++
-    ) {
-
-        var t =
-            trees[i];
-
-
-        if (
-            isOnRoad(
-                t.x,
-                t.y
-            )
-        ) {
-
-            continue;
-
-        }
-
-
-        drawTree(
-            t.x,
-            t.y,
-            t.size
+    const glow =
+        ctx.createRadialGradient(
+            moonX,
+            moonY,
+            0,
+            moonX,
+            moonY,
+            moonR * 2.8
         );
 
-    }
+    glow.addColorStop(
+        0,
+        "#b7c0c088"
+    );
 
+    glow.addColorStop(
+        .25,
+        "#79828d22"
+    );
 
-    /* КАМНИ */
+    glow.addColorStop(
+        1,
+        "transparent"
+    );
 
-    for (
-        var k = 0;
-        k < 25;
-        k++
-    ) {
+    ctx.fillStyle = glow;
 
-        var stoneX =
-            (k * 151) % W;
+    ctx.beginPath();
+    ctx.arc(
+        moonX,
+        moonY,
+        moonR * 2.8,
+        0,
+        TAU
+    );
+    ctx.fill();
 
-        var stoneY =
-            wallY +
-            100 +
-            (
-                k * 97
-            ) %
-            Math.max(
-                80,
-                H - wallY - 120
-            );
+    ctx.fillStyle = "#bdc1b8";
 
+    ctx.beginPath();
+    ctx.arc(
+        moonX,
+        moonY,
+        moonR,
+        0,
+        TAU
+    );
+    ctx.fill();
 
-        if (
-            isOnRoad(
-                stoneX,
-                stoneY
-            )
-        ) {
+    /* moon craters */
 
-            continue;
+    ctx.fillStyle = "#9da39b";
 
-        }
+    ctx.globalAlpha = .35;
 
+    ctx.beginPath();
+    ctx.arc(
+        moonX - 15,
+        moonY + 9,
+        7,
+        0,
+        TAU
+    );
+    ctx.fill();
 
-        ctx.fillStyle =
-            "#252a25";
+    ctx.beginPath();
+    ctx.arc(
+        moonX + 12,
+        moonY - 11,
+        5,
+        0,
+        TAU
+    );
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+
+    /* clouds */
+
+    ctx.fillStyle = "#151c23aa";
+
+    for (let i = 0; i < 5; i++) {
+
+        const x =
+            (i * 280 +
+             (performance.now() * .004)) %
+            (W + 400) - 200;
+
+        const y =
+            70 + i * 45;
 
         ctx.beginPath();
 
         ctx.ellipse(
-            stoneX,
-            stoneY,
-            12 + (k % 4) * 3,
-            7,
+            x,
+            y,
+            150,
+            25,
             0,
             0,
-            Math.PI * 2
+            TAU
         );
 
         ctx.fill();
-
     }
 
-}
+    /* stars */
 
+    ctx.fillStyle = "#aaa99b";
 
-/* ==================================================
-   ПРОВЕРКА ДОРОГИ
-================================================== */
+    for (let i = 0; i < 70; i++) {
 
-function isOnRoad(x, y) {
+        const x =
+            (i * 193) % W;
 
-    var wallY =
-        getWallY();
+        const y =
+            (i * 71) % (H * .35);
 
+        const a =
+            .25 +
+            .2 *
+            Math.sin(
+                performance.now() * .001 +
+                i
+            );
 
-    /*
-       Примерная центральная
-       линия дороги.
-    */
+        ctx.globalAlpha = a;
 
-    var progress =
-        (H - y) /
-        Math.max(
+        ctx.fillRect(
+            x,
+            y,
             1,
-            H - wallY
+            1
         );
+    }
 
-
-    var center =
-        W * 0.55 +
-        Math.sin(
-            progress * 3.5
-        ) * W * 0.055;
-
-
-    var width =
-        W * (
-            0.10 +
-            progress * 0.08
-        );
-
-
-    return (
-        Math.abs(
-            x - center
-        ) < width
-    );
-
+    ctx.globalAlpha = 1;
 }
 
 
-/* ==================================================
-   ДЕРЕВО
-================================================== */
+/* =========================================================
+   BACKGROUND CASTLE
+   ========================================================= */
 
-function drawTree(
-    x,
-    y,
-    size
-) {
+function drawCastleBackground() {
 
-    /*
-       Ствол
-    */
+    const baseY =
+        H * .66;
 
-    ctx.fillStyle =
-        "#17140f";
+    /* distant mountains */
+
+    ctx.fillStyle = "#10151a";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0, baseY - 90);
+
+    for (
+        let x = 0;
+        x <= W;
+        x += 100
+    ) {
+
+        const y =
+            baseY -
+            80 -
+            Math.sin(x * .009) * 35 -
+            Math.sin(x * .022) * 15;
+
+        ctx.lineTo(x, y);
+    }
+
+    ctx.lineTo(W, baseY);
+    ctx.lineTo(0, baseY);
+
+    ctx.closePath();
+    ctx.fill();
+
+    /* rear castle */
+
+    const towerW =
+        Math.max(65, W * .075);
+
+    const towerH =
+        Math.max(170, H * .28);
+
+    const castleY =
+        baseY - towerH;
+
+    ctx.fillStyle = "#222521";
+
+    /* central keep */
 
     ctx.fillRect(
-        x - size * 0.1,
-        y - size * 0.25,
-        size * 0.2,
-        size * 0.9
+        W * .39,
+        castleY + 35,
+        W * .22,
+        towerH
     );
 
+    /* towers */
 
-    /*
-       Ветки
-    */
+    drawTower(
+        W * .20,
+        castleY - 10,
+        towerW,
+        towerH + 45
+    );
 
-    ctx.strokeStyle =
-        "#17140f";
+    drawTower(
+        W * .80 - towerW,
+        castleY - 10,
+        towerW,
+        towerH + 45
+    );
 
-    ctx.lineWidth = 5;
+    /* center tower */
+
+    drawTower(
+        W * .44,
+        castleY - 25,
+        towerW * 1.2,
+        towerH + 65
+    );
+
+    /* gate */
+
+    ctx.fillStyle = "#111310";
+
+    const gateX = W * .46;
+    const gateY = baseY - 90;
+
+    ctx.fillRect(
+        gateX,
+        gateY,
+        W * .08,
+        90
+    );
+
+    ctx.fillStyle = "#090b0a";
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        x,
-        y
-    );
-
-    ctx.lineTo(
-        x - size * 0.42,
-        y - size * 0.48
-    );
-
-    ctx.moveTo(
-        x,
-        y
-    );
-
-    ctx.lineTo(
-        x + size * 0.42,
-        y - size * 0.48
-    );
-
-    ctx.stroke();
-
-
-    /*
-       Крона
-    */
-
-    ctx.fillStyle =
-        "#101b13";
-
-    ctx.beginPath();
-
     ctx.arc(
-        x,
-        y - size * 0.56,
-        size * 0.43,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.arc(
-        x - size * 0.28,
-        y - size * 0.40,
-        size * 0.32,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.arc(
-        x + size * 0.28,
-        y - size * 0.42,
-        size * 0.34,
-        0,
-        Math.PI * 2
+        W * .50,
+        gateY,
+        W * .04,
+        Math.PI,
+        0
     );
 
     ctx.fill();
 
+    /* flags */
 
-    /*
-       Более тёмные детали.
-    */
-
-    ctx.fillStyle =
-        "#0a120d";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x - size * 0.12,
-        y - size * 0.64,
-        size * 0.18,
-        0,
-        Math.PI * 2
+    drawFlag(
+        W * .47,
+        castleY - 70
     );
 
-    ctx.arc(
-        x + size * 0.2,
-        y - size * 0.47,
-        size * 0.16,
-        0,
-        Math.PI * 2
+    drawFlag(
+        W * .23,
+        castleY - 60
     );
 
-    ctx.fill();
-
+    drawFlag(
+        W * .78,
+        castleY - 60
+    );
 }
 
+function drawTower(x, y, w, h) {
 
-/* ==================================================
-   ЗАМОК
-================================================== */
-
-function drawCastle() {
-
-    var y =
-        getWallY();
-
-    var h =
-        getWallHeight();
-
-
-    /* ТЕНЬ */
-
-    ctx.fillStyle =
-        "rgba(0,0,0,0.65)";
+    ctx.fillStyle = "#292b27";
 
     ctx.fillRect(
-        0,
-        y + h,
-        W,
-        35
-    );
-
-
-    /* ОСНОВА */
-
-    ctx.fillStyle =
-        "#343732";
-
-    ctx.fillRect(
-        0,
-        y + 20,
-        W,
+        x,
+        y,
+        w,
         h
     );
 
+    /* blocks */
 
-    /* КАМЕННАЯ КЛАДКА */
-
-    ctx.strokeStyle =
-        "#222520";
-
+    ctx.strokeStyle = "#171916";
     ctx.lineWidth = 2;
 
-    var blockW = 70;
-
-    var blockH = 27;
-
-
     for (
-        var yy = y + 20;
+        let yy = y + 25;
         yy < y + h;
-        yy += blockH
+        yy += 28
     ) {
 
-        var row =
-            Math.floor(
-                (yy - y) /
-                blockH
-            );
-
-        var offset =
-            row % 2 === 0
-            ? 0
-            : blockW / 2;
-
-
-        for (
-            var xx = -blockW;
-            xx < W + blockW;
-            xx += blockW
-        ) {
-
-            ctx.strokeRect(
-                xx + offset,
-                yy,
-                blockW,
-                blockH
-            );
-
-        }
-
+        ctx.beginPath();
+        ctx.moveTo(x, yy);
+        ctx.lineTo(x + w, yy);
+        ctx.stroke();
     }
 
+    for (
+        let yy = y + 10;
+        yy < y + h;
+        yy += 56
+    ) {
 
-    /* ВЕРХ */
+        for (
+            let xx = x;
+            xx < x + w;
+            xx += 42
+        ) {
 
-    ctx.fillStyle =
-        "#484b44";
+            ctx.beginPath();
+            ctx.moveTo(xx, yy);
+            ctx.lineTo(xx, yy + 28);
+            ctx.stroke();
+        }
+    }
 
-    ctx.fillRect(
-        0,
-        y + 10,
-        W,
-        18
-    );
+    /* battlements */
 
+    ctx.fillStyle = "#242722";
 
-    drawBattlements(y);
+    const blocks = 5;
 
+    const bw = w / blocks;
 
-    drawTower(
-        55,
-        y
-    );
+    for (let i = 0; i < blocks; i += 2) {
 
-    drawTower(
-        W - 55,
-        y
-    );
+        ctx.fillRect(
+            x + i * bw,
+            y - 18,
+            bw * .65,
+            18
+        );
+    }
 
+    /* windows */
 
-    /*
-       Факелы теперь ниже.
-    */
-
-    drawTorch(
-        135,
-        y + 38
-    );
-
-    drawTorch(
-        W - 135,
-        y + 38
-    );
-
-}
-
-
-/* ==================================================
-   ЗУБЦЫ
-================================================== */
-
-function drawBattlements(y) {
-
-    var merlonW = 38;
-
-    var gap = 20;
-
-
-    ctx.fillStyle =
-        "#3c3f39";
-
+    ctx.fillStyle = "#080a08";
 
     for (
-        var x = 0;
-        x < W;
-        x += merlonW + gap
+        let yy = y + 45;
+        yy < y + h - 20;
+        yy += 65
     ) {
 
         ctx.fillRect(
-            x,
-            y - 15,
-            merlonW,
-            30
+            x + w * .35,
+            yy,
+            w * .3,
+            25
         );
-
     }
 
+    /* torches */
+
+    drawTorch(
+        x + w * .15,
+        y + h * .55
+    );
+
+    drawTorch(
+        x + w * .85,
+        y + h * .55
+    );
+}
+
+function drawFlag(x, y) {
+
+    ctx.strokeStyle = "#413d34";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x, y + 60);
+    ctx.stroke();
+
+    ctx.fillStyle = "#4a3028";
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 45, y + 10);
+    ctx.lineTo(x, y + 23);
+    ctx.closePath();
+    ctx.fill();
 }
 
 
-/* ==================================================
-   БАШНИ
-================================================== */
+/* =========================================================
+   TORCH
+   ========================================================= */
 
-function drawTower(
-    x,
-    y
-) {
+function drawTorch(x, y) {
 
-    var width = 82;
+    /* glow */
 
-    var height = 125;
+    const pulse =
+        1 +
+        Math.sin(performance.now() * .009 + x) * .08;
 
-
-    ctx.fillStyle =
-        "#393c37";
-
-    ctx.fillRect(
-        x - width / 2,
-        y - height + 30,
-        width,
-        height
-    );
-
-
-    ctx.strokeStyle =
-        "#242722";
-
-    ctx.lineWidth = 2;
-
-
-    for (
-        var yy = y - height + 30;
-        yy < y + 30;
-        yy += 27
-    ) {
-
-        ctx.strokeRect(
-            x - width / 2,
-            yy,
-            width,
-            27
+    const glow =
+        ctx.createRadialGradient(
+            x,
+            y,
+            2,
+            x,
+            y,
+            70 * pulse
         );
 
-    }
+    glow.addColorStop(
+        0,
+        "#e29a45aa"
+    );
 
+    glow.addColorStop(
+        .25,
+        "#9d5e2825"
+    );
 
-    ctx.fillStyle =
-        "#494c45";
+    glow.addColorStop(
+        1,
+        "transparent"
+    );
+
+    ctx.fillStyle = glow;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        70 * pulse,
+        0,
+        TAU
+    );
+
+    ctx.fill();
+
+    /* mount */
+
+    ctx.fillStyle = "#493b2a";
 
     ctx.fillRect(
-        x - width / 2 - 7,
-        y - height + 15,
-        width + 14,
+        x - 3,
+        y + 4,
+        6,
         22
     );
 
+    /* flame */
 
-    for (
-        var i = -1;
-        i <= 1;
-        i++
-    ) {
-
-        ctx.fillRect(
-            x + i * 26 - 10,
-            y - height - 8,
-            20,
-            25
-        );
-
-    }
-
-
-    ctx.fillStyle =
-        "#10130f";
-
-    ctx.fillRect(
-        x - 8,
-        y - height + 55,
-        16,
-        27
-    );
-
-}
-
-
-/* ==================================================
-   ФАКЕЛ
-================================================== */
-
-function drawTorch(
-    x,
-    y
-) {
-
-    /*
-       Крепление.
-    */
-
-    ctx.fillStyle =
-        "#302218";
-
-    ctx.fillRect(
-        x - 4,
-        y,
-        8,
-        28
-    );
-
-
-    /*
-       Огненная часть.
-    */
+    ctx.fillStyle = "#d47c2d";
 
     ctx.beginPath();
 
-    ctx.arc(
-        x,
-        y - 4,
-        8,
-        0,
-        Math.PI * 2
-    );
-
-    ctx.fillStyle =
-        "#e0a344";
-
-    ctx.shadowBlur = 22;
-
-    ctx.shadowColor =
-        "#d99032";
-
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-
-}
-
-
-/* ==================================================
-   ЛУЧНИК
-================================================== */
-
-function drawPlayer() {
-
-    var x =
-        player.x;
-
-    /*
-       Лучник стоит
-       на площадке стены.
-
-       Его ноги находятся
-       за передними зубцами.
-    */
-
-    var y =
-        getWallY() + 8;
-
-
-    /* НОГИ */
-
-    ctx.fillStyle =
-        "#151813";
-
-    ctx.fillRect(
+    ctx.moveTo(x, y - 22);
+    ctx.quadraticCurveTo(
         x - 9,
-        y - 11,
-        7,
-        30
-    );
-
-    ctx.fillRect(
-        x + 2,
-        y - 11,
-        7,
-        30
-    );
-
-
-    /* ТЕЛО */
-
-    ctx.fillStyle =
-        "#292e29";
-
-    ctx.fillRect(
-        x - 15,
-        y - 55,
-        30,
-        43
-    );
-
-
-    /* ПЛЕЧИ */
-
-    ctx.fillRect(
-        x - 20,
-        y - 51,
-        40,
-        10
-    );
-
-
-    /* ГОЛОВА */
-
-    ctx.beginPath();
-
-    ctx.arc(
+        y - 8,
         x,
-        y - 67,
-        12,
-        0,
-        Math.PI * 2
+        y + 2
     );
 
-    ctx.fillStyle =
-        "#a88e6d";
+    ctx.quadraticCurveTo(
+        x + 11,
+        y - 8,
+        x,
+        y - 22
+    );
 
     ctx.fill();
 
-
-    /* КАПЮШОН */
+    ctx.fillStyle = "#f0c56a";
 
     ctx.beginPath();
 
-    ctx.arc(
+    ctx.moveTo(x, y - 15);
+    ctx.quadraticCurveTo(
+        x - 4,
+        y - 6,
         x,
-        y - 70,
-        16,
-        Math.PI,
-        Math.PI * 2
+        y
     );
 
-    ctx.fillStyle =
-        "#121712";
+    ctx.quadraticCurveTo(
+        x + 5,
+        y - 7,
+        x,
+        y - 15
+    );
 
     ctx.fill();
 
+    /* smoke */
 
-    /* ЛУК */
-
-    ctx.strokeStyle =
-        "#8b643d";
-
-    ctx.lineWidth = 4;
-
-    ctx.beginPath();
-
-    ctx.arc(
-        x + 21,
-        y - 40,
-        29,
-        -Math.PI * 0.8,
-        Math.PI * 0.8
-    );
-
-    ctx.stroke();
-
-
-    /* ТЕТИВА */
-
-    ctx.strokeStyle =
-        "#c9c0a6";
-
-    ctx.lineWidth = 1;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        x + 14,
-        y - 67
-    );
-
-    ctx.lineTo(
-        x + 14,
-        y - 13
-    );
-
-    ctx.stroke();
-
-
-    /* СТРЕЛА */
-
-    ctx.strokeStyle =
-        "#d8ccaa";
-
+    ctx.strokeStyle = "#77766e35";
     ctx.lineWidth = 2;
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        x + 3,
-        y - 41
-    );
-
-    ctx.lineTo(
-        x + 42,
-        y - 41
+    ctx.moveTo(x, y - 24);
+    ctx.bezierCurveTo(
+        x - 8,
+        y - 45,
+        x + 9,
+        y - 55,
+        x,
+        y - 70
     );
 
     ctx.stroke();
-
-
-    /*
-       Передние зубцы перекрывают
-       ноги лучника.
-    */
-
-    drawFrontBattlements();
-
 }
 
 
-/* ==================================================
-   ПЕРЕДНИЕ ЗУБЦЫ
-================================================== */
+/* =========================================================
+   BATTLEFIELD
+   ========================================================= */
 
-function drawFrontBattlements() {
+function drawBattlefield() {
 
-    var y =
-        getWallY();
+    const top =
+        H * .52;
 
-    var merlonW = 38;
+    const bottom =
+        wallGeometry().top;
 
-    var gap = 20;
+    /* distant mist */
 
-
-    ctx.fillStyle =
-        "#3c3f39";
-
-
-    for (
-        var x = 0;
-        x < W;
-        x += merlonW + gap
-    ) {
-
-        ctx.fillRect(
-            x,
-            y - 15,
-            merlonW,
-            27
+    const mist =
+        ctx.createLinearGradient(
+            0,
+            top - 100,
+            0,
+            bottom
         );
 
-    }
-
-}
-
-
-/* ==================================================
-   ОРКИ
-================================================== */
-
-function spawnOrc() {
-
-    var type =
-        "normal";
-
-    var random =
-        Math.random();
-
-
-    if (
-        wave >= 2 &&
-        random < 0.18
-    ) {
-
-        type =
-            "fast";
-
-    }
-
-
-    if (
-        wave >= 4 &&
-        random < 0.07
-    ) {
-
-        type =
-            "heavy";
-
-    }
-
-
-    var spawnY =
-        H - 35;
-
-
-    var spawnX =
-        W * 0.38 +
-        Math.random() *
-        W * 0.24;
-
-
-    var enemy;
-
-
-    if (
-        type === "fast"
-    ) {
-
-        enemy = {
-
-            type: "fast",
-
-            x: spawnX,
-
-            y: spawnY,
-
-            hp: 34,
-
-            maxHp: 34,
-
-            speed: 64,
-
-            damage: 5,
-
-            reward: 13,
-
-            size: 20
-
-        };
-
-    }
-
-    else if (
-        type === "heavy"
-    ) {
-
-        enemy = {
-
-            type: "heavy",
-
-            x: spawnX,
-
-            y: spawnY,
-
-            hp: 125,
-
-            maxHp: 125,
-
-            speed: 25,
-
-            damage: 13,
-
-            reward: 30,
-
-            size: 32
-
-        };
-
-    }
-
-    else {
-
-        enemy = {
-
-            type: "normal",
-
-            x: spawnX,
-
-            y: spawnY,
-
-            hp: 60,
-
-            maxHp: 60,
-
-            speed: 40,
-
-            damage: 7,
-
-            reward: 10,
-
-            size: 25
-
-        };
-
-    }
-
-
-    enemies.push(
-        enemy
+    mist.addColorStop(
+        0,
+        "#52605c20"
     );
 
-}
+    mist.addColorStop(
+        .55,
+        "#151b1a55"
+    );
 
+    mist.addColorStop(
+        1,
+        "#0a0b0add"
+    );
 
-/* ==================================================
-   ОРК
-================================================== */
-
-function drawEnemy(e) {
-
-    var s =
-        e.size;
-
-
-    /* ЦВЕТ */
-
-    if (
-        e.type === "heavy"
-    ) {
-
-        ctx.fillStyle =
-            "#30372c";
-
-    }
-
-    else if (
-        e.type === "fast"
-    ) {
-
-        ctx.fillStyle =
-            "#3a482f";
-
-    }
-
-    else {
-
-        ctx.fillStyle =
-            "#34402f";
-
-    }
-
-
-    /*
-       НОГИ
-    */
+    ctx.fillStyle = mist;
 
     ctx.fillRect(
-        e.x - s * 0.28,
-        e.y + s * 0.25,
-        s * 0.20,
-        s * 0.72
+        0,
+        top - 100,
+        W,
+        bottom - top + 100
     );
 
-    ctx.fillRect(
-        e.x + s * 0.08,
-        e.y + s * 0.25,
-        s * 0.20,
-        s * 0.72
-    );
+    /* ground */
 
-
-    /*
-       ТУЛОВИЩЕ.
-       Уже не прямоугольник.
-    */
+    ctx.fillStyle = "#181a17";
 
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x - s * 0.42,
-        e.y - s * 0.25
+        0,
+        top
     );
 
     ctx.lineTo(
-        e.x + s * 0.42,
-        e.y - s * 0.25
+        W,
+        top
     );
 
     ctx.lineTo(
-        e.x + s * 0.32,
-        e.y + s * 0.42
+        W,
+        bottom
     );
 
     ctx.lineTo(
-        e.x - s * 0.32,
-        e.y + s * 0.42
+        0,
+        bottom
     );
 
     ctx.closePath();
 
     ctx.fill();
 
+    /* road */
 
-    /*
-       ПЛЕЧИ
-    */
-
-    ctx.fillRect(
-        e.x - s * 0.53,
-        e.y - s * 0.20,
-        s * 1.06,
-        s * 0.22
+    drawRoad(
+        W * .5,
+        top,
+        W * .5,
+        bottom
     );
 
+    /* forest */
 
-    /*
-       РУКИ
-    */
+    drawForest();
 
-    ctx.fillRect(
-        e.x - s * 0.62,
-        e.y - s * 0.05,
-        s * 0.18,
-        s * 0.65
-    );
+    /* stones */
 
-    ctx.fillRect(
-        e.x + s * 0.44,
-        e.y - s * 0.05,
-        s * 0.18,
-        s * 0.65
-    );
+    for (let i = 0; i < 60; i++) {
 
+        const x =
+            (i * 157) % W;
 
-    /*
-       ГОЛОВА
-    */
+        const y =
+            top +
+            ((i * 83) % Math.max(
+                20,
+                bottom - top
+            ));
 
-    ctx.fillStyle =
-        "#526044";
+        /*
+         * Не рисуем камни на центральной дороге.
+         */
+        const roadWidth =
+            lerp(
+                35,
+                180,
+                (y - top) /
+                Math.max(1, bottom - top)
+            );
 
-    ctx.beginPath();
+        if (
+            Math.abs(x - W * .5) <
+            roadWidth * .55
+        ) continue;
 
-    ctx.arc(
-        e.x,
-        e.y - s * 0.72,
-        s * 0.43,
-        0,
-        Math.PI * 2
-    );
+        ctx.fillStyle =
+            i % 2
+                ? "#292c27"
+                : "#34352e";
 
-    ctx.fill();
+        ctx.beginPath();
 
+        ctx.ellipse(
+            x,
+            y,
+            rand(3, 8),
+            rand(2, 5),
+            rand(0, TAU),
+            0,
+            TAU
+        );
 
-    /*
-       УШИ
-    */
+        ctx.fill();
+    }
+}
 
-    ctx.beginPath();
+function drawRoad(cx, top, bottom) {
 
-    ctx.moveTo(
-        e.x - s * 0.25,
-        e.y - s * 0.73
-    );
-
-    ctx.lineTo(
-        e.x - s * 0.70,
-        e.y - s * 0.94
-    );
-
-    ctx.lineTo(
-        e.x - s * 0.35,
-        e.y - s * 0.53
-    );
-
-    ctx.fill();
-
+    ctx.fillStyle = "#272620";
 
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x + s * 0.25,
-        e.y - s * 0.73
+        cx - 24,
+        top
+    );
+
+    ctx.bezierCurveTo(
+        cx - 55,
+        top + 100,
+        cx + 100,
+        top + 160,
+        cx + 20,
+        bottom
     );
 
     ctx.lineTo(
-        e.x + s * 0.70,
-        e.y - s * 0.94
+        cx + 190,
+        bottom
     );
 
-    ctx.lineTo(
-        e.x + s * 0.35,
-        e.y - s * 0.53
+    ctx.bezierCurveTo(
+        cx + 170,
+        top + 190,
+        cx + 60,
+        top + 130,
+        cx + 40,
+        top
     );
+
+    ctx.closePath();
 
     ctx.fill();
 
+    /* mud tracks */
 
-    /*
-       ГЛАЗА
-    */
+    ctx.strokeStyle = "#34332c";
+    ctx.lineWidth = 7;
 
-    ctx.fillStyle =
-        "#d8bd63";
+    ctx.beginPath();
 
-    ctx.fillRect(
-        e.x - s * 0.21,
-        e.y - s * 0.80,
-        4,
-        4
+    ctx.moveTo(cx, top);
+    ctx.bezierCurveTo(
+        cx + 35,
+        top + 120,
+        cx + 100,
+        top + 160,
+        cx + 70,
+        bottom
     );
 
-    ctx.fillRect(
-        e.x + s * 0.08,
-        e.y - s * 0.80,
-        4,
-        4
-    );
+    ctx.stroke();
 
-
-    /*
-       БРОНЯ
-    */
-
-    ctx.fillStyle =
-        "#252a24";
-
-    ctx.fillRect(
-        e.x - s * 0.30,
-        e.y - s * 0.22,
-        s * 0.60,
-        s * 0.16
-    );
-
-
-    /*
-       ОРУЖИЕ
-    */
-
-    ctx.strokeStyle =
-        "#725235";
-
+    ctx.strokeStyle = "#171815";
     ctx.lineWidth = 4;
 
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x + s * 0.32,
-        e.y
+        cx - 10,
+        top
     );
 
-    ctx.lineTo(
-        e.x + s * 0.78,
-        e.y + s * 0.55
+    ctx.bezierCurveTo(
+        cx - 30,
+        top + 120,
+        cx + 60,
+        top + 190,
+        cx + 42,
+        bottom
     );
 
     ctx.stroke();
 
+    /* puddles */
+
+    ctx.fillStyle = "#343b3a";
+
+    for (let i = 0; i < 8; i++) {
+
+        const t = i / 8;
+
+        const y =
+            lerp(
+                top + 40,
+                bottom - 20,
+                t
+            );
+
+        const x =
+            cx +
+            Math.sin(t * 5) *
+            50;
+
+        ctx.beginPath();
+
+        ctx.ellipse(
+            x,
+            y,
+            15 + t * 15,
+            5 + t * 5,
+            -.1,
+            0,
+            TAU
+        );
+
+        ctx.fill();
+    }
+}
+
+
+/* =========================================================
+   FOREST
+   ========================================================= */
+
+function drawForest() {
+
+    const top = H * .46;
+    const bottom = wallGeometry().top;
 
     /*
-       HP
-    */
+     * Деревья размещаются по краям дороги.
+     * Центральный коридор намеренно оставляем свободным.
+     */
 
-    ctx.fillStyle =
-        "#130d0d";
+    const rows = 4;
 
-    ctx.fillRect(
-        e.x - s,
-        e.y - s * 1.35,
-        s * 2,
-        5
-    );
+    for (let row = 0; row < rows; row++) {
 
-    ctx.fillStyle =
-        "#a84f43";
+        const y =
+            top +
+            row *
+            ((bottom - top) / rows);
 
-    ctx.fillRect(
-        e.x - s,
-        e.y - s * 1.35,
-        s * 2 *
-        Math.max(
-            0,
-            e.hp / e.maxHp
-        ),
-        5
-    );
+        const scale =
+            .55 +
+            row * .18;
 
-}
-
-
-/* ==================================================
-   ПОИСК ОРКА
-================================================== */
-
-function getNearestEnemy() {
-
-    if (
-        enemies.length === 0
-    ) {
-
-        return null;
-
-    }
-
-
-    var nearest =
-        enemies[0];
-
-    var bestDistance =
-        Math.abs(
-            enemies[0].x -
-            player.x
-        ) +
-        enemies[0].y;
-
-
-    for (
-        var i = 1;
-        i < enemies.length;
-        i++
-    ) {
-
-        var e =
-            enemies[i];
-
-        var distance =
-            Math.abs(
-                e.x -
-                player.x
-            ) +
-            e.y;
-
-
-        if (
-            distance <
-            bestDistance
+        for (
+            let i = -2;
+            i < 13;
+            i++
         ) {
 
-            bestDistance =
-                distance;
+            const side =
+                i % 2 === 0
+                    ? -1
+                    : 1;
 
-            nearest =
-                e;
+            const baseX =
+                side > 0
+                    ? W * .5 +
+                      130 +
+                      (i * 37)
+                    : W * .5 -
+                      130 -
+                      (i * 37);
 
+            const x =
+                ((baseX % W) + W) % W;
+
+            const offset =
+                row * 57 +
+                (i * 31);
+
+            const finalX =
+                side > 0
+                    ? Math.min(
+                        W - 25,
+                        x + offset
+                    )
+                    : Math.max(
+                        25,
+                        x - offset
+                    );
+
+            drawPine(
+                finalX,
+                y + rand(-12, 12),
+                scale
+            );
         }
-
     }
 
+    /* distant forest wall */
 
-    return nearest;
+    ctx.fillStyle = "#202820";
 
-}
+    ctx.globalAlpha = .65;
 
+    for (let i = 0; i < 28; i++) {
 
-/* ==================================================
-   СТРЕЛЬБА
-================================================== */
+        const x =
+            (i / 28) * W;
 
-function shoot() {
-
-    if (
-        !gameRunning
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        player.cooldown > 0
-    ) {
-
-        return;
-
-    }
-
-
-    var target =
-        getNearestEnemy();
-
-
-    if (
-        target === null
-    ) {
-
-        return;
-
-    }
-
-
-    player.cooldown =
-        player.fireRate;
-
-
-    var startX =
-        player.x;
-
-    var startY =
-        getWallY() - 5;
-
-
-    var targetX =
-        target.x;
-
-    var targetY =
-        target.y -
-        target.size * 0.5;
-
-
-    var dx =
-        targetX -
-        startX;
-
-    var dy =
-        targetY -
-        startY;
-
-
-    var distance =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
+        drawPine(
+            x,
+            top + rand(-20, 20),
+            .35
         );
-
-
-    var speed =
-        700;
-
-
-    arrows.push({
-
-        x: startX,
-
-        y: startY,
-
-        vx:
-            dx /
-            distance *
-            speed,
-
-        vy:
-            dy /
-            distance *
-            speed,
-
-        damage:
-            player.damage
-
-    });
-
-}
-
-
-/* ==================================================
-   СТРЕЛА
-================================================== */
-
-function drawArrow(a) {
-
-    var angle =
-        Math.atan2(
-            a.vy,
-            a.vx
-        );
-
-
-    ctx.save();
-
-    ctx.translate(
-        a.x,
-        a.y
-    );
-
-    ctx.rotate(
-        angle
-    );
-
-
-    ctx.strokeStyle =
-        "#d8c99f";
-
-    ctx.lineWidth = 3;
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        -18,
-        0
-    );
-
-    ctx.lineTo(
-        18,
-        0
-    );
-
-    ctx.stroke();
-
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        18,
-        0
-    );
-
-    ctx.lineTo(
-        9,
-        -5
-    );
-
-    ctx.moveTo(
-        18,
-        0
-    );
-
-    ctx.lineTo(
-        9,
-        5
-    );
-
-    ctx.stroke();
-
-
-    ctx.restore();
-
-}
-
-
-/* ==================================================
-   ЧАСТИЦЫ
-================================================== */
-
-function hitParticles(
-    x,
-    y
-) {
-
-    for (
-        var i = 0;
-        i < 7;
-        i++
-    ) {
-
-        particles.push({
-
-            x: x,
-
-            y: y,
-
-            vx:
-                -100 +
-                Math.random() *
-                200,
-
-            vy:
-                -100 +
-                Math.random() *
-                200,
-
-            life:
-                0.35
-
-        });
-
     }
 
+    ctx.globalAlpha = 1;
 }
 
+function drawPine(x, y, scale) {
 
-function updateParticles(
-    dt
-) {
+    const h =
+        100 * scale;
 
-    for (
-        var i = 0;
-        i < particles.length;
-        i++
-    ) {
+    const w =
+        55 * scale;
 
-        var p =
-            particles[i];
+    /* trunk */
 
-        p.x +=
-            p.vx * dt;
+    ctx.fillStyle = "#3d3328";
 
-        p.y +=
-            p.vy * dt;
+    ctx.fillRect(
+        x - 4 * scale,
+        y,
+        8 * scale,
+        h * .35
+    );
 
-        p.life -=
-            dt;
+    /* foliage */
 
-    }
+    ctx.fillStyle = "#273229";
 
+    for (let i = 0; i < 3; i++) {
 
-    particles =
-        particles.filter(
-            function(p) {
-
-                return p.life > 0;
-
-            }
-        );
-
-}
-
-
-function drawParticles() {
-
-    for (
-        var i = 0;
-        i < particles.length;
-        i++
-    ) {
-
-        var p =
-            particles[i];
-
-
-        ctx.fillStyle =
-            "rgba(220,190,100," +
-            Math.max(
-                0,
-                p.life * 2
-            ) +
-            ")";
-
-
-        ctx.fillRect(
-            p.x,
-            p.y,
-            4,
-            4
-        );
-
-    }
-
-}
-
-
-/* ==================================================
-   ДОЖДЬ
-================================================== */
-
-function updateRain(
-    dt
-) {
-
-    for (
-        var i = 0;
-        i < rain.length;
-        i++
-    ) {
-
-        var r =
-            rain[i];
-
-        r.y +=
-            r.speed * dt;
-
-
-        if (
-            r.y > H
-        ) {
-
-            r.y =
-                -20;
-
-            r.x =
-                Math.random() *
-                W;
-
-        }
-
-    }
-
-}
-
-
-function drawRain() {
-
-    ctx.strokeStyle =
-        "rgba(170,190,190,0.18)";
-
-    ctx.lineWidth = 1;
-
-
-    for (
-        var i = 0;
-        i < rain.length;
-        i++
-    ) {
-
-        var r =
-            rain[i];
-
+        const yy =
+            y -
+            i * h * .22;
 
         ctx.beginPath();
 
         ctx.moveTo(
-            r.x,
-            r.y
+            x,
+            yy - h * .42
         );
 
         ctx.lineTo(
-            r.x - 4,
-            r.y +
-            r.length
+            x - w,
+            yy + h * .12
+        );
+
+        ctx.lineTo(
+            x + w,
+            yy + h * .12
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+    }
+
+    /* highlights */
+
+    ctx.strokeStyle = "#3d493b55";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x,
+        y - h * .42
+    );
+
+    ctx.lineTo(
+        x - w * .65,
+        y + h * .08
+    );
+
+    ctx.stroke();
+}
+
+
+/* =========================================================
+   MAIN WALL
+   ========================================================= */
+
+function drawMainWall(g) {
+
+    const y = g.top;
+
+    /*
+     * Толстая каменная стена.
+     */
+    ctx.fillStyle = "#353630";
+
+    ctx.fillRect(
+        0,
+        y,
+        W,
+        g.h
+    );
+
+    /* lower darker section */
+
+    ctx.fillStyle = "#252723";
+
+    ctx.fillRect(
+        0,
+        y + g.h * .48,
+        W,
+        g.h * .52
+    );
+
+    /* stone blocks */
+
+    const blockH =
+        Math.max(20, g.h / 4);
+
+    ctx.strokeStyle = "#171916";
+    ctx.lineWidth = 2;
+
+    for (
+        let row = 0;
+        row < 5;
+        row++
+    ) {
+
+        const yy =
+            y +
+            row * blockH;
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, yy);
+        ctx.lineTo(W, yy);
+
+        ctx.stroke();
+
+        const offset =
+            row % 2
+                ? 45
+                : 0;
+
+        for (
+            let x = offset;
+            x < W;
+            x += 90
+        ) {
+
+            ctx.beginPath();
+
+            ctx.moveTo(x, yy);
+            ctx.lineTo(
+                x,
+                yy + blockH
+            );
+
+            ctx.stroke();
+        }
+    }
+
+    /* moss */
+
+    ctx.fillStyle = "#4c5745";
+
+    for (let i = 0; i < 25; i++) {
+
+        const x =
+            (i * 131) % W;
+
+        const yy =
+            y +
+            (i * 47) % Math.max(1, g.h);
+
+        ctx.globalAlpha = .25;
+
+        ctx.fillRect(
+            x,
+            yy,
+            rand(8, 28),
+            3
+        );
+    }
+
+    ctx.globalAlpha = 1;
+
+    /* damage based on HP */
+
+    const hpRatio =
+        game.castle.hp /
+        game.castle.maxHP;
+
+    if (hpRatio < .7) {
+
+        drawCracks(
+            .7 - hpRatio
+        );
+    }
+
+    /* top ledge */
+
+    ctx.fillStyle = "#484941";
+
+    ctx.fillRect(
+        0,
+        y - 9,
+        W,
+        12
+    );
+
+    ctx.fillStyle = "#1d1e1b";
+
+    ctx.fillRect(
+        0,
+        y + 2,
+        W,
+        5
+    );
+
+    /* interior floor behind crenellations */
+
+    ctx.fillStyle = "#22231f";
+
+    ctx.fillRect(
+        0,
+        y - 70,
+        W,
+        65
+    );
+
+    /* torches mounted LOW on walls */
+
+    drawTorch(
+        W * .13,
+        y - 45
+    );
+
+    drawTorch(
+        W * .87,
+        y - 45
+    );
+
+    drawTorch(
+        W * .50,
+        y - 42
+    );
+}
+
+function drawCracks(damage) {
+
+    ctx.strokeStyle = "#161714";
+    ctx.lineWidth = 2;
+
+    const amount =
+        Math.min(
+            14,
+            Math.floor(damage * 18)
+        );
+
+    for (let i = 0; i < amount; i++) {
+
+        const x =
+            (i * 197) % W;
+
+        const y =
+            wallGeometry().top +
+            20 +
+            (i * 43) %
+            Math.max(
+                30,
+                wallGeometry().h - 25
+            );
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, y);
+
+        ctx.lineTo(
+            x + rand(-10, 10),
+            y + rand(10, 25)
+        );
+
+        ctx.lineTo(
+            x + rand(-20, 20),
+            y + rand(25, 45)
+        );
+
+        ctx.stroke();
+    }
+}
+
+
+/* =========================================================
+   FOREGROUND CRENELLATIONS
+   ========================================================= */
+
+function drawForegroundCrenellations() {
+
+    const g = wallGeometry();
+
+    const baseY =
+        g.top - 8;
+
+    /*
+     * Они расположены ПЕРЕД лучником.
+     * Высота умеренная — персонаж остаётся видимым.
+     */
+    const toothHeight = 48;
+    const toothWidth = 45;
+    const gap = 30;
+
+    ctx.fillStyle = "#44453e";
+
+    for (
+        let x = -20;
+        x < W + 20;
+        x += toothWidth + gap
+    ) {
+
+        ctx.fillRect(
+            x,
+            baseY - toothHeight,
+            toothWidth,
+            toothHeight
+        );
+    }
+
+    /* darker front */
+
+    ctx.fillStyle = "#30312c";
+
+    for (
+        let x = -20;
+        x < W + 20;
+        x += toothWidth + gap
+    ) {
+
+        ctx.fillRect(
+            x,
+            baseY - toothHeight,
+            7,
+            toothHeight
+        );
+    }
+
+    /* top edge */
+
+    ctx.strokeStyle = "#5a594f";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        baseY - toothHeight
+    );
+
+    ctx.lineTo(
+        W,
+        baseY - toothHeight
+    );
+
+    ctx.stroke();
+}
+
+
+/* =========================================================
+   AIM
+   ========================================================= */
+
+function drawAim() {
+
+    if (
+        game.state !== "playing" &&
+        game.state !== "paused"
+    ) return;
+
+    const x = input.pointerActive
+        ? input.pointerX
+        : game.archer.aimX;
+
+    const y = input.pointerActive
+        ? input.pointerY
+        : game.archer.aimY;
+
+    ctx.save();
+
+    ctx.translate(x, y);
+
+    const target =
+        game.orcs.find(
+            o =>
+                !o.dead &&
+                Math.hypot(
+                    o.x - x,
+                    o.y - y
+                ) < o.radius + 12
+        );
+
+    ctx.strokeStyle =
+        target
+            ? "#d8b26d"
+            : "#b7ae9c";
+
+    ctx.lineWidth = 1.5;
+
+    const r = 13;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        r,
+        0,
+        TAU
+    );
+
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(-23, 0);
+    ctx.lineTo(-8, 0);
+
+    ctx.moveTo(8, 0);
+    ctx.lineTo(23, 0);
+
+    ctx.moveTo(0, -23);
+    ctx.lineTo(0, -8);
+
+    ctx.moveTo(0, 8);
+    ctx.lineTo(0, 23);
+
+    ctx.stroke();
+
+    ctx.fillStyle =
+        target
+            ? "#d6a65d"
+            : "#c4b9a3";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        2,
+        0,
+        TAU
+    );
+
+    ctx.fill();
+
+    ctx.restore();
+}
+
+
+/* =========================================================
+   WALL IMPACTS
+   ========================================================= */
+
+function drawWallImpacts() {
+
+    for (const impact of game.wallImpacts) {
+
+        const p =
+            1 -
+            impact.life / .35;
+
+        ctx.save();
+
+        ctx.translate(
+            impact.x,
+            impact.y
+        );
+
+        ctx.globalAlpha =
+            1 - p;
+
+        ctx.strokeStyle = "#b99d70";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            0,
+            0,
+            8 + p * 18,
+            0,
+            TAU
         );
 
         ctx.stroke();
 
+        ctx.restore();
     }
-
 }
 
 
-/* ==================================================
-   МОЛНИЯ
-================================================== */
+/* =========================================================
+   VIGNETTE
+   ========================================================= */
 
-function updateLightning(
-    dt
-) {
+function drawVignette() {
 
-    lightningTimer -=
-        dt;
+    const gradient =
+        ctx.createRadialGradient(
+            W * .5,
+            H * .5,
+            Math.min(W, H) * .25,
+            W * .5,
+            H * .5,
+            Math.max(W, H) * .75
+        );
 
+    gradient.addColorStop(
+        0,
+        "transparent"
+    );
 
-    if (
-        lightningTimer <= 0
-    ) {
+    gradient.addColorStop(
+        .72,
+        "rgba(0,0,0,.12)"
+    );
 
-        lightningTimer =
-            5;
+    gradient.addColorStop(
+        1,
+        "rgba(0,0,0,.7)"
+    );
 
-        lightningTime =
-            0.12;
-
-    }
-
-
-    if (
-        lightningTime > 0
-    ) {
-
-        lightningTime -=
-            dt;
-
-    }
-
-}
-
-
-function drawLightning() {
-
-    if (
-        lightningTime <= 0
-    ) {
-
-        return;
-
-    }
-
-
-    ctx.fillStyle =
-        "rgba(230,235,220,0.22)";
+    ctx.fillStyle = gradient;
 
     ctx.fillRect(
         0,
@@ -2397,886 +3871,652 @@ function drawLightning() {
         W,
         H
     );
-
 }
 
 
-/* ==================================================
-   ВОЛНА
-================================================== */
+/* =========================================================
+   UI HELPERS
+   ========================================================= */
 
-function startWave() {
+function showOnly(id) {
 
-    waveSpawned =
-        0;
+    const ids = [
+        "menu",
+        "waveScreen",
+        "gameOver",
+        "pauseScreen",
+        "upgradePanel",
+        "howPanel"
+    ];
+
+    for (const x of ids) {
+
+        document
+            .getElementById(x)
+            .classList.add("hidden");
+    }
+
+    if (id) {
+
+        document
+            .getElementById(id)
+            .classList.remove("hidden");
+    }
+
+    if (id === "gameUI") {
+        document
+            .getElementById("gameUI")
+            .classList.remove("hidden");
+    }
+}
 
 
-    /*
-       Было слишком много
-       врагов слишком рано.
+/* =========================================================
+   UPGRADES
+   ========================================================= */
 
-       Теперь рост постепенно
-       ускоряется.
-    */
+const upgradeDefinitions = {
 
-    enemiesPerWave =
-        5 +
-        Math.floor(
-            wave * 1.5
+    bow: {
+        name: "Улучшение лука",
+        desc: "+9 урона за уровень",
+        base: 80
+    },
+
+    draw: {
+        name: "Натяжение",
+        desc: "Увеличивает скорость стрельбы",
+        base: 100
+    },
+
+    arrows: {
+        name: "Стрелы",
+        desc: "+7 урона за уровень",
+        base: 120
+    },
+
+    wall: {
+        name: "Укрепление стены",
+        desc: "+180 максимального HP",
+        base: 150
+    }
+};
+
+function upgradeCost(type) {
+
+    const level =
+        save.upgrades[type];
+
+    return Math.floor(
+        upgradeDefinitions[type].base *
+        Math.pow(1.55, level)
+    );
+}
+
+function renderUpgrades() {
+
+    const rows =
+        document.getElementById(
+            "upgradeRows"
         );
 
+    rows.innerHTML = "";
 
-    spawnTimer =
-        0;
+    for (const type of Object.keys(
+        upgradeDefinitions
+    )) {
 
-    nextWaveTimer =
-        0;
+        const def =
+            upgradeDefinitions[type];
 
+        const level =
+            save.upgrades[type];
+
+        const cost =
+            upgradeCost(type);
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            "upgrade-row";
+
+        row.innerHTML = `
+            <div class="upgrade-info">
+                <div class="upgrade-name">
+                    ${def.name}
+                </div>
+                <div class="upgrade-desc">
+                    ${def.desc}
+                </div>
+                <div class="upgrade-level">
+                    LEVEL ${level}
+                </div>
+            </div>
+
+            <button
+                class="upgrade-buy"
+                data-upgrade="${type}"
+            >
+                ${cost} G
+            </button>
+        `;
+
+        rows.appendChild(row);
+    }
+
+    const repair =
+        document.createElement("div");
+
+    repair.className =
+        "upgrade-row";
+
+    repair.innerHTML = `
+        <div class="upgrade-info">
+            <div class="upgrade-name">
+                Ремонт стены
+            </div>
+            <div class="upgrade-desc">
+                Восстановить 22% максимального HP
+            </div>
+        </div>
+
+        <button
+            class="upgrade-buy"
+            data-upgrade="repair"
+        >
+            60 G
+        </button>
+    `;
+
+    rows.appendChild(repair);
+
+    document.getElementById(
+        "upgradeGold"
+    ).textContent =
+        `GOLD: ${game.gold}`;
 }
 
+document
+    .getElementById("upgradeRows")
+    .addEventListener(
+        "click",
+        e => {
 
-/* ==================================================
-   СПАВН
-================================================== */
-
-function updateSpawning(
-    dt
-) {
-
-    if (
-        waveSpawned >=
-        enemiesPerWave
-    ) {
-
-        return;
-
-    }
-
-
-    spawnTimer -=
-        dt;
-
-
-    if (
-        spawnTimer <= 0
-    ) {
-
-        spawnOrc();
-
-        waveSpawned++;
-
-
-        /*
-           Между орками
-           теперь чуть больше времени.
-        */
-
-        spawnTimer =
-            Math.max(
-                0.65,
-                0.95 -
-                wave * 0.025
-            );
-
-    }
-
-}
-
-
-/* ==================================================
-   ОБНОВЛЕНИЕ
-================================================== */
-
-function update(
-    dt
-) {
-
-    if (
-        !gameRunning
-    ) {
-
-        return;
-
-    }
-
-
-    /* ЛУЧНИК */
-
-    if (
-        leftPressed
-    ) {
-
-        player.x -=
-            player.speed *
-            dt;
-
-    }
-
-
-    if (
-        rightPressed
-    ) {
-
-        player.x +=
-            player.speed *
-            dt;
-
-    }
-
-
-    if (
-        player.x < 35
-    ) {
-
-        player.x =
-            35;
-
-    }
-
-
-    if (
-        player.x >
-        W - 35
-    ) {
-
-        player.x =
-            W - 35;
-
-    }
-
-
-    /* ПЕРЕЗАРЯДКА */
-
-    if (
-        player.cooldown > 0
-    ) {
-
-        player.cooldown -=
-            dt;
-
-    }
-
-
-    /* СПАВН */
-
-    updateSpawning(dt);
-
-
-    /* СТРЕЛЫ */
-
-    for (
-        var i =
-            arrows.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        var a =
-            arrows[i];
-
-
-        a.x +=
-            a.vx *
-            dt;
-
-        a.y +=
-            a.vy *
-            dt;
-
-
-        var hit =
-            false;
-
-
-        for (
-            var j =
-                enemies.length - 1;
-            j >= 0;
-            j--
-        ) {
-
-            var e =
-                enemies[j];
-
-
-            var dx =
-                a.x -
-                e.x;
-
-            var dy =
-                a.y -
-                (
-                    e.y -
-                    e.size * 0.4
+            const btn =
+                e.target.closest(
+                    "[data-upgrade]"
                 );
 
+            if (!btn) return;
 
-            var distance =
-                Math.sqrt(
-                    dx * dx +
-                    dy * dy
-                );
+            const type =
+                btn.dataset.upgrade;
 
+            if (type === "repair") {
 
-            if (
-                distance <
-                e.size
-            ) {
+                if (game.gold < 60) return;
 
-                e.hp -=
-                    a.damage;
+                game.gold -= 60;
 
+                game.castle.repair();
 
-                hitParticles(
-                    e.x,
-                    e.y
-                );
+                save.gold = game.gold;
 
+                saveGame();
 
-                hit =
-                    true;
-
-
-                if (
-                    e.hp <= 0
-                ) {
-
-                    gold +=
-                        e.reward;
-
-
-                    enemies.splice(
-                        j,
-                        1
-                    );
-
-                }
-
-
-                break;
-
-            }
-
-        }
-
-
-        if (
-            hit ||
-            a.x < -50 ||
-            a.x > W + 50 ||
-            a.y < -50 ||
-            a.y > H + 50
-        ) {
-
-            arrows.splice(
-                i,
-                1
-            );
-
-        }
-
-    }
-
-
-    /* ==================================================
-       ОРКИ
-    ================================================== */
-
-    /*
-       КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ:
-
-       Орки теперь идут именно
-       к НИЖНЕЙ части стены.
-
-       Лучник находится выше,
-       поэтому орк больше не
-       начинает атаку возле него.
-    */
-
-    var attackY =
-        getWallAttackY();
-
-
-    for (
-        var i =
-            enemies.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        var e =
-            enemies[i];
-
-
-        /*
-           Пока орк ещё не достиг
-           основания стены —
-           он продолжает двигаться.
-        */
-
-        if (
-            e.y >
-            attackY
-        ) {
-
-            e.y -=
-                e.speed *
-                dt;
-
-        }
-
-        else {
-
-            /*
-               Орк достиг стены.
-
-               Теперь он стоит
-               у стены и атакует её.
-            */
-
-            e.y =
-                attackY;
-
-
-            wallHP -=
-                e.damage *
-                dt;
-
-
-            if (
-                wallHP <= 0
-            ) {
-
-                wallHP =
-                    0;
-
-                endGame();
+                renderUpgrades();
 
                 return;
-
             }
 
+            const cost =
+                upgradeCost(type);
+
+            if (game.gold < cost) {
+                return;
+            }
+
+            game.gold -= cost;
+
+            save.upgrades[type]++;
+
+            save.gold = game.gold;
+
+            game.damage =
+                38 +
+                save.upgrades.bow * 9 +
+                save.upgrades.arrows * 7;
+
+            if (type === "wall") {
+                game.castle.maxHP =
+                    1000 +
+                    save.upgrades.wall * 180;
+
+                game.castle.hp =
+                    Math.min(
+                        game.castle.maxHP,
+                        game.castle.hp + 180
+                    );
+            }
+
+            saveGame();
+
+            renderUpgrades();
+            game.updateUI();
+
+            audio.click();
         }
-
-    }
-
-
-    /* НОВАЯ ВОЛНА */
-
-    if (
-        waveSpawned >=
-        enemiesPerWave &&
-        enemies.length === 0
-    ) {
-
-        nextWaveTimer +=
-            dt;
-
-
-        if (
-            nextWaveTimer >= 2.5
-        ) {
-
-            wave++;
-
-            startWave();
-
-        }
-
-    }
-
-
-    updateParticles(dt);
-
-    updateRain(dt);
-
-    updateLightning(dt);
-
-    updateHUD();
-
-}
-
-
-/* ==================================================
-   HUD
-================================================== */
-
-function updateHUD() {
-
-    document.getElementById(
-        "wallHP"
-    ).textContent =
-        Math.ceil(
-            wallHP
-        );
-
-
-    document.getElementById(
-        "waveNumber"
-    ).textContent =
-        wave;
-
-
-    document.getElementById(
-        "goldAmount"
-    ).textContent =
-        gold;
-
-}
-
-
-/* ==================================================
-   ОТРИСОВКА
-================================================== */
-
-function draw() {
-
-    drawBackground();
-
-    drawForest();
-
-
-    /*
-       Орки.
-    */
-
-    for (
-        var i = 0;
-        i < enemies.length;
-        i++
-    ) {
-
-        drawEnemy(
-            enemies[i]
-        );
-
-    }
-
-
-    /*
-       Замок.
-    */
-
-    drawCastle();
-
-
-    /*
-       Лучник.
-    */
-
-    drawPlayer();
-
-
-    /*
-       Стрелы.
-    */
-
-    for (
-        var i = 0;
-        i < arrows.length;
-        i++
-    ) {
-
-        drawArrow(
-            arrows[i]
-        );
-
-    }
-
-
-    drawParticles();
-
-    drawRain();
-
-    drawLightning();
-
-}
-
-
-/* ==================================================
-   GAME LOOP
-================================================== */
-
-function gameLoop(
-    time
-) {
-
-    if (
-        !gameRunning
-    ) {
-
-        return;
-
-    }
-
-
-    var dt =
-        (
-            time -
-            lastTime
-        ) / 1000;
-
-
-    if (
-        dt > 0.033
-    ) {
-
-        dt =
-            0.033;
-
-    }
-
-
-    lastTime =
-        time;
-
-
-    update(dt);
-
-    draw();
-
-
-    requestAnimationFrame(
-        gameLoop
     );
 
-}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+document
+    .getElementById("playBtn")
+    .onclick = () => {
+
+        audio.init();
+
+        document
+            .getElementById("menu")
+            .classList.add("hidden");
+
+        document
+            .getElementById("gameUI")
+            .classList.remove("hidden");
+
+        document
+            .getElementById("mobileControls")
+            .classList.remove("hidden");
+
+        game.start();
+    };
 
 
-/* ==================================================
-   СТАРТ
-================================================== */
+document
+    .getElementById("upgradesBtn")
+    .onclick = () => {
 
-function startGame() {
+        audio.init();
 
-    document.getElementById(
-        "menu"
-    ).style.display =
-        "none";
+        renderUpgrades();
 
+        document
+            .getElementById("menu")
+            .classList.add("hidden");
 
-    document.getElementById(
-        "gameOver"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "hud"
-    ).style.display =
-        "flex";
+        document
+            .getElementById("upgradePanel")
+            .classList.remove("hidden");
+    };
 
 
-    document.getElementById(
-        "controls"
-    ).style.display =
-        "flex";
+document
+    .getElementById("waveUpgradeBtn")
+    .onclick = () => {
+
+        renderUpgrades();
+
+        document
+            .getElementById("waveScreen")
+            .classList.add("hidden");
+
+        document
+            .getElementById("upgradePanel")
+            .classList.remove("hidden");
+    };
 
 
-    wallHP =
-        100;
+document
+    .getElementById("closeUpgradeBtn")
+    .onclick = () => {
 
-    gold =
-        0;
+        document
+            .getElementById("upgradePanel")
+            .classList.add("hidden");
 
-    wave =
-        1;
+        if (game.state === "waveClear") {
 
+            document
+                .getElementById("waveScreen")
+                .classList.remove("hidden");
 
-    enemies = [];
+        } else {
 
-    arrows = [];
-
-    particles = [];
-
-
-    player.x =
-        W / 2;
-
-    player.cooldown =
-        0;
-
-
-    gameRunning =
-        true;
+            document
+                .getElementById("menu")
+                .classList.remove("hidden");
+        }
+    };
 
 
-    createWorld();
+document
+    .getElementById("howBtn")
+    .onclick = () => {
 
-    startWave();
+        document
+            .getElementById("menu")
+            .classList.add("hidden");
+
+        document
+            .getElementById("howPanel")
+            .classList.remove("hidden");
+    };
 
 
-    lastTime =
-        performance.now();
+document
+    .getElementById("closeHowBtn")
+    .onclick = () => {
+
+        document
+            .getElementById("howPanel")
+            .classList.add("hidden");
+
+        document
+            .getElementById("menu")
+            .classList.remove("hidden");
+    };
 
 
-    requestAnimationFrame(
-        gameLoop
+document
+    .getElementById("settingsBtn")
+    .onclick = () => {
+
+        save.sound = !save.sound;
+
+        audio.enabled = save.sound;
+
+        saveGame();
+
+        document
+            .getElementById("settingsBtn")
+            .textContent =
+            "SOUND: " +
+            (save.sound ? "ON" : "OFF");
+    };
+
+
+document
+    .getElementById("nextWaveBtn")
+    .onclick = () => {
+
+        game.nextWave();
+    };
+
+
+document
+    .getElementById("retryBtn")
+    .onclick = () => {
+
+        document
+            .getElementById("gameOver")
+            .classList.add("hidden");
+
+        document
+            .getElementById("gameUI")
+            .classList.remove("hidden");
+
+        document
+            .getElementById("mobileControls")
+            .classList.remove("hidden");
+
+        game.resetForRetry();
+    };
+
+
+document
+    .getElementById("defeatMenuBtn")
+    .onclick = () => {
+
+        document
+            .getElementById("gameOver")
+            .classList.add("hidden");
+
+        document
+            .getElementById("gameUI")
+            .classList.add("hidden");
+
+        document
+            .getElementById("mobileControls")
+            .classList.add("hidden");
+
+        document
+            .getElementById("pauseBtn")
+            .classList.add("hidden");
+
+        game.state = "menu";
+
+        document
+            .getElementById("menu")
+            .classList.remove("hidden");
+    };
+
+
+document
+    .getElementById("pauseBtn")
+    .onclick = () => {
+
+        game.togglePause();
+    };
+
+
+document
+    .getElementById("resumeBtn")
+    .onclick = () => {
+
+        game.togglePause();
+    };
+
+
+document
+    .getElementById("pauseMenuBtn")
+    .onclick = () => {
+
+        document
+            .getElementById("pauseScreen")
+            .classList.add("hidden");
+
+        document
+            .getElementById("gameUI")
+            .classList.add("hidden");
+
+        document
+            .getElementById("mobileControls")
+            .classList.add("hidden");
+
+        document
+            .getElementById("pauseBtn")
+            .classList.add("hidden");
+
+        game.state = "menu";
+
+        document
+            .getElementById("menu")
+            .classList.remove("hidden");
+    };
+
+
+/* =========================================================
+   MOBILE CONTROLS
+   ========================================================= */
+
+function holdButton(button, key) {
+
+    const start = e => {
+
+        e.preventDefault();
+
+        input.keys[key] = true;
+
+        try {
+            button.setPointerCapture(e.pointerId);
+        } catch {}
+    };
+
+    const end = e => {
+
+        e.preventDefault();
+
+        input.keys[key] = false;
+    };
+
+    button.addEventListener(
+        "pointerdown",
+        start
     );
 
+    button.addEventListener(
+        "pointerup",
+        end
+    );
+
+    button.addEventListener(
+        "pointercancel",
+        end
+    );
+
+    button.addEventListener(
+        "pointerleave",
+        end
+    );
 }
 
+holdButton(
+    document.getElementById("leftBtn"),
+    "ArrowLeft"
+);
 
-/* ==================================================
-   RESTART
-================================================== */
-
-function restartGame() {
-
-    startGame();
-
-}
-
-
-/* ==================================================
-   GAME OVER
-================================================== */
-
-function endGame() {
-
-    gameRunning =
-        false;
+holdButton(
+    document.getElementById("rightBtn"),
+    "ArrowRight"
+);
 
 
-    document.getElementById(
-        "gameOver"
-    ).style.display =
-        "flex";
-
-
-    document.getElementById(
-        "hud"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "controls"
-    ).style.display =
-        "none";
-
-}
-
-
-/* ==================================================
-   КЛАВИАТУРА
-================================================== */
-
-document.addEventListener(
-    "keydown",
-    function(e) {
-
-        if (
-            e.key === "ArrowLeft" ||
-            e.key.toLowerCase() === "a"
-        ) {
-
-            leftPressed =
-                true;
-
-        }
-
-
-        if (
-            e.key === "ArrowRight" ||
-            e.key.toLowerCase() === "d"
-        ) {
-
-            rightPressed =
-                true;
-
-        }
-
-
-        if (
-            e.code === "Space"
-        ) {
+/*
+ * FIRE:
+ * На сенсорном устройстве прицел задаётся
+ * касанием Canvas, а эта кнопка выпускает стрелу.
+ */
+document
+    .getElementById("fireBtn")
+    .addEventListener(
+        "pointerdown",
+        e => {
 
             e.preventDefault();
 
-            shoot();
+            audio.init();
 
+            game.archer.fire();
         }
-
-    }
-);
-
-
-document.addEventListener(
-    "keyup",
-    function(e) {
-
-        if (
-            e.key === "ArrowLeft" ||
-            e.key.toLowerCase() === "a"
-        ) {
-
-            leftPressed =
-                false;
-
-        }
-
-
-        if (
-            e.key === "ArrowRight" ||
-            e.key.toLowerCase() === "d"
-        ) {
-
-            rightPressed =
-                false;
-
-        }
-
-    }
-);
-
-
-/* ==================================================
-   МОБИЛЬНОЕ УПРАВЛЕНИЕ
-================================================== */
-
-var leftButton =
-    document.getElementById(
-        "leftButton"
-    );
-
-var rightButton =
-    document.getElementById(
-        "rightButton"
     );
 
 
-leftButton.addEventListener(
-    "touchstart",
-    function(e) {
+/*
+ * При сенсорном управлении касание canvas
+ * перемещает прицел.
+ */
+canvas.addEventListener(
+    "pointerdown",
+    e => {
 
-        e.preventDefault();
+        if (e.pointerType !== "touch") {
+            return;
+        }
 
-        leftPressed =
-            true;
-
-    },
-    {
-        passive: false
+        input.updatePointer(e);
+        input.pointerActive = true;
     }
 );
-
-
-leftButton.addEventListener(
-    "touchend",
-    function(e) {
-
-        e.preventDefault();
-
-        leftPressed =
-            false;
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-rightButton.addEventListener(
-    "touchstart",
-    function(e) {
-
-        e.preventDefault();
-
-        rightPressed =
-            true;
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-rightButton.addEventListener(
-    "touchend",
-    function(e) {
-
-        e.preventDefault();
-
-        rightPressed =
-            false;
-
-    },
-    {
-        passive: false
-    }
-);
-
-
-/* МЫШЬ */
-
-leftButton.addEventListener(
-    "mousedown",
-    function() {
-
-        leftPressed =
-            true;
-
-    }
-);
-
-
-leftButton.addEventListener(
-    "mouseup",
-    function() {
-
-        leftPressed =
-            false;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "mousedown",
-    function() {
-
-        rightPressed =
-            true;
-
-    }
-);
-
-
-rightButton.addEventListener(
-    "mouseup",
-    function() {
-
-        rightPressed =
-            false;
-
-    }
-);
-
-
-/* ==================================================
-   КЛИК = СТРЕЛЬБА
-================================================== */
 
 canvas.addEventListener(
-    "click",
-    function() {
+    "pointermove",
+    e => {
 
-        shoot();
+        if (e.pointerType !== "touch") {
+            return;
+        }
 
+        input.updatePointer(e);
     }
 );
 
 
-/* ==================================================
-   ПЕРВОНАЧАЛЬНЫЙ ЭКРАН
-================================================== */
+/* =========================================================
+   INITIAL STATE
+   ========================================================= */
 
-createWorld();
+document
+    .getElementById("settingsBtn")
+    .textContent =
+    "SOUND: " +
+    (save.sound ? "ON" : "OFF");
 
-draw();
+document
+    .getElementById("gameUI")
+    .classList.add("hidden");
+
+document
+    .getElementById("mobileControls")
+    .classList.add("hidden");
+
+document
+    .getElementById("pauseBtn")
+    .classList.add("hidden");
+
+document
+    .getElementById("tutorial")
+    .classList.add("hidden");
+
+
+/* =========================================================
+   EXTRA ATMOSPHERIC DUST
+   ========================================================= */
+
+setInterval(() => {
+
+    if (
+        game.state === "playing" &&
+        game.particles.length < 100
+    ) {
+
+        const g = wallGeometry();
+
+        game.particles.push(
+            new Particle(
+                rand(0, W),
+                rand(
+                    H * .25,
+                    g.top - 20
+                ),
+                "#77786d",
+                1.5,
+                rand(1.5, 3)
+            )
+        );
+    }
+
+}, 180);
+
+
+/* =========================================================
+   SAVE PERIODICALLY
+   ========================================================= */
+
+setInterval(() => {
+
+    if (
+        game.state === "playing" ||
+        game.state === "paused"
+    ) {
+        save.gold = game.gold;
+        saveGame();
+    }
+
+}, 5000);
 
 </script>
 
