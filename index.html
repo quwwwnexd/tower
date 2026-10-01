@@ -2,386 +2,736 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dark Castle Defense</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Castle of Ash</title>
 
 <style>
 * {
     box-sizing: border-box;
-    user-select: none;
+    margin: 0;
+    padding: 0;
 }
 
-html, body {
-    margin: 0;
+html,
+body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #090b0b;
+    background: #080b09;
     font-family: Georgia, serif;
-    color: #eee;
+}
+
+body {
+    touch-action: none;
 }
 
 canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    background: #101514;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
+
+
+/* =========================
+   ГЛАВНОЕ МЕНЮ
+========================= */
 
 #menu {
     position: fixed;
-    inset: 0;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background:
-        radial-gradient(circle at center, rgba(45,55,45,.25), rgba(0,0,0,.9)),
-        #080a09;
-    z-index: 20;
+        radial-gradient(
+            circle,
+            rgba(45,55,45,0.25),
+            rgba(0,0,0,0.95)
+        );
 }
 
 .menuBox {
-    width: min(520px, 90vw);
-    padding: 40px;
+    width: min(520px, 88vw);
+
+    padding: 42px 30px;
+
     text-align: center;
-    border: 2px solid #655d47;
-    background: rgba(15,18,16,.94);
-    box-shadow: 0 0 50px rgba(0,0,0,.9);
+
+    background: rgba(13,16,14,0.96);
+
+    border: 2px solid #70664d;
+
+    box-shadow:
+        0 0 40px rgba(0,0,0,0.9),
+        inset 0 0 30px rgba(100,90,60,0.08);
 }
 
-.menuBox h1 {
-    margin: 0 0 10px;
-    font-size: 42px;
-    color: #d6c59b;
-    text-shadow: 0 0 15px #000;
+.menuTitle {
+    color: #d8c79a;
+
+    font-size: clamp(32px, 7vw, 52px);
+
+    letter-spacing: 4px;
+
+    margin-bottom: 18px;
+
+    text-shadow:
+        0 0 15px #000;
 }
 
-.menuBox p {
-    color: #aaa;
+.menuText {
+    color: #aaa99e;
+
     line-height: 1.6;
+
+    font-size: 16px;
+
+    margin-bottom: 25px;
 }
 
-button {
-    margin-top: 20px;
-    padding: 14px 32px;
-    border: 1px solid #877852;
-    background: #24251e;
-    color: #e9dfc4;
-    font-size: 18px;
+.startButton {
+    border: 2px solid #857957;
+
+    background: #25271f;
+
+    color: #e3d7b8;
+
+    padding: 15px 38px;
+
+    font-size: 19px;
+
     font-family: Georgia, serif;
+
     cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
 }
 
-button:hover {
-    background: #35372b;
+.startButton:hover {
+    background: #35372c;
 }
+
+.startButton:active {
+    transform: scale(0.97);
+}
+
+
+/* =========================
+   HUD
+========================= */
 
 #hud {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    right: 15px;
     display: none;
+
+    position: fixed;
+
+    z-index: 50;
+
+    top: 12px;
+    left: 12px;
+    right: 12px;
+
     justify-content: space-between;
+
     pointer-events: none;
-    z-index: 10;
 }
 
-.panel {
-    padding: 10px 15px;
-    border: 1px solid rgba(180,160,110,.45);
-    background: rgba(5,7,6,.72);
-    box-shadow: 0 3px 15px rgba(0,0,0,.5);
+.hudBox {
+    background: rgba(7,9,8,0.78);
+
+    border: 1px solid rgba(180,160,110,0.5);
+
+    color: #ddd3b6;
+
+    padding: 9px 14px;
+
+    font-size: 15px;
 }
+
+
+/* =========================
+   GAME OVER
+========================= */
 
 #gameOver {
-    position: fixed;
-    inset: 0;
     display: none;
+
+    position: fixed;
+
+    z-index: 100;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,.75);
-    z-index: 30;
+
+    background: rgba(0,0,0,0.82);
 }
 
 .gameOverBox {
-    text-align: center;
+    width: min(450px, 88vw);
+
     padding: 35px;
-    background: #111512;
-    border: 2px solid #665b42;
+
+    text-align: center;
+
+    background: #101411;
+
+    border: 2px solid #655a43;
 }
 
-.gameOverBox h2 {
-    color: #cbbd91;
+.gameOverTitle {
+    color: #c9bc92;
+
     font-size: 38px;
+
+    margin-bottom: 15px;
+}
+
+.gameOverText {
+    color: #aaa;
+
+    margin-bottom: 15px;
+}
+
+
+/* =========================
+   УПРАВЛЕНИЕ
+========================= */
+
+#controls {
+    display: none;
+
+    position: fixed;
+
+    z-index: 60;
+
+    left: 20px;
+    bottom: 20px;
+
+    gap: 10px;
+}
+
+.controlButton {
+    width: 64px;
+    height: 54px;
+
+    border: 1px solid #74694d;
+
+    background: rgba(20,23,20,0.8);
+
+    color: #ddd2ad;
+
+    font-size: 25px;
 }
 </style>
 </head>
 
+
 <body>
 
-<canvas id="game"></canvas>
+
+<!-- ==================================================
+     CANVAS
+================================================== -->
+
+<canvas id="gameCanvas"></canvas>
+
+
+<!-- ==================================================
+     МЕНЮ
+================================================== -->
 
 <div id="menu">
-    <div class="menuBox">
-        <h1>CASTLE OF ASH</h1>
-        <p>
-            Тёмный лес пробудился.<br>
-            Орды орков идут к древней крепостной стене.
-            Ты — последний лучник замка.
-        </p>
 
-        <button id="startButton">НАЧАТЬ ИГРУ</button>
+    <div class="menuBox">
+
+        <div class="menuTitle">
+            CASTLE OF ASH
+        </div>
+
+        <div class="menuText">
+
+            Тёмный лес проснулся.<br>
+            Орды орков идут к древней крепости.<br><br>
+
+            Ты — последний лучник на стене.
+
+        </div>
+
+        <!-- КНОПКА -->
+        <button
+            class="startButton"
+            onclick="startGame()"
+        >
+            НАЧАТЬ ИГРУ
+        </button>
+
     </div>
+
 </div>
+
+
+<!-- ==================================================
+     HUD
+================================================== -->
 
 <div id="hud">
-    <div class="panel">
-        🏰 Стена: <span id="wallHp">100</span>/100
+
+    <div class="hudBox">
+        🏰 Стена:
+        <span id="wallHP">100</span>/100
     </div>
 
-    <div class="panel">
-        🌊 Волна: <span id="wave">1</span>
+    <div class="hudBox">
+        🌊 Волна:
+        <span id="waveNumber">1</span>
     </div>
 
-    <div class="panel">
-        💰 Золото: <span id="gold">0</span>
+    <div class="hudBox">
+        💰 Золото:
+        <span id="goldAmount">0</span>
     </div>
+
 </div>
+
+
+<!-- ==================================================
+     КНОПКИ УПРАВЛЕНИЯ
+================================================== -->
+
+<div id="controls">
+
+    <button
+        class="controlButton"
+        ontouchstart="leftPressed=true"
+        ontouchend="leftPressed=false"
+        onmousedown="leftPressed=true"
+        onmouseup="leftPressed=false"
+    >
+        ◀
+    </button>
+
+    <button
+        class="controlButton"
+        ontouchstart="rightPressed=true"
+        ontouchend="rightPressed=false"
+        onmousedown="rightPressed=true"
+        onmouseup="rightPressed=false"
+    >
+        ▶
+    </button>
+
+</div>
+
+
+<!-- ==================================================
+     GAME OVER
+================================================== -->
 
 <div id="gameOver">
+
     <div class="gameOverBox">
-        <h2>ЗАМОК ПАЛ</h2>
-        <p>Орды леса прорвались к крепости.</p>
-        <button id="restartButton">НАЧАТЬ ЗАНОВО</button>
+
+        <div class="gameOverTitle">
+            ЗАМОК ПАЛ
+        </div>
+
+        <div class="gameOverText">
+            Орки прорвались к стенам крепости.
+        </div>
+
+        <button
+            class="startButton"
+            onclick="restartGame()"
+        >
+            НАЧАТЬ ЗАНОВО
+        </button>
+
     </div>
+
 </div>
 
+
 <script>
-"use strict";
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
 
-let W = 0;
-let H = 0;
+/* ==================================================
+   CANVAS
+================================================== */
 
-function resize() {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+var canvas = document.getElementById("gameCanvas");
+var ctx = canvas.getContext("2d");
+
+var W = 0;
+var H = 0;
+
+
+function resizeCanvas() {
+
+    W = window.innerWidth;
+    H = window.innerHeight;
+
+    canvas.width = W;
+    canvas.height = H;
 }
 
-window.addEventListener("resize", resize);
-resize();
+window.addEventListener("resize", resizeCanvas);
+
+resizeCanvas();
 
 
-// ======================================================
-// СОСТОЯНИЕ ИГРЫ
-// ======================================================
 
-let gameRunning = false;
+/* ==================================================
+   ИГРА
+================================================== */
 
-let wallHP = 100;
-let gold = 0;
-let wave = 1;
+var gameRunning = false;
 
-let enemies = [];
-let arrows = [];
-let particles = [];
-let rain = [];
-let trees = [];
+var wallHP = 100;
 
-let waveTimer = 0;
-let spawnTimer = 0;
+var gold = 0;
 
-let lightningTimer = 5;
-let lightningFlash = 0;
+var wave = 1;
 
-let lastTime = 0;
-
-
-// ======================================================
-// ИГРОК
-// ======================================================
-
-const player = {
+var player = {
     x: 0,
     speed: 360,
     cooldown: 0,
-    fireRate: 0.42,
-    damage: 25
+    fireRate: 0.38,
+    damage: 30
 };
 
+var enemies = [];
 
-// ======================================================
-// СТЕНА
-// ======================================================
+var arrows = [];
 
-function wallY() {
+var particles = [];
+
+var trees = [];
+
+var rain = [];
+
+var leftPressed = false;
+
+var rightPressed = false;
+
+var lastTime = 0;
+
+var waveSpawned = 0;
+
+var enemiesPerWave = 6;
+
+var spawnTimer = 0;
+
+var nextWaveTimer = 0;
+
+var lightningTimer = 5;
+
+var lightningTime = 0;
+
+
+
+/* ==================================================
+   ПОЗИЦИЯ СТЕНЫ
+================================================== */
+
+function getWallY() {
+
     return H * 0.38;
 }
 
-function wallHeight() {
+
+function getWallHeight() {
+
     return Math.max(105, H * 0.13);
 }
 
 
-// ======================================================
-// СОЗДАНИЕ МИРА
-// ======================================================
+
+/* ==================================================
+   СОЗДАНИЕ МИРА
+================================================== */
 
 function createWorld() {
 
     trees = [];
 
-    for (let i = 0; i < 90; i++) {
-
-        const y = wallY() + 50 + Math.random() * (H - wallY() - 70);
-
-        trees.push({
-            x: Math.random() * W,
-            y: y,
-            size: 25 + Math.random() * 55,
-            dark: Math.random()
-        });
-    }
-
     rain = [];
 
-    for (let i = 0; i < 220; i++) {
+    var wallY = getWallY();
+
+
+    /* ДЕРЕВЬЯ */
+
+    for (var i = 0; i < 70; i++) {
+
+        trees.push({
+
+            x: Math.random() * W,
+
+            y:
+                wallY +
+                90 +
+                Math.random() *
+                Math.max(
+                    50,
+                    H - wallY - 100
+                ),
+
+            size:
+                25 +
+                Math.random() * 45
+
+        });
+
+    }
+
+
+    /* ДОЖДЬ */
+
+    for (var r = 0; r < 180; r++) {
 
         rain.push({
+
             x: Math.random() * W,
+
             y: Math.random() * H,
-            speed: 450 + Math.random() * 350,
-            length: 8 + Math.random() * 12
+
+            speed:
+                400 +
+                Math.random() * 300,
+
+            length:
+                8 +
+                Math.random() * 12
+
         });
+
     }
+
 }
 
 
-// ======================================================
-// ФОН
-// ======================================================
+
+/* ==================================================
+   ФОН
+================================================== */
 
 function drawBackground() {
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, H);
-
-    gradient.addColorStop(0, "#11191a");
-    gradient.addColorStop(.35, "#17201e");
-    gradient.addColorStop(1, "#070b09");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, W, H);
-
-
-    // Луна
-
-    ctx.beginPath();
-    ctx.arc(W * .78, H * .13, 42, 0, Math.PI * 2);
-
-    ctx.fillStyle = "#d7d4b8";
-    ctx.shadowBlur = 30;
-    ctx.shadowColor = "#aaa98d";
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-
-
-    // Лёгкий туман
-
-    for (let i = 0; i < 7; i++) {
-
-        ctx.fillStyle = `rgba(100,115,105,${0.025 + i * .005})`;
-
-        ctx.beginPath();
-
-        ctx.ellipse(
-            W * .5,
-            wallY() + 100 + i * 45,
-            W * .6,
-            35,
+    var gradient =
+        ctx.createLinearGradient(
             0,
             0,
-            Math.PI * 2
+            0,
+            H
         );
 
-        ctx.fill();
-    }
-}
+
+    gradient.addColorStop(
+        0,
+        "#101719"
+    );
+
+    gradient.addColorStop(
+        0.45,
+        "#17201d"
+    );
+
+    gradient.addColorStop(
+        1,
+        "#070b08"
+    );
 
 
-// ======================================================
-// ЛЕС
-// ======================================================
-
-function drawForest() {
-
-    // Земля
-
-    ctx.fillStyle = "#0b110d";
+    ctx.fillStyle = gradient;
 
     ctx.fillRect(
         0,
-        wallY() + wallHeight() * .45,
+        0,
         W,
         H
     );
 
 
-    // Тени дороги
+    /* ЛУНА */
 
     ctx.beginPath();
 
-    ctx.moveTo(W * .45, H);
-    ctx.bezierCurveTo(
-        W * .52, H * .85,
-        W * .42, H * .7,
-        W * .55, wallY() + 70
+    ctx.arc(
+        W * 0.78,
+        H * 0.13,
+        38,
+        0,
+        Math.PI * 2
     );
 
-    ctx.lineTo(W * .67, wallY() + 70);
+    ctx.fillStyle = "#d4d2b5";
+
+    ctx.shadowBlur = 30;
+
+    ctx.shadowColor = "#aaa98c";
+
+    ctx.fill();
+
+    ctx.shadowBlur = 0;
+
+
+    /* ЛУННЫЙ СВЕТ */
+
+    var moonGradient =
+        ctx.createRadialGradient(
+            W * 0.78,
+            H * 0.13,
+            10,
+            W * 0.78,
+            H * 0.13,
+            280
+        );
+
+    moonGradient.addColorStop(
+        0,
+        "rgba(190,200,180,0.08)"
+    );
+
+    moonGradient.addColorStop(
+        1,
+        "rgba(190,200,180,0)"
+    );
+
+    ctx.fillStyle = moonGradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+}
+
+
+
+/* ==================================================
+   ЛЕС
+================================================== */
+
+function drawForest() {
+
+    var wallY = getWallY();
+
+    var wallH = getWallHeight();
+
+
+    /* ЗЕМЛЯ */
+
+    ctx.fillStyle = "#0a100c";
+
+    ctx.fillRect(
+        0,
+        wallY + wallH * 0.35,
+        W,
+        H
+    );
+
+
+    /* ДОРОГА */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        W * 0.43,
+        H
+    );
 
     ctx.bezierCurveTo(
-        W * .53, H * .7,
-        W * .64, H * .85,
-        W * .58, H
+        W * 0.55,
+        H * 0.82,
+        W * 0.40,
+        H * 0.68,
+        W * 0.55,
+        wallY + 65
+    );
+
+    ctx.lineTo(
+        W * 0.66,
+        wallY + 65
+    );
+
+    ctx.bezierCurveTo(
+        W * 0.55,
+        H * 0.68,
+        W * 0.70,
+        H * 0.82,
+        W * 0.60,
+        H
     );
 
     ctx.closePath();
 
-    ctx.fillStyle = "#20231b";
+    ctx.fillStyle = "#20251c";
+
     ctx.fill();
 
 
-    // Деревья
+    /* ДЕРЕВЬЯ */
 
-    for (const tree of trees) {
+    for (
+        var i = 0;
+        i < trees.length;
+        i++
+    ) {
 
         drawTree(
-            tree.x,
-            tree.y,
-            tree.size
+            trees[i].x,
+            trees[i].y,
+            trees[i].size
         );
+
     }
 
 
-    // Камни
+    /* КАМНИ */
 
-    for (let i = 0; i < 28; i++) {
+    for (var k = 0; k < 24; k++) {
 
-        const x = (i * 137) % W;
-        const y = wallY() + 100 + ((i * 83) % Math.max(50, H - wallY() - 120));
+        var stoneX =
+            (k * 151) % W;
+
+        var stoneY =
+            wallY +
+            100 +
+            (
+                k * 97
+            ) %
+            Math.max(
+                50,
+                H - wallY - 120
+            );
+
 
         ctx.fillStyle = "#242923";
 
         ctx.beginPath();
 
         ctx.ellipse(
-            x,
-            y,
-            12 + (i % 4) * 4,
+            stoneX,
+            stoneY,
+            12 + (k % 4) * 3,
             7,
             0,
             0,
@@ -389,94 +739,167 @@ function drawForest() {
         );
 
         ctx.fill();
+
     }
+
 }
 
+
+
+/* ==================================================
+   ДЕРЕВО
+================================================== */
 
 function drawTree(x, y, size) {
 
-    // Ствол
+    /* СТВОЛ */
 
-    ctx.fillStyle = "#17130f";
+    ctx.fillStyle = "#17140f";
 
     ctx.fillRect(
-        x - size * .11,
-        y - size * .25,
-        size * .22,
-        size * .9
+        x - size * 0.1,
+        y - size * 0.25,
+        size * 0.2,
+        size * 0.9
     );
 
 
-    // Крона
+    /* ВЕТКИ */
 
-    ctx.fillStyle = "#0d1712";
+    ctx.strokeStyle = "#17140f";
 
-    for (let i = 0; i < 5; i++) {
+    ctx.lineWidth = 4;
 
-        ctx.beginPath();
+    ctx.beginPath();
 
-        ctx.arc(
-            x + Math.sin(i * 4) * size * .22,
-            y - size * .45 - i * size * .08,
-            size * (.34 + (i % 2) * .08),
-            0,
-            Math.PI * 2
-        );
+    ctx.moveTo(
+        x,
+        y - size * 0.05
+    );
 
-        ctx.fill();
-    }
+    ctx.lineTo(
+        x - size * 0.4,
+        y - size * 0.5
+    );
+
+    ctx.moveTo(
+        x,
+        y - size * 0.1
+    );
+
+    ctx.lineTo(
+        x + size * 0.4,
+        y - size * 0.48
+    );
+
+    ctx.stroke();
+
+
+    /* КРОНА */
+
+    ctx.fillStyle = "#0c1711";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y - size * 0.55,
+        size * 0.42,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        x - size * 0.28,
+        y - size * 0.42,
+        size * 0.32,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        x + size * 0.28,
+        y - size * 0.43,
+        size * 0.34,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
 }
 
 
-// ======================================================
-// ЗАМОК
-// ======================================================
+
+/* ==================================================
+   СТЕНА
+================================================== */
 
 function drawCastle() {
 
-    const y = wallY();
-    const h = wallHeight();
+    var y = getWallY();
 
-    // Тень за стеной
+    var h = getWallHeight();
 
-    ctx.fillStyle = "#080a09";
+
+    /* ТЕНЬ */
+
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
 
     ctx.fillRect(
         0,
         y + h,
         W,
-        35
+        30
     );
 
 
-    // Основная стена
+    /* ОСНОВНОЕ ТЕЛО СТЕНЫ */
 
-    ctx.fillStyle = "#343632";
+    ctx.fillStyle = "#343732";
 
     ctx.fillRect(
         0,
-        y + 25,
+        y + 20,
         W,
         h
     );
 
 
-    // Каменные блоки
+    /* КАМНИ */
 
-    ctx.strokeStyle = "#222521";
+    ctx.strokeStyle = "#222520";
+
     ctx.lineWidth = 2;
 
-    const blockW = 70;
-    const blockH = 28;
 
-    for (let yy = y + 25; yy < y + h; yy += blockH) {
+    var blockW = 70;
 
-        const offset =
-            Math.floor((yy - y) / blockH) % 2 === 0
+    var blockH = 27;
+
+
+    for (
+        var yy = y + 20;
+        yy < y + h;
+        yy += blockH
+    ) {
+
+        var row =
+            Math.floor(
+                (yy - y) / blockH
+            );
+
+        var offset =
+            row % 2 === 0
             ? 0
             : blockW / 2;
 
-        for (let xx = -blockW; xx < W + blockW; xx += blockW) {
+
+        for (
+            var xx = -blockW;
+            xx < W + blockW;
+            xx += blockW
+        ) {
 
             ctx.strokeRect(
                 xx + offset,
@@ -484,82 +907,126 @@ function drawCastle() {
                 blockW,
                 blockH
             );
+
         }
+
     }
 
 
-    // Верхняя площадка
+    /* ВЕРХ СТЕНЫ */
 
-    ctx.fillStyle = "#454741";
+    ctx.fillStyle = "#484b44";
 
     ctx.fillRect(
         0,
-        y + 18,
+        y + 10,
         W,
         18
     );
 
 
-    // Зубцы
+    /* ЗУБЦЫ */
 
-    const merlonW = 38;
-    const gap = 20;
+    drawBattlements(
+        y
+    );
 
-    ctx.fillStyle = "#3c3e39";
+
+    /* БАШНИ */
+
+    drawTower(
+        55,
+        y
+    );
+
+    drawTower(
+        W - 55,
+        y
+    );
+
+
+    /* ФАКЕЛЫ */
+
+    drawTorch(
+        135,
+        y + 12
+    );
+
+    drawTorch(
+        W - 135,
+        y + 12
+    );
+
+}
+
+
+
+/* ==================================================
+   ЗУБЦЫ
+================================================== */
+
+function drawBattlements(y) {
+
+    var merlonW = 38;
+
+    var gap = 20;
+
+
+    ctx.fillStyle = "#3c3f39";
+
 
     for (
-        let x = 0;
+        var x = 0;
         x < W;
         x += merlonW + gap
     ) {
 
         ctx.fillRect(
             x,
-            y - 12,
+            y - 15,
             merlonW,
-            32
+            30
         );
+
     }
 
-
-    // Башни по краям
-
-    drawTower(55, y);
-    drawTower(W - 55, y);
-
-
-    // Факелы
-
-    drawTorch(130, y + 12);
-    drawTorch(W - 130, y + 12);
 }
 
 
+
+/* ==================================================
+   БАШНЯ
+================================================== */
+
 function drawTower(x, y) {
 
-    const width = 90;
-    const height = 145;
+    var width = 90;
 
-    // Тело башни
+    var height = 145;
 
-    ctx.fillStyle = "#393b36";
+
+    /* ТЕЛО */
+
+    ctx.fillStyle = "#393c37";
 
     ctx.fillRect(
         x - width / 2,
-        y - height + 35,
+        y - height + 30,
         width,
         height
     );
 
 
-    // Камни
+    /* КАМНИ */
 
-    ctx.strokeStyle = "#242621";
+    ctx.strokeStyle = "#242722";
+
     ctx.lineWidth = 2;
 
+
     for (
-        let yy = y - height + 35;
-        yy < y + 35;
+        var yy = y - height + 30;
+        yy < y + 30;
         yy += 27
     ) {
 
@@ -569,50 +1036,62 @@ function drawTower(x, y) {
             width,
             27
         );
+
     }
 
 
-    // Верх башни
+    /* ВЕРХ */
 
-    ctx.fillStyle = "#464842";
+    ctx.fillStyle = "#494c45";
 
     ctx.fillRect(
-        x - width / 2 - 8,
-        y - height + 20,
-        width + 16,
-        20
+        x - width / 2 - 7,
+        y - height + 15,
+        width + 14,
+        22
     );
 
 
-    // Зубцы башни
+    /* ЗУБЦЫ */
 
-    for (let i = -1; i <= 1; i++) {
+    for (
+        var i = -1;
+        i <= 1;
+        i++
+    ) {
 
         ctx.fillRect(
             x + i * 28 - 11,
-            y - height - 5,
+            y - height - 10,
             22,
-            27
+            28
         );
+
     }
 
 
-    // Окно
+    /* ОКНО */
 
-    ctx.fillStyle = "#11130f";
+    ctx.fillStyle = "#10130f";
 
     ctx.fillRect(
-        x - 10,
-        y - height + 60,
-        20,
+        x - 9,
+        y - height + 58,
+        18,
         30
     );
+
 }
 
 
+
+/* ==================================================
+   ФАКЕЛ
+================================================== */
+
 function drawTorch(x, y) {
 
-    ctx.fillStyle = "#261c12";
+    ctx.fillStyle = "#302218";
 
     ctx.fillRect(
         x - 4,
@@ -626,105 +1105,116 @@ function drawTorch(x, y) {
 
     ctx.arc(
         x,
-        y - 3,
+        y - 4,
         8,
         0,
         Math.PI * 2
     );
 
-    ctx.fillStyle = "#e1a844";
+    ctx.fillStyle = "#e0a344";
 
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "#e29b35";
+    ctx.shadowBlur = 22;
+
+    ctx.shadowColor = "#d99032";
 
     ctx.fill();
 
     ctx.shadowBlur = 0;
+
 }
 
 
-// ======================================================
-// ЛУЧНИК
-// ======================================================
+
+/* ==================================================
+   ЛУЧНИК
+================================================== */
 
 function drawPlayer() {
 
-    const x = player.x;
-    const y = wallY() + 8;
+    var x = player.x;
+
+    var y = getWallY() + 12;
 
 
-    // Ноги — находятся за парапетом
+    /* НОГИ */
 
-    ctx.fillStyle = "#171814";
+    ctx.fillStyle = "#151813";
 
     ctx.fillRect(
         x - 9,
-        y - 15,
+        y - 13,
         7,
-        30
+        35
     );
 
     ctx.fillRect(
         x + 2,
-        y - 15,
+        y - 13,
         7,
-        30
+        35
     );
 
 
-    // Тело
+    /* ТЕЛО */
 
-    ctx.fillStyle = "#292d28";
+    ctx.fillStyle = "#292e29";
 
-    ctx.beginPath();
-
-    ctx.roundRect(
+    ctx.fillRect(
         x - 15,
-        y - 58,
+        y - 57,
         30,
-        45,
-        6
+        45
     );
 
-    ctx.fill();
+
+    /* ПЛЕЧИ */
+
+    ctx.fillRect(
+        x - 20,
+        y - 53,
+        40,
+        10
+    );
 
 
-    // Голова
+    /* ГОЛОВА */
 
     ctx.beginPath();
 
     ctx.arc(
         x,
-        y - 70,
+        y - 69,
         12,
         0,
         Math.PI * 2
     );
 
-    ctx.fillStyle = "#b29b7a";
+    ctx.fillStyle = "#a88e6d";
+
     ctx.fill();
 
 
-    // Капюшон
-
-    ctx.fillStyle = "#151914";
+    /* КАПЮШОН */
 
     ctx.beginPath();
 
     ctx.arc(
         x,
         y - 72,
-        15,
+        16,
         Math.PI,
         Math.PI * 2
     );
 
+    ctx.fillStyle = "#121712";
+
     ctx.fill();
 
 
-    // Лук
+    /* ЛУК */
 
-    ctx.strokeStyle = "#8d6842";
+    ctx.strokeStyle = "#8b643d";
+
     ctx.lineWidth = 4;
 
     ctx.beginPath();
@@ -732,161 +1222,267 @@ function drawPlayer() {
     ctx.arc(
         x + 21,
         y - 42,
-        28,
-        -Math.PI * .8,
-        Math.PI * .8
+        29,
+        -Math.PI * 0.8,
+        Math.PI * 0.8
     );
 
     ctx.stroke();
 
 
-    // Тетива
+    /* ТЕТИВА */
 
-    ctx.strokeStyle = "#c7bda1";
+    ctx.strokeStyle = "#c9c0a6";
+
     ctx.lineWidth = 1;
 
     ctx.beginPath();
 
     ctx.moveTo(
         x + 14,
-        y - 67
+        y - 69
     );
 
     ctx.lineTo(
         x + 14,
-        y - 17
+        y - 15
     );
 
     ctx.stroke();
 
 
-    // Стрела
+    /* СТРЕЛА */
 
-    ctx.strokeStyle = "#ddd2ad";
+    ctx.strokeStyle = "#d8ccaa";
+
     ctx.lineWidth = 2;
 
     ctx.beginPath();
 
     ctx.moveTo(
-        x + 2,
+        x + 3,
         y - 43
     );
 
     ctx.lineTo(
-        x + 43,
+        x + 46,
         y - 43
     );
 
     ctx.stroke();
 
 
-    // Передняя часть зубцов,
-    // чтобы лучник выглядел стоящим ЗА стеной
+    /* Передние зубцы.
+       Они перекрывают ноги лучника.
+       Поэтому визуально он стоит ЗА стеной. */
 
     drawFrontBattlements();
+
 }
 
 
+
+/* ==================================================
+   ПЕРЕДНИЕ ЗУБЦЫ
+================================================== */
+
 function drawFrontBattlements() {
 
-    const y = wallY();
+    var y = getWallY();
 
-    const merlonW = 38;
-    const gap = 20;
+    var merlonW = 38;
 
-    ctx.fillStyle = "#3c3e39";
+    var gap = 20;
+
+
+    ctx.fillStyle = "#3c3f39";
+
 
     for (
-        let x = 0;
+        var x = 0;
         x < W;
         x += merlonW + gap
     ) {
 
         ctx.fillRect(
             x,
-            y - 12,
+            y - 15,
             merlonW,
-            22
+            27
         );
+
     }
+
 }
 
 
-// ======================================================
-// ВРАГИ
-// ======================================================
 
-function spawnEnemy(type = "orc") {
+/* ==================================================
+   ОРКИ
+================================================== */
 
-    let enemy;
+function spawnOrc() {
+
+    var type = "normal";
+
+    var random =
+        Math.random();
+
+
+    if (
+        wave >= 2 &&
+        random < 0.2
+    ) {
+
+        type = "fast";
+
+    }
+
+
+    if (
+        wave >= 3 &&
+        random < 0.1
+    ) {
+
+        type = "heavy";
+
+    }
+
+
+    var enemy;
+
 
     if (type === "fast") {
 
         enemy = {
+
             type: "fast",
-            x: W * .2 + Math.random() * W * .6,
-            y: H - 40,
-            hp: 35,
-            maxHp: 35,
+
+            x:
+                W * 0.18 +
+                Math.random() *
+                W * 0.64,
+
+            y: H - 45,
+
+            hp: 38,
+
+            maxHp: 38,
+
             speed: 72,
+
             damage: 7,
-            reward: 12,
+
+            reward: 13,
+
             size: 22
+
         };
 
-    } else if (type === "heavy") {
-
-        enemy = {
-            type: "heavy",
-            x: W * .2 + Math.random() * W * .6,
-            y: H - 40,
-            hp: 130,
-            maxHp: 130,
-            speed: 27,
-            damage: 16,
-            reward: 30,
-            size: 34
-        };
-
-    } else {
-
-        enemy = {
-            type: "orc",
-            x: W * .2 + Math.random() * W * .6,
-            y: H - 40,
-            hp: 60,
-            maxHp: 60,
-            speed: 43,
-            damage: 9,
-            reward: 10,
-            size: 27
-        };
     }
 
+    else if (type === "heavy") {
+
+        enemy = {
+
+            type: "heavy",
+
+            x:
+                W * 0.18 +
+                Math.random() *
+                W * 0.64,
+
+            y: H - 45,
+
+            hp: 140,
+
+            maxHp: 140,
+
+            speed: 28,
+
+            damage: 17,
+
+            reward: 30,
+
+            size: 35
+
+        };
+
+    }
+
+    else {
+
+        enemy = {
+
+            type: "normal",
+
+            x:
+                W * 0.18 +
+                Math.random() *
+                W * 0.64,
+
+            y: H - 45,
+
+            hp: 65,
+
+            maxHp: 65,
+
+            speed: 43,
+
+            damage: 9,
+
+            reward: 10,
+
+            size: 27
+
+        };
+
+    }
+
+
     enemies.push(enemy);
+
 }
 
 
+
+/* ==================================================
+   РИСОВАНИЕ ОРКА
+================================================== */
+
 function drawEnemy(e) {
 
-    const size = e.size;
+    var s = e.size;
 
-    // Тело
 
-    ctx.fillStyle =
-        e.type === "heavy"
-        ? "#30352c"
-        : e.type === "fast"
-        ? "#39452f"
-        : "#34402e";
+    /* ТЕЛО */
+
+    if (e.type === "heavy") {
+
+        ctx.fillStyle = "#30372c";
+
+    }
+
+    else if (e.type === "fast") {
+
+        ctx.fillStyle = "#3a482f";
+
+    }
+
+    else {
+
+        ctx.fillStyle = "#34402f";
+
+    }
+
 
     ctx.beginPath();
 
     ctx.ellipse(
         e.x,
         e.y,
-        size * .55,
-        size,
+        s * 0.55,
+        s,
         0,
         0,
         Math.PI * 2
@@ -895,16 +1491,16 @@ function drawEnemy(e) {
     ctx.fill();
 
 
-    // Голова
+    /* ГОЛОВА */
 
-    ctx.fillStyle = "#536044";
+    ctx.fillStyle = "#526044";
 
     ctx.beginPath();
 
     ctx.arc(
         e.x,
-        e.y - size * .75,
-        size * .42,
+        e.y - s * 0.75,
+        s * 0.42,
         0,
         Math.PI * 2
     );
@@ -912,23 +1508,23 @@ function drawEnemy(e) {
     ctx.fill();
 
 
-    // Уши
+    /* УШИ */
 
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x - size * .3,
-        e.y - size * .8
+        e.x - s * 0.25,
+        e.y - s * 0.75
     );
 
     ctx.lineTo(
-        e.x - size * .65,
-        e.y - size * .95
+        e.x - s * 0.7,
+        e.y - s * 0.95
     );
 
     ctx.lineTo(
-        e.x - size * .35,
-        e.y - size * .6
+        e.x - s * 0.35,
+        e.y - s * 0.55
     );
 
     ctx.fill();
@@ -937,177 +1533,259 @@ function drawEnemy(e) {
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x + size * .3,
-        e.y - size * .8
+        e.x + s * 0.25,
+        e.y - s * 0.75
     );
 
     ctx.lineTo(
-        e.x + size * .65,
-        e.y - size * .95
+        e.x + s * 0.7,
+        e.y - s * 0.95
     );
 
     ctx.lineTo(
-        e.x + size * .35,
-        e.y - size * .6
+        e.x + s * 0.35,
+        e.y - s * 0.55
     );
 
     ctx.fill();
 
 
-    // Глаза
+    /* ГЛАЗА */
 
-    ctx.fillStyle = "#d9bd65";
+    ctx.fillStyle = "#d8bd63";
 
     ctx.fillRect(
-        e.x - size * .22,
-        e.y - size * .8,
+        e.x - s * 0.21,
+        e.y - s * 0.8,
         5,
         5
     );
 
     ctx.fillRect(
-        e.x + size * .08,
-        e.y - size * .8,
+        e.x + s * 0.08,
+        e.y - s * 0.8,
         5,
         5
     );
 
 
-    // Оружие
+    /* ОРУЖИЕ */
 
-    ctx.strokeStyle = "#6e5034";
+    ctx.strokeStyle = "#725235";
+
     ctx.lineWidth = 5;
 
     ctx.beginPath();
 
     ctx.moveTo(
-        e.x + size * .35,
-        e.y - size * .1
+        e.x + s * 0.25,
+        e.y - s * 0.1
     );
 
     ctx.lineTo(
-        e.x + size * .8,
-        e.y + size * .6
+        e.x + s * 0.8,
+        e.y + s * 0.6
     );
 
     ctx.stroke();
 
 
-    // Полоска HP
+    /* HP */
 
-    ctx.fillStyle = "#180e0d";
+    ctx.fillStyle = "#130d0d";
 
     ctx.fillRect(
-        e.x - size,
-        e.y - size * 1.35,
-        size * 2,
+        e.x - s,
+        e.y - s * 1.35,
+        s * 2,
         5
     );
 
-    ctx.fillStyle = "#a84e43";
+
+    ctx.fillStyle = "#a84f43";
 
     ctx.fillRect(
-        e.x - size,
-        e.y - size * 1.35,
-        size * 2 * (e.hp / e.maxHp),
+        e.x - s,
+        e.y - s * 1.35,
+        s * 2 * (
+            e.hp / e.maxHp
+        ),
         5
     );
+
 }
 
 
-// ======================================================
-// СТРЕЛЫ
-// ======================================================
+
+/* ==================================================
+   СТРЕЛА
+================================================== */
 
 function shoot() {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        return;
+    }
 
-    if (player.cooldown > 0) return;
 
-    player.cooldown = player.fireRate;
+    if (player.cooldown > 0) {
+        return;
+    }
+
+
+    player.cooldown =
+        player.fireRate;
+
 
     arrows.push({
+
         x: player.x,
-        y: wallY() - 25,
-        speed: 700,
-        damage: player.damage,
-        angle: -Math.PI / 2
+
+        y: getWallY() - 25,
+
+        speed: 720,
+
+        damage: player.damage
+
     });
+
 }
 
 
+
+/* ==================================================
+   РИСОВАНИЕ СТРЕЛЫ
+================================================== */
+
 function drawArrow(a) {
 
-    ctx.save();
+    ctx.strokeStyle = "#d8c99f";
 
-    ctx.translate(a.x, a.y);
-    ctx.rotate(a.angle);
-
-    ctx.strokeStyle = "#d8c59a";
     ctx.lineWidth = 3;
 
     ctx.beginPath();
 
-    ctx.moveTo(-18, 0);
-    ctx.lineTo(18, 0);
+    ctx.moveTo(
+        a.x - 18,
+        a.y
+    );
+
+    ctx.lineTo(
+        a.x + 18,
+        a.y
+    );
 
     ctx.stroke();
+
+
+    /* наконечник */
 
     ctx.beginPath();
 
-    ctx.moveTo(18, 0);
-    ctx.lineTo(10, -5);
+    ctx.moveTo(
+        a.x + 18,
+        a.y
+    );
 
-    ctx.moveTo(18, 0);
-    ctx.lineTo(10, 5);
+    ctx.lineTo(
+        a.x + 9,
+        a.y - 5
+    );
+
+    ctx.moveTo(
+        a.x + 18,
+        a.y
+    );
+
+    ctx.lineTo(
+        a.x + 9,
+        a.y + 5
+    );
 
     ctx.stroke();
 
-    ctx.restore();
 }
 
 
-// ======================================================
-// ЧАСТИЦЫ
-// ======================================================
 
-function createHitParticles(x, y) {
+/* ==================================================
+   ЧАСТИЦЫ
+================================================== */
 
-    for (let i = 0; i < 7; i++) {
+function hitParticles(x, y) {
+
+    for (
+        var i = 0;
+        i < 7;
+        i++
+    ) {
 
         particles.push({
+
             x: x,
+
             y: y,
-            vx: -80 + Math.random() * 160,
-            vy: -80 + Math.random() * 160,
-            life: .35
+
+            vx:
+                -100 +
+                Math.random() * 200,
+
+            vy:
+                -100 +
+                Math.random() * 200,
+
+            life: 0.35
+
         });
+
     }
+
 }
 
 
 function updateParticles(dt) {
 
-    for (const p of particles) {
+    for (
+        var i = 0;
+        i < particles.length;
+        i++
+    ) {
+
+        var p = particles[i];
 
         p.x += p.vx * dt;
+
         p.y += p.vy * dt;
 
         p.life -= dt;
+
     }
 
+
     particles =
-        particles.filter(p => p.life > 0);
+        particles.filter(
+            function(p) {
+                return p.life > 0;
+            }
+        );
+
 }
 
 
 function drawParticles() {
 
-    for (const p of particles) {
+    for (
+        var i = 0;
+        i < particles.length;
+        i++
+    ) {
+
+        var p = particles[i];
 
         ctx.fillStyle =
-            `rgba(210,180,100,${p.life * 2})`;
+            "rgba(220,190,100," +
+            Math.max(0, p.life * 2) +
+            ")";
 
         ctx.fillRect(
             p.x,
@@ -1115,35 +1793,59 @@ function drawParticles() {
             4,
             4
         );
+
     }
+
 }
 
 
-// ======================================================
-// ДОЖДЬ
-// ======================================================
+
+/* ==================================================
+   ДОЖДЬ
+================================================== */
 
 function updateRain(dt) {
 
-    for (const r of rain) {
+    for (
+        var i = 0;
+        i < rain.length;
+        i++
+    ) {
+
+        var r = rain[i];
 
         r.y += r.speed * dt;
+
 
         if (r.y > H) {
 
             r.y = -20;
-            r.x = Math.random() * W;
+
+            r.x =
+                Math.random() * W;
+
         }
+
     }
+
 }
 
 
 function drawRain() {
 
-    ctx.strokeStyle = "rgba(170,190,190,.18)";
+    ctx.strokeStyle =
+        "rgba(170,190,190,0.18)";
+
     ctx.lineWidth = 1;
 
-    for (const r of rain) {
+
+    for (
+        var i = 0;
+        i < rain.length;
+        i++
+    ) {
+
+        var r = rain[i];
 
         ctx.beginPath();
 
@@ -1158,38 +1860,49 @@ function drawRain() {
         );
 
         ctx.stroke();
+
     }
+
 }
 
 
-// ======================================================
-// МОЛНИЯ
-// ======================================================
+
+/* ==================================================
+   МОЛНИЯ
+================================================== */
 
 function updateLightning(dt) {
 
     lightningTimer -= dt;
 
+
     if (lightningTimer <= 0) {
 
         lightningTimer = 5;
 
-        lightningFlash = .15;
+        lightningTime = 0.12;
+
     }
 
-    if (lightningFlash > 0) {
 
-        lightningFlash -= dt;
+    if (lightningTime > 0) {
+
+        lightningTime -= dt;
+
     }
+
 }
 
 
 function drawLightning() {
 
-    if (lightningFlash <= 0) return;
+    if (lightningTime <= 0) {
+        return;
+    }
+
 
     ctx.fillStyle =
-        `rgba(220,230,220,${lightningFlash * 2})`;
+        "rgba(230,235,220,0.22)";
 
     ctx.fillRect(
         0,
@@ -1197,248 +1910,313 @@ function drawLightning() {
         W,
         H
     );
+
 }
 
 
-// ======================================================
-// ВОЛНЫ
-// ======================================================
+
+/* ==================================================
+   НАЧАЛО ВОЛНЫ
+================================================== */
 
 function startWave() {
 
-    waveTimer = 0;
+    waveSpawned = 0;
 
-    let count =
+    enemiesPerWave =
         5 + wave * 2;
 
-    for (let i = 0; i < count; i++) {
+    spawnTimer = 0;
 
-        setTimeout(() => {
+    nextWaveTimer = 0;
 
-            if (!gameRunning) return;
-
-            let type = "orc";
-
-            if (
-                wave >= 2 &&
-                Math.random() < .2
-            ) {
-                type = "fast";
-            }
-
-            if (
-                wave >= 3 &&
-                Math.random() < .12
-            ) {
-                type = "heavy";
-            }
-
-            spawnEnemy(type);
-
-        }, i * 700);
-    }
 }
 
 
-// ======================================================
-// ОБНОВЛЕНИЕ
-// ======================================================
+
+/* ==================================================
+   СПАВН
+================================================== */
+
+function updateSpawning(dt) {
+
+    if (waveSpawned >= enemiesPerWave) {
+        return;
+    }
+
+
+    spawnTimer -= dt;
+
+
+    if (spawnTimer <= 0) {
+
+        spawnOrc();
+
+        waveSpawned++;
+
+        spawnTimer = 0.75;
+
+    }
+
+}
+
+
+
+/* ==================================================
+   ОБНОВЛЕНИЕ ИГРЫ
+================================================== */
 
 function update(dt) {
 
-    if (!gameRunning) return;
-
-
-    // Игрок
-
-    if (keys.left) {
-
-        player.x -= player.speed * dt;
+    if (!gameRunning) {
+        return;
     }
 
-    if (keys.right) {
 
-        player.x += player.speed * dt;
+    /* ДВИЖЕНИЕ */
+
+    if (leftPressed) {
+
+        player.x -=
+            player.speed * dt;
+
     }
 
-    player.x =
-        Math.max(35, Math.min(W - 35, player.x));
 
+    if (rightPressed) {
+
+        player.x +=
+            player.speed * dt;
+
+    }
+
+
+    if (player.x < 35) {
+        player.x = 35;
+    }
+
+
+    if (player.x > W - 35) {
+        player.x = W - 35;
+    }
+
+
+    /* ПЕРЕЗАРЯДКА */
 
     if (player.cooldown > 0) {
 
         player.cooldown -= dt;
+
     }
 
 
-    // Стрелы
+    /* СПАВН */
 
-    for (const a of arrows) {
+    updateSpawning(dt);
+
+
+    /* СТРЕЛЫ */
+
+    for (
+        var i = arrows.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        var a = arrows[i];
 
         a.y -= a.speed * dt;
-    }
 
 
-    // Попадания
+        var hit =
+            false;
 
-    for (let ai = arrows.length - 1; ai >= 0; ai--) {
 
-        const a = arrows[ai];
-
-        let hit = false;
+        /* ПОПАДАНИЕ */
 
         for (
-            let ei = enemies.length - 1;
-            ei >= 0;
-            ei--
+            var j = enemies.length - 1;
+            j >= 0;
+            j--
         ) {
 
-            const e = enemies[ei];
+            var e = enemies[j];
 
-            const dx = a.x - e.x;
-            const dy = a.y - e.y;
 
-            const distance =
-                Math.sqrt(dx * dx + dy * dy);
+            var dx =
+                a.x - e.x;
 
-            if (distance < e.size) {
+            var dy =
+                a.y - (
+                    e.y -
+                    e.size * 0.4
+                );
 
-                e.hp -= a.damage;
 
-                createHitParticles(
+            var distance =
+                Math.sqrt(
+                    dx * dx +
+                    dy * dy
+                );
+
+
+            if (
+                distance <
+                e.size
+            ) {
+
+                e.hp -=
+                    a.damage;
+
+                hitParticles(
                     e.x,
-                    e.y - e.size * .5
+                    e.y
                 );
 
                 hit = true;
 
+
                 if (e.hp <= 0) {
 
-                    gold += e.reward;
+                    gold +=
+                        e.reward;
 
-                    enemies.splice(ei);
+                    enemies.splice(
+                        j,
+                        1
+                    );
+
                 }
 
                 break;
+
             }
+
         }
+
 
         if (
             hit ||
-            a.y < wallY() - 180
+            a.y < 0
         ) {
 
-            arrows.splice(ai, 1);
+            arrows.splice(
+                i,
+                1
+            );
+
         }
+
     }
 
 
-    // Орки
+    /* ОРКИ */
 
-    for (let i = enemies.length - 1; i >= 0; i--) {
+    var targetY =
+        getWallY() +
+        getWallHeight() * 0.2;
 
-        const e = enemies[i];
 
-        const targetY =
-            wallY() + wallHeight() * .2;
+    for (
+        var i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        var e = enemies[i];
+
 
         if (e.y > targetY) {
 
-            e.y -= e.speed * dt;
+            e.y -=
+                e.speed * dt;
 
-        } else {
+        }
 
-            wallHP -= e.damage * dt;
+        else {
+
+            wallHP -=
+                e.damage * dt;
+
 
             if (wallHP <= 0) {
 
                 wallHP = 0;
+
                 endGame();
+
+                return;
+
             }
+
         }
+
+    }
+
+
+    /* НОВАЯ ВОЛНА */
+
+    if (
+        waveSpawned >= enemiesPerWave &&
+        enemies.length === 0
+    ) {
+
+        nextWaveTimer += dt;
+
+
+        if (nextWaveTimer >= 2) {
+
+            wave++;
+
+            startWave();
+
+        }
+
     }
 
 
     updateParticles(dt);
+
     updateRain(dt);
+
     updateLightning(dt);
 
-
-    // Автоматическое появление новых волн
-
-    waveTimer += dt;
-
-    if (
-        enemies.length === 0 &&
-        waveTimer > 3
-    ) {
-
-        wave++;
-
-        startWave();
-    }
-
-
     updateHUD();
+
 }
 
 
-// ======================================================
-// УПРАВЛЕНИЕ
-// ======================================================
 
-const keys = {
-    left: false,
-    right: false
-};
+/* ==================================================
+   HUD
+================================================== */
 
+function updateHUD() {
 
-window.addEventListener("keydown", e => {
-
-    if (
-        e.key === "ArrowLeft" ||
-        e.key.toLowerCase() === "a"
-    ) {
-        keys.left = true;
-    }
-
-    if (
-        e.key === "ArrowRight" ||
-        e.key.toLowerCase() === "d"
-    ) {
-        keys.right = true;
-    }
-
-    if (e.code === "Space") {
-
-        e.preventDefault();
-
-        shoot();
-    }
-});
+    document.getElementById(
+        "wallHP"
+    ).textContent =
+        Math.ceil(wallHP);
 
 
-window.addEventListener("keyup", e => {
-
-    if (
-        e.key === "ArrowLeft" ||
-        e.key.toLowerCase() === "a"
-    ) {
-        keys.left = false;
-    }
-
-    if (
-        e.key === "ArrowRight" ||
-        e.key.toLowerCase() === "d"
-    ) {
-        keys.right = false;
-    }
-});
+    document.getElementById(
+        "waveNumber"
+    ).textContent =
+        wave;
 
 
-// ======================================================
-// ОТРИСОВКА
-// ======================================================
+    document.getElementById(
+        "goldAmount"
+    ).textContent =
+        gold;
+
+}
+
+
+
+/* ==================================================
+   ОТРИСОВКА
+================================================== */
 
 function draw() {
 
@@ -1447,29 +2225,43 @@ function draw() {
     drawForest();
 
 
-    // Враги
+    /* ОРКИ */
 
-    for (const e of enemies) {
+    for (
+        var i = 0;
+        i < enemies.length;
+        i++
+    ) {
 
-        drawEnemy(e);
+        drawEnemy(
+            enemies[i]
+        );
+
     }
 
 
-    // Замок
+    /* ЗАМОК */
 
     drawCastle();
 
 
-    // Лучник
+    /* ЛУЧНИК */
 
     drawPlayer();
 
 
-    // Стрелы
+    /* СТРЕЛЫ */
 
-    for (const a of arrows) {
+    for (
+        var i = 0;
+        i < arrows.length;
+        i++
+    ) {
 
-        drawArrow(a);
+        drawArrow(
+            arrows[i]
+        );
+
     }
 
 
@@ -1478,122 +2270,257 @@ function draw() {
     drawRain();
 
     drawLightning();
+
 }
 
 
-// ======================================================
-// HUD
-// ======================================================
 
-function updateHUD() {
-
-    document.getElementById("wallHp").textContent =
-        Math.ceil(wallHP);
-
-    document.getElementById("wave").textContent =
-        wave;
-
-    document.getElementById("gold").textContent =
-        gold;
-}
-
-
-// ======================================================
-// СТАРТ
-// ======================================================
-
-function startGame() {
-
-    document.getElementById("menu").style.display =
-        "none";
-
-    document.getElementById("hud").style.display =
-        "flex";
-
-    document.getElementById("gameOver").style.display =
-        "none";
-
-    wallHP = 100;
-    gold = 0;
-    wave = 1;
-
-    enemies = [];
-    arrows = [];
-    particles = [];
-
-    player.x = W / 2;
-    player.cooldown = 0;
-
-    gameRunning = true;
-
-    createWorld();
-
-    startWave();
-
-    lastTime = performance.now();
-
-    requestAnimationFrame(gameLoop);
-}
-
-
-// ======================================================
-// КОНЕЦ ИГРЫ
-// ======================================================
-
-function endGame() {
-
-    gameRunning = false;
-
-    document.getElementById("gameOver").style.display =
-        "flex";
-}
-
-
-// ======================================================
-// GAME LOOP
-// ======================================================
+/* ==================================================
+   GAME LOOP
+================================================== */
 
 function gameLoop(time) {
 
-    if (!gameRunning) return;
+    if (!gameRunning) {
+        return;
+    }
 
-    const dt =
-        Math.min(
-            (time - lastTime) / 1000,
-            .033
-        );
+
+    var dt =
+        (time - lastTime) /
+        1000;
+
+
+    if (dt > 0.033) {
+        dt = 0.033;
+    }
+
 
     lastTime = time;
+
 
     update(dt);
 
     draw();
 
-    requestAnimationFrame(gameLoop);
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
 }
 
 
-// ======================================================
-// КНОПКИ
-// ======================================================
 
-document
-    .getElementById("startButton")
-    .addEventListener("click", startGame);
+/* ==================================================
+   ЗАПУСК ИГРЫ
+================================================== */
 
+function startGame() {
 
-document
-    .getElementById("restartButton")
-    .addEventListener("click", startGame);
+    console.log(
+        "ИГРА ЗАПУЩЕНА"
+    );
 
 
-// ======================================================
-// НАЧАЛЬНОЕ СОСТОЯНИЕ
-// ======================================================
+    document.getElementById(
+        "menu"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "gameOver"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "hud"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "controls"
+    ).style.display =
+        "flex";
+
+
+    wallHP = 100;
+
+    gold = 0;
+
+    wave = 1;
+
+
+    enemies = [];
+
+    arrows = [];
+
+    particles = [];
+
+
+    player.x =
+        W / 2;
+
+
+    player.cooldown = 0;
+
+
+    gameRunning = true;
+
+
+    createWorld();
+
+    startWave();
+
+
+    lastTime =
+        performance.now();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+
+/* ==================================================
+   RESTART
+================================================== */
+
+function restartGame() {
+
+    startGame();
+
+}
+
+
+
+/* ==================================================
+   GAME OVER
+================================================== */
+
+function endGame() {
+
+    gameRunning = false;
+
+
+    document.getElementById(
+        "gameOver"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "hud"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "controls"
+    ).style.display =
+        "none";
+
+}
+
+
+
+/* ==================================================
+   КЛАВИАТУРА
+================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(e) {
+
+        if (
+            e.key === "ArrowLeft" ||
+            e.key.toLowerCase() === "a"
+        ) {
+
+            leftPressed = true;
+
+        }
+
+
+        if (
+            e.key === "ArrowRight" ||
+            e.key.toLowerCase() === "d"
+        ) {
+
+            rightPressed = true;
+
+        }
+
+
+        if (
+            e.code === "Space"
+        ) {
+
+            e.preventDefault();
+
+            shoot();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(e) {
+
+        if (
+            e.key === "ArrowLeft" ||
+            e.key.toLowerCase() === "a"
+        ) {
+
+            leftPressed = false;
+
+        }
+
+
+        if (
+            e.key === "ArrowRight" ||
+            e.key.toLowerCase() === "d"
+        ) {
+
+            rightPressed = false;
+
+        }
+
+    }
+);
+
+
+/* ==================================================
+   КЛИК/ТАП ПО ИГРЕ = СТРЕЛЬБА
+================================================== */
+
+canvas.addEventListener(
+    "click",
+    function() {
+
+        shoot();
+
+    }
+);
+
+
+/* ==================================================
+   ПЕРВОНАЧАЛЬНЫЙ ЭКРАН
+================================================== */
 
 createWorld();
 
 draw();
+
 
 </script>
 
