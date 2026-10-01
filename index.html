@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>LAST WATCH — Dark Fantasy Tower Defense</title>
+<title>LAST WATCH</title>
 
 <style>
 *{
@@ -22,20 +22,11 @@ html,body{
     color:#ddd;
 }
 
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
 #game{
     position:relative;
     width:100vw;
     height:100vh;
-    max-width:1500px;
-    max-height:900px;
     overflow:hidden;
-    background:#070c0a;
 }
 
 canvas{
@@ -44,8 +35,6 @@ canvas{
     width:100%;
     height:100%;
 }
-
-/* ---------- UI ---------- */
 
 #ui{
     position:absolute;
@@ -60,40 +49,27 @@ canvas{
     right:20px;
     display:flex;
     justify-content:space-between;
-    align-items:flex-start;
-    gap:15px;
 }
 
 .panel{
-    background:rgba(8,12,11,.88);
-    border:1px solid #5b5540;
-    box-shadow:
-        0 0 20px rgba(0,0,0,.7),
-        inset 0 0 15px rgba(120,100,60,.06);
-    padding:10px 15px;
+    background:rgba(7,10,9,.88);
+    border:1px solid #615a45;
+    padding:9px 14px;
+    box-shadow:0 0 18px #000;
 }
 
 .stat{
-    font-size:17px;
-    margin:2px 0;
-    text-shadow:0 2px 3px #000;
+    font-size:16px;
+    margin:2px;
 }
 
-.gold{
-    color:#e0b85c;
-}
-
-.wall{
-    color:#c7d0bd;
-}
-
-.wave{
-    color:#c28b60;
-}
+.gold{color:#d8b65e}
+.wall{color:#c4c9bd}
+.wave{color:#c28c62}
 
 #message{
     position:absolute;
-    top:95px;
+    top:90px;
     left:50%;
     transform:translateX(-50%);
     text-align:center;
@@ -101,20 +77,17 @@ canvas{
     transition:.3s;
 }
 
-#message.visible{
-    opacity:1;
-}
+#message.visible{opacity:1}
 
 #waveText{
-    font-size:38px;
+    font-size:36px;
+    letter-spacing:5px;
     color:#d7c89b;
-    text-shadow:0 3px 10px #000;
-    letter-spacing:4px;
+    text-shadow:0 3px 12px #000;
 }
 
 #enemyText{
-    margin-top:6px;
-    font-size:16px;
+    margin-top:5px;
     color:#aaa;
 }
 
@@ -129,33 +102,25 @@ canvas{
 }
 
 button{
-    background:
-        linear-gradient(#34362e,#171b18);
-    border:1px solid #756d52;
+    background:linear-gradient(#36372f,#171a17);
+    border:1px solid #71694e;
     color:#d8d0b5;
     padding:10px 14px;
     cursor:pointer;
     font-family:Georgia,serif;
-    font-size:14px;
-    box-shadow:0 4px 12px #000;
-    transition:.15s;
 }
 
 button:hover{
-    background:linear-gradient(#515044,#252922);
-    color:#fff;
-    transform:translateY(-1px);
+    background:linear-gradient(#4c4d42,#242720);
 }
 
 button:disabled{
     opacity:.35;
-    cursor:not-allowed;
-    transform:none;
 }
 
 #upgradePanel{
     position:absolute;
-    bottom:70px;
+    bottom:65px;
     left:50%;
     transform:translateX(-50%);
     display:none;
@@ -166,93 +131,75 @@ button:disabled{
 }
 
 .upgrade{
-    width:190px;
-    min-height:80px;
+    width:175px;
+    min-height:78px;
 }
 
 .upgrade b{
     display:block;
-    color:#d7b55b;
-    margin-bottom:5px;
+    color:#d6b45c;
+    margin-bottom:4px;
 }
 
 .upgrade small{
     color:#aaa;
 }
 
-/* ---------- screens ---------- */
-
 .screen{
     position:absolute;
     inset:0;
+    z-index:10;
     display:flex;
     justify-content:center;
     align-items:center;
-    background:
-        radial-gradient(circle at center,rgba(34,48,38,.2),rgba(0,0,0,.92)),
-        #050807;
-    z-index:10;
+    background:radial-gradient(circle,rgba(30,40,32,.2),rgba(0,0,0,.94));
 }
 
-.screen.hidden{
-    display:none;
-}
+.hidden{display:none!important}
 
 .menu{
-    width:min(700px,90%);
+    width:min(680px,90%);
     text-align:center;
-    padding:50px 30px;
-    background:rgba(7,10,9,.93);
+    padding:45px 30px;
+    background:rgba(6,9,8,.94);
     border:1px solid #625b43;
     box-shadow:0 0 80px #000;
 }
 
 .title{
-    font-size:clamp(40px,7vw,76px);
+    font-size:clamp(42px,7vw,75px);
     letter-spacing:8px;
     color:#c8c1a4;
-    text-shadow:
-        0 3px 0 #302e26,
-        0 0 25px rgba(180,150,80,.2);
 }
 
 .subtitle{
-    margin-top:8px;
-    color:#777967;
-    letter-spacing:5px;
-    font-size:13px;
+    color:#727668;
+    letter-spacing:4px;
+    font-size:12px;
 }
 
 .story{
-    margin:30px auto;
-    max-width:570px;
+    margin:28px auto;
+    max-width:560px;
     line-height:1.7;
     color:#aaa;
 }
 
 .bigButton{
     font-size:20px;
-    padding:15px 45px;
-    margin-top:10px;
+    padding:14px 45px;
 }
 
 .controls{
-    margin-top:25px;
-    color:#686d64;
+    margin-top:20px;
+    color:#6e746b;
     font-size:13px;
     line-height:1.8;
 }
 
 .resultTitle{
-    font-size:52px;
+    font-size:50px;
     color:#c8b27c;
-    letter-spacing:5px;
-}
-
-#resultText{
-    margin:25px;
-    line-height:1.8;
-    color:#aaa;
 }
 </style>
 </head>
@@ -260,246 +207,275 @@ button:disabled{
 <body>
 
 <div id="game">
-
 <canvas id="canvas"></canvas>
 
 <div id="ui">
 
-    <div id="topbar">
+<div id="topbar">
 
-        <div class="panel">
-            <div class="stat wave">WAVE: <span id="wave">0</span></div>
-            <div class="stat wall">🏰 WALL: <span id="wall">100</span>/100</div>
-        </div>
+<div class="panel">
+<div class="stat wave">WAVE: <span id="wave">0</span></div>
+<div class="stat wall">🏰 WALL: <span id="wall">100</span>/100</div>
+</div>
 
-        <div class="panel">
-            <div class="stat gold">◆ GOLD: <span id="gold">0</span></div>
-            <div class="stat">🏹 DAMAGE: <span id="damage">25</span></div>
-            <div class="stat">⚡ FIRE RATE: <span id="rate">1.0</span>/s</div>
-        </div>
-
-    </div>
-
-    <div id="message">
-        <div id="waveText">WAVE 1</div>
-        <div id="enemyText"></div>
-    </div>
-
-    <div id="upgradePanel">
-
-        <button class="upgrade" onclick="buyUpgrade('damage')">
-            <b>⚔ Усилить стрелы</b>
-            <small>+8 урона<br>Цена: <span id="costDamage">50</span> золота</small>
-        </button>
-
-        <button class="upgrade" onclick="buyUpgrade('speed')">
-            <b>⚡ Быстрый лук</b>
-            <small>+25% скорость стрельбы<br>Цена: <span id="costSpeed">75</span> золота</small>
-        </button>
-
-        <button class="upgrade" onclick="buyUpgrade('wall')">
-            <b>🏰 Укрепить стену</b>
-            <small>+25 прочности<br>Цена: <span id="costWall">80</span> золота</small>
-        </button>
-
-        <button class="upgrade" onclick="buyUpgrade('pierce')">
-            <b>➳ Пробивные стрелы</b>
-            <small>Стрела пробивает врага<br>Цена: <span id="costPierce">180</span></small>
-        </button>
-
-        <button class="upgrade" onclick="buyUpgrade('fire')">
-            <b>🔥 Огненные стрелы</b>
-            <small>Дополнительный урон<br>Цена: <span id="costFire">250</span></small>
-        </button>
-
-    </div>
-
-    <div id="bottom">
-        <button onclick="openUpgrades()">⚒ УЛУЧШЕНИЯ</button>
-        <button onclick="startNextWave()" id="nextWaveBtn">⚔ НАЧАТЬ ВОЛНУ</button>
-    </div>
+<div class="panel">
+<div class="stat gold">◆ GOLD: <span id="gold">80</span></div>
+<div class="stat">🏹 DAMAGE: <span id="damage">25</span></div>
+<div class="stat">⚡ FIRE RATE: <span id="rate">1.0</span>/s</div>
+</div>
 
 </div>
 
+<div id="message">
+<div id="waveText">WAVE 1</div>
+<div id="enemyText"></div>
+</div>
 
-<!-- MENU -->
+<div id="upgradePanel">
+
+<button class="upgrade" onclick="buyUpgrade('damage')">
+<b>⚔ Усилить стрелы</b>
+<small>+8 урона<br>Цена: <span id="costDamage">50</span></small>
+</button>
+
+<button class="upgrade" onclick="buyUpgrade('speed')">
+<b>⚡ Быстрый лук</b>
+<small>+25% скорость<br>Цена: <span id="costSpeed">75</span></small>
+</button>
+
+<button class="upgrade" onclick="buyUpgrade('wall')">
+<b>🏰 Укрепить стену</b>
+<small>+25 прочности<br>Цена: <span id="costWall">80</span></small>
+</button>
+
+<button class="upgrade" onclick="buyUpgrade('pierce')">
+<b>➳ Пробивные стрелы</b>
+<small>Стрела пробивает врагов<br>Цена: 180</small>
+</button>
+
+<button class="upgrade" onclick="buyUpgrade('fire')">
+<b>🔥 Огненные стрелы</b>
+<small>Дополнительный урон<br>Цена: 250</small>
+</button>
+
+</div>
+
+<div id="bottom">
+<button onclick="openUpgrades()">⚒ УЛУЧШЕНИЯ</button>
+<button onclick="startNextWave()" id="nextWaveBtn">⚔ НАЧАТЬ ВОЛНУ</button>
+</div>
+
+</div>
+
 
 <div class="screen" id="menuScreen">
-    <div class="menu">
 
-        <div class="title">LAST WATCH</div>
-        <div class="subtitle">THE LAST ARCHER OF THE OLD KINGDOM</div>
+<div class="menu">
 
-        <div class="story">
-            Королевство давно мертво.<br>
-            Леса поглотили дороги, башни разрушились,
-            а орды снова поднялись из тумана.<br><br>
+<div class="title">LAST WATCH</div>
+<div class="subtitle">THE LAST ARCHER OF THE OLD KINGDOM</div>
 
-            На древней стене остался только один защитник.
-            Ночью из леса приходит бесконечная орда.
-            <br><br>
-            <i>Ты — последняя линия обороны.</i>
-        </div>
+<div class="story">
+Королевство давно мертво.<br>
+Лес поглотил дороги, башни разрушились,
+а орды снова поднялись из тумана.<br><br>
+На древней стене остался только один защитник.<br><br>
+<i>Ты — последняя линия обороны.</i>
+</div>
 
-        <button class="bigButton" onclick="startGame()">НАЧАТЬ ИГРУ</button>
+<button class="bigButton" onclick="startGame()">
+НАЧАТЬ ИГРУ
+</button>
 
-        <div class="controls">
-            ← → — движение по стене<br>
-            SPACE / ЛКМ — выстрел<br>
-            ESC — пауза
-        </div>
+<div class="controls">
+← → — движение<br>
+SPACE / ЛКМ — выстрел<br>
+ESC — пауза
+</div>
 
-    </div>
+</div>
 </div>
 
 
-<!-- RESULT -->
-
 <div class="screen hidden" id="resultScreen">
-    <div class="menu">
 
-        <div class="resultTitle" id="resultTitle">THE WALL FALLS</div>
+<div class="menu">
 
-        <div id="resultText"></div>
+<div class="resultTitle" id="resultTitle">
+THE WALL FALLS
+</div>
 
-        <button class="bigButton" onclick="restartGame()">
-            НАЧАТЬ ЗАНОВО
-        </button>
+<div id="resultText"></div>
 
-    </div>
+<br>
+
+<button class="bigButton" onclick="restartGame()">
+НАЧАТЬ ЗАНОВО
+</button>
+
+</div>
 </div>
 
 </div>
 
 
 <script>
+
 /* ============================================================
-   LAST WATCH
-   Dark Fantasy Tower Defense
+   CORE
    ============================================================ */
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
 
-let W = 1200;
-let H = 800;
+let W=1200,H=800;
 
 function resize(){
-    const dpr = Math.min(window.devicePixelRatio || 1,2);
 
-    W = canvas.clientWidth;
-    H = canvas.clientHeight;
+    W=canvas.clientWidth;
+    H=canvas.clientHeight;
 
-    canvas.width = W*dpr;
-    canvas.height = H*dpr;
+    const dpr=Math.min(devicePixelRatio||1,2);
+
+    canvas.width=W*dpr;
+    canvas.height=H*dpr;
 
     ctx.setTransform(dpr,0,0,dpr,0,0);
+
+    player.x=clamp(player.x,60,W-60);
 }
 
 window.addEventListener("resize",resize);
-resize();
 
 
 /* ============================================================
-   GAME STATE
+   IMPORTANT: WALL POSITION
+   ============================================================
+
+   Раньше стена находилась практически в самом низу.
+
+   Теперь она находится примерно на 42% высоты экрана.
+
+   Это оставляет большую территорию между лесом и стеной.
+*/
+
+const WALL_Y_RATIO=.43;
+
+function wallY(){
+    return H*WALL_Y_RATIO;
+}
+
+
+/* ============================================================
+   STATE
    ============================================================ */
 
-let gameRunning = false;
-let paused = false;
+let gameRunning=false;
+let paused=false;
 
-let wave = 0;
-let gold = 0;
+let wave=0;
+let gold=80;
 
-let wallHP = 100;
-let wallMax = 100;
+let wallHP=100;
+let wallMax=100;
 
-let damage = 25;
-let fireRate = 1;
-let shootCooldown = 0;
+let damage=25;
+let fireRate=1;
 
-let pierce = false;
-let fireArrows = false;
+let pierce=false;
+let fireArrows=false;
 
-let totalKills = 0;
+let shootCooldown=0;
 
-let enemies = [];
-let arrows = [];
-let particles = [];
-let rain = [];
-let trees = [];
-let stones = [];
-let fog = [];
+let enemies=[];
+let arrows=[];
+let particles=[];
 
-let keys = {};
+let trees=[];
+let stones=[];
+let fog=[];
+let rain=[];
 
-let waveActive = false;
-let enemiesToSpawn = 0;
-let spawnTimer = 0;
-let spawnInterval = 1;
+let waveActive=false;
+let enemiesToSpawn=0;
+let currentComposition=[];
+let spawnTimer=0;
+
+let totalKills=0;
+
+let keys={};
 
 
 /* ============================================================
    PLAYER
    ============================================================ */
 
-const player = {
+const player={
     x:W/2,
-    y:0,
     speed:420
 };
 
 
 /* ============================================================
-   INITIAL WORLD
+   WORLD
    ============================================================ */
 
 function createWorld(){
 
-    trees = [];
-    stones = [];
-    fog = [];
-    rain = [];
+    trees=[];
+    stones=[];
+    fog=[];
+    rain=[];
 
-    for(let i=0;i<90;i++){
+    /*
+       Деревья теперь создаются один раз
+       и имеют постоянные координаты.
+       Поэтому они больше НЕ трясутся.
+    */
+
+    for(let i=0;i<75;i++){
 
         trees.push({
             x:Math.random()*W,
-            y:160+Math.random()*(H-250),
-            scale:.5+Math.random()*1.4,
-            side:Math.random()<.5 ? -1:1
+            y:170+Math.random()*(H-250),
+            scale:.6+Math.random()*1.3,
+            phase:Math.random()*6
         });
 
     }
 
-    for(let i=0;i<45;i++){
+    for(let i=0;i<35;i++){
 
         stones.push({
             x:Math.random()*W,
-            y:210+Math.random()*(H-270),
-            r:3+Math.random()*12
+            y:190+Math.random()*(H-260),
+            r:4+Math.random()*10
         });
 
     }
 
-    for(let i=0;i<500;i++){
+    /*
+       Лёгкий дождь.
+    */
+
+    for(let i=0;i<180;i++){
 
         rain.push({
             x:Math.random()*W,
             y:Math.random()*H,
-            speed:400+Math.random()*400,
-            length:5+Math.random()*10
+            speed:180+Math.random()*120,
+            length:5+Math.random()*7
         });
 
     }
 
-    for(let i=0;i<12;i++){
+    for(let i=0;i<10;i++){
 
         fog.push({
             x:Math.random()*W,
-            y:180+Math.random()*(H-250),
-            size:80+Math.random()*160,
-            speed:8+Math.random()*15,
-            alpha:.025+Math.random()*.04
+            y:200+Math.random()*(H-280),
+            size:90+Math.random()*130,
+            alpha:.025+Math.random()*.025
         });
 
     }
@@ -509,87 +485,133 @@ createWorld();
 
 
 /* ============================================================
-   UTILITY
+   WEATHER
    ============================================================ */
 
-function clamp(v,min,max){
-    return Math.max(min,Math.min(max,v));
+let lightningTimer=0;
+let lightningFlash=0;
+
+function updateWeather(dt){
+
+    lightningTimer+=dt;
+
+    /*
+       Гроза примерно раз в 5 секунд.
+    */
+
+    if(lightningTimer>=5){
+
+        lightningTimer=0;
+
+        /*
+           Небольшая случайность,
+           чтобы вспышки не были механически одинаковыми.
+        */
+
+        if(Math.random()<.85){
+
+            lightningFlash=.16;
+
+            createLightningParticles();
+
+        }
+    }
+
+    if(lightningFlash>0)
+        lightningFlash-=dt;
 }
 
-function rand(min,max){
-    return min+Math.random()*(max-min);
+
+function createLightningParticles(){
+
+    for(let i=0;i<15;i++){
+
+        particles.push({
+
+            x:Math.random()*W,
+            y:Math.random()*H*.35,
+
+            vx:0,
+            vy:20+Math.random()*40,
+
+            life:.2+Math.random()*.2,
+
+            size:1+Math.random()*2,
+
+            type:"rainSpark"
+        });
+    }
 }
 
 
 /* ============================================================
-   ENEMY TYPES
+   ENEMIES
    ============================================================ */
 
-const enemyTypes = {
+const enemyTypes={
 
-    grunt:{
-        name:"Обычные орки",
-        hp:70,
-        speed:30,
-        damage:7,
-        reward:12,
-        size:25
-    },
+grunt:{
+    name:"Обычные орки",
+    hp:70,
+    speed:35,
+    damage:7,
+    reward:12,
+    size:25
+},
 
-    runner:{
-        name:"Быстрые орки",
-        hp:35,
-        speed:62,
-        damage:5,
-        reward:15,
-        size:20
-    },
+runner:{
+    name:"Быстрые орки",
+    hp:35,
+    speed:68,
+    damage:5,
+    reward:15,
+    size:20
+},
 
-    heavy:{
-        name:"Тяжёлые орки",
-        hp:190,
-        speed:20,
-        damage:14,
-        reward:30,
-        size:32
-    },
+heavy:{
+    name:"Тяжёлые орки",
+    hp:190,
+    speed:22,
+    damage:14,
+    reward:30,
+    size:32
+},
 
-    shield:{
-        name:"Орки со щитами",
-        hp:120,
-        speed:27,
-        damage:10,
-        reward:25,
-        size:28,
-        shield:true
-    },
+shield:{
+    name:"Орки со щитами",
+    hp:120,
+    speed:29,
+    damage:10,
+    reward:25,
+    size:28,
+    shield:true
+},
 
-    boss:{
-        name:"ОРК-ВОЖДЬ",
-        hp:700,
-        speed:14,
-        damage:30,
-        reward:180,
-        size:50,
-        boss:true
-    }
+boss:{
+    name:"ОРК-ВОЖДЬ",
+    hp:700,
+    speed:15,
+    damage:30,
+    reward:180,
+    size:50,
+    boss:true
+}
 
 };
 
 
 /* ============================================================
-   WAVE SYSTEM
+   WAVES
    ============================================================ */
 
 function getWaveComposition(){
 
-    const count = 7 + wave*3;
-
-    const list = [];
+    const count=7+wave*3;
+    const list=[];
 
     for(let i=0;i<count;i++){
 
-        let type = "grunt";
+        let type="grunt";
 
         if(wave>=2 && Math.random()<.22)
             type="runner";
@@ -609,8 +631,6 @@ function getWaveComposition(){
     return list;
 }
 
-let currentComposition = [];
-
 
 function startNextWave(){
 
@@ -619,73 +639,76 @@ function startNextWave(){
 
     wave++;
 
-    currentComposition = getWaveComposition();
+    currentComposition=getWaveComposition();
 
-    enemiesToSpawn = currentComposition.length;
+    enemiesToSpawn=currentComposition.length;
 
-    spawnTimer = .5;
+    spawnTimer=.5;
 
-    waveActive = true;
+    waveActive=true;
 
-    document.getElementById("nextWaveBtn").disabled = true;
+    document.getElementById("nextWaveBtn").disabled=true;
 
     showWaveMessage();
-
-    updateUI();
 }
 
 
 function showWaveMessage(){
 
-    const msg = document.getElementById("message");
+    const counts={};
 
-    document.getElementById("waveText").textContent =
-        "WAVE " + wave;
-
-    let counts = {};
-
-    currentComposition.forEach(type=>{
-        counts[type]=(counts[type]||0)+1;
+    currentComposition.forEach(t=>{
+        counts[t]=(counts[t]||0)+1;
     });
 
     let text=[];
 
     for(const type in counts){
+
         text.push(
-            counts[type]+" × "+enemyTypes[type].name
+            counts[type]+" × "+
+            enemyTypes[type].name
         );
     }
 
-    document.getElementById("enemyText").textContent =
-        text.join("   •   ");
+    document.getElementById("waveText").textContent=
+        "WAVE "+wave;
 
-    msg.classList.add("visible");
+    document.getElementById("enemyText").textContent=
+        text.join(" • ");
+
+    document.getElementById("message")
+        .classList.add("visible");
 
     setTimeout(()=>{
-        msg.classList.remove("visible");
-    },3500);
+        document.getElementById("message")
+            .classList.remove("visible");
+    },3200);
 }
 
 
 /* ============================================================
-   SPAWN ENEMY
+   SPAWN
    ============================================================ */
 
 function spawnEnemy(type){
 
-    const t = enemyTypes[type];
+    const t=enemyTypes[type];
 
-    const scale = 1 + Math.max(0,wave-1)*.09;
+    const scale=1+Math.max(0,wave-1)*.09;
 
-    const x = rand(80,W-80);
+    enemies.push({
 
-    const enemy = {
+        type,
 
-        type:type,
+        /*
+           Орки появляются глубоко в лесу,
+           а НЕ около стены.
+        */
 
-        x:x,
+        x:rand(70,W-70),
 
-        y:H-125,
+        y:H-80,
 
         hp:t.hp*scale,
 
@@ -693,74 +716,79 @@ function spawnEnemy(type){
 
         speed:t.speed*(1+wave*.025),
 
-        damage:t.damage*(1+wave*.045),
+        damage:t.damage*(1+wave*.04),
 
-        reward:Math.round(t.reward*(1+wave*.03)),
+        reward:Math.round(
+            t.reward*(1+wave*.03)
+        ),
 
         size:t.size,
 
         shield:t.shield||false,
-
         boss:t.boss||false,
 
         attackCooldown:0,
 
         hitFlash:0,
 
-        wobble:Math.random()*10,
+        wobble:Math.random()*6,
 
         dead:false
-
-    };
-
-    enemies.push(enemy);
+    });
 }
 
 
 /* ============================================================
-   PLAYER MOVEMENT
+   CONTROLS
    ============================================================ */
 
 window.addEventListener("keydown",e=>{
 
-    keys[e.key.toLowerCase()] = true;
+    keys[e.key.toLowerCase()]=true;
 
     if(e.code==="Space"){
+
         e.preventDefault();
+
         shoot();
     }
 
-    if(e.key==="Escape"){
+    if(e.key==="Escape")
         paused=!paused;
-    }
 
 });
 
 window.addEventListener("keyup",e=>{
-    keys[e.key.toLowerCase()] = false;
+    keys[e.key.toLowerCase()]=false;
 });
 
-canvas.addEventListener("mousedown",()=>{
-    shoot();
-});
+canvas.addEventListener("mousedown",shoot);
 
+
+/* ============================================================
+   PLAYER
+   ============================================================ */
 
 function updatePlayer(dt){
 
     if(keys["arrowleft"])
-        player.x -= player.speed*dt;
+        player.x-=player.speed*dt;
 
     if(keys["arrowright"])
-        player.x += player.speed*dt;
+        player.x+=player.speed*dt;
 
-    player.x = clamp(player.x,45,W-45);
+    player.x=clamp(
+        player.x,
+        55,
+        W-55
+    );
 
-    shootCooldown -= dt;
+    shootCooldown-=dt;
 }
 
 
 /* ============================================================
-   SHOOTING
+   SHOOT
    ============================================================ */
 
 function shoot(){
@@ -771,27 +799,22 @@ function shoot(){
     if(shootCooldown>0)
         return;
 
-    shootCooldown = 1/fireRate;
+    shootCooldown=1/fireRate;
 
-    /*
-       Стрела стартует с позиции лучника
-       и получает направление к ближайшему врагу.
-    */
-
-    let target = null;
-    let best = Infinity;
+    let target=null;
+    let best=Infinity;
 
     for(const e of enemies){
 
-        if(e.dead) continue;
+        if(e.dead)continue;
 
-        const dx=e.x-player.x;
-        const dy=e.y-player.y;
+        const d=Math.hypot(
+            e.x-player.x,
+            e.y-(wallY()-55)
+        );
 
-        const dist=Math.hypot(dx,dy);
-
-        if(dist<best){
-            best=dist;
+        if(d<best){
+            best=d;
             target=e;
         }
     }
@@ -802,7 +825,7 @@ function shoot(){
     if(target){
 
         dx=target.x-player.x;
-        dy=target.y-player.y;
+        dy=target.y-(wallY()-55);
 
         const len=Math.hypot(dx,dy);
 
@@ -813,7 +836,13 @@ function shoot(){
     arrows.push({
 
         x:player.x,
-        y:player.y-15,
+
+        /*
+           Лучник находится за зубцами.
+           Стрела вылетает над стеной.
+        */
+
+        y=wallY()-55,
 
         vx:dx*650,
         vy:dy*650,
@@ -822,13 +851,11 @@ function shoot(){
 
         rotation:Math.atan2(dy,dx),
 
-        pierce:pierce,
+        pierce,
         fire:fireArrows,
 
         hit:new Set()
-
     });
-
 }
 
 
@@ -840,55 +867,57 @@ function updateEnemies(dt){
 
     for(const e of enemies){
 
-        if(e.dead)
-            continue;
+        if(e.dead)continue;
 
-        e.attackCooldown -= dt;
-        e.hitFlash -= dt;
+        e.attackCooldown-=dt;
+        e.hitFlash-=dt;
+
+        const targetY=wallY()+18;
 
         /*
-           Орки движутся вверх.
+           Орки идут снизу вверх
+           до самой стены.
         */
 
-        if(e.y > H-170){
+        if(e.y>targetY){
 
-            e.y -= e.speed*dt;
+            e.y-=e.speed*dt;
 
         }else{
 
-            /*
-               Они дошли до стены.
-               Теперь атакуют её.
-            */
-
             if(e.attackCooldown<=0){
 
-                wallHP -= e.damage;
+                wallHP-=e.damage;
 
                 e.attackCooldown=.8;
 
                 createBloodParticles(
                     e.x,
-                    H-155,
+                    targetY,
                     5
                 );
 
                 if(wallHP<=0){
+
                     wallHP=0;
+
                     gameOver();
                 }
             }
         }
 
-        e.wobble += dt*4;
+        /*
+           Только небольшое естественное покачивание
+           персонажа — НЕ дерева.
+        */
 
+        e.wobble+=dt*3;
     }
-
 }
 
 
 /* ============================================================
-   ARROW UPDATE
+   ARROWS
    ============================================================ */
 
 function updateArrows(dt){
@@ -898,15 +927,19 @@ function updateArrows(dt){
         a.life-=dt;
 
         /*
-           Небольшая гравитация создаёт дугу.
+           Баллистика
         */
 
-        a.vy += 110*dt;
+        a.vy+=110*dt;
 
-        a.x += a.vx*dt;
-        a.y += a.vy*dt;
+        a.x+=a.vx*dt;
+        a.y+=a.vy*dt;
 
-        a.rotation=Math.atan2(a.vy,a.vx);
+        a.rotation=Math.atan2(
+            a.vy,
+            a.vx
+        );
+
 
         for(const e of enemies){
 
@@ -918,47 +951,34 @@ function updateArrows(dt){
                 a.y-e.y
             );
 
-            if(d < e.size*.7){
+            if(d<e.size*.7){
 
                 a.hit.add(e);
 
                 let dealt=damage;
 
                 if(a.fire)
-                    dealt += 22;
-
-                /*
-                   Щит блокирует часть стрел.
-                */
+                    dealt+=22;
 
                 if(e.shield){
 
-                    if(Math.random()<.55){
-
+                    if(Math.random()<.55)
                         dealt*=.25;
-
-                        createBlockParticles(
-                            a.x,a.y
-                        );
-
-                    }
-
                 }
 
                 e.hp-=dealt;
                 e.hitFlash=.12;
 
                 createHitParticles(
-                    a.x,a.y
+                    a.x,
+                    a.y
                 );
 
-                if(a.fire){
-
+                if(a.fire)
                     createFireParticles(
-                        e.x,e.y
+                        e.x,
+                        e.y
                     );
-
-                }
 
                 if(e.hp<=0){
 
@@ -968,9 +988,7 @@ function updateArrows(dt){
                         a.life=0;
                 }
             }
-
         }
-
     }
 
     arrows=arrows.filter(a=>
@@ -980,7 +998,6 @@ function updateArrows(dt){
         a.y>-100 &&
         a.y<H+100
     );
-
 }
 
 
@@ -990,8 +1007,7 @@ function updateArrows(dt){
 
 function killEnemy(e){
 
-    if(e.dead)
-        return;
+    if(e.dead)return;
 
     e.dead=true;
 
@@ -1002,7 +1018,7 @@ function killEnemy(e){
     createBloodParticles(
         e.x,
         e.y,
-        e.boss?30:12
+        e.boss?30:10
     );
 
     updateUI();
@@ -1019,22 +1035,18 @@ function createBloodParticles(x,y,count){
 
         particles.push({
 
-            x:x,
-            y:y,
+            x,y,
 
-            vx:rand(-100,100),
-            vy:rand(-120,30),
+            vx:rand(-90,90),
+            vy:rand(-110,30),
 
             life:rand(.3,.8),
 
             size:rand(2,5),
 
             type:"blood"
-
         });
-
     }
-
 }
 
 
@@ -1044,53 +1056,24 @@ function createHitParticles(x,y){
 
         particles.push({
 
-            x:x,
-            y:y,
+            x,y,
 
             vx:rand(-60,60),
             vy:rand(-80,20),
 
-            life:.25+Math.random()*.3,
+            life:.3,
 
             size:2+Math.random()*3,
 
             type:"spark"
-
         });
-
     }
-
-}
-
-
-function createBlockParticles(x,y){
-
-    for(let i=0;i<8;i++){
-
-        particles.push({
-
-            x:x,
-            y:y,
-
-            vx:rand(-80,80),
-            vy:rand(-100,30),
-
-            life:.4,
-
-            size:2+Math.random()*2,
-
-            type:"block"
-
-        });
-
-    }
-
 }
 
 
 function createFireParticles(x,y){
 
-    for(let i=0;i<4;i++){
+    for(let i=0;i<5;i++){
 
         particles.push({
 
@@ -1100,16 +1083,13 @@ function createFireParticles(x,y){
             vx:rand(-25,25),
             vy:rand(-60,0),
 
-            life:.4+Math.random()*.4,
+            life:.4+Math.random()*.3,
 
             size:rand(3,7),
 
             type:"fire"
-
         });
-
     }
-
 }
 
 
@@ -1123,7 +1103,6 @@ function updateParticles(dt){
         p.y+=p.vy*dt;
 
         p.vy+=120*dt;
-
     }
 
     particles=particles.filter(p=>p.life>0);
@@ -1131,23 +1110,19 @@ function updateParticles(dt){
 
 
 /* ============================================================
-   DRAW BACKGROUND
+   BACKGROUND
    ============================================================ */
 
 function drawBackground(){
-
-    /*
-       Sky
-    */
 
     const sky=ctx.createLinearGradient(
         0,0,0,H
     );
 
-    sky.addColorStop(0,"#070d12");
-    sky.addColorStop(.25,"#101a18");
-    sky.addColorStop(.55,"#111b15");
-    sky.addColorStop(1,"#060a08");
+    sky.addColorStop(0,"#060c11");
+    sky.addColorStop(.3,"#0d1715");
+    sky.addColorStop(.7,"#101711");
+    sky.addColorStop(1,"#070a08");
 
     ctx.fillStyle=sky;
     ctx.fillRect(0,0,W,H);
@@ -1157,48 +1132,59 @@ function drawBackground(){
        Moon
     */
 
+    ctx.fillStyle="rgba(210,220,200,.12)";
+
     ctx.beginPath();
 
     ctx.arc(
         W*.78,
-        H*.13,
+        H*.12,
         48,
         0,
         Math.PI*2
     );
 
-    ctx.fillStyle="rgba(190,205,180,.15)";
-    ctx.fill();
-
-    ctx.beginPath();
-
-    ctx.arc(
-        W*.78-8,
-        H*.13-5,
-        38,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fillStyle="rgba(220,225,195,.09)";
     ctx.fill();
 
 
     /*
-       Distant forest
+       Forest floor
     */
 
-    for(let x=-20;x<W+30;x+=45){
+    ctx.fillStyle="#101711";
 
-        const h=70+Math.random()*90;
+    ctx.fillRect(
+        0,
+        130,
+        W,
+        H
+    );
 
-        ctx.fillStyle="#0a120f";
+
+    /*
+       Distant trees.
+       Они тоже статичные.
+    */
+
+    for(let x=-20;x<W+50;x+=50){
+
+        const h=80+
+            ((x*17)%60);
+
+        ctx.fillStyle="#0a110d";
 
         ctx.beginPath();
 
-        ctx.moveTo(x,H-125);
-        ctx.lineTo(x+22,H-125-h);
-        ctx.lineTo(x+45,H-125);
+        ctx.moveTo(x,H*.48);
+        ctx.lineTo(
+            x+25,
+            H*.48-h
+        );
+        ctx.lineTo(
+            x+50,
+            H*.48
+        );
+
         ctx.closePath();
 
         ctx.fill();
@@ -1206,43 +1192,30 @@ function drawBackground(){
 
 
     /*
-       Ground
-    */
-
-    ctx.fillStyle="#101711";
-    ctx.fillRect(
-        0,
-        160,
-        W,
-        H-260
-    );
-
-
-    /*
-       winding road
+       Road.
     */
 
     ctx.beginPath();
 
-    ctx.moveTo(W*.45,H-125);
+    ctx.moveTo(W*.45,H);
 
     ctx.bezierCurveTo(
-        W*.42,H*.75,
-        W*.63,H*.55,
-        W*.52,H*.38
+        W*.42,H*.78,
+        W*.64,H*.62,
+        W*.50,H*.43
     );
 
-    ctx.lineTo(W*.66,H*.38);
+    ctx.lineTo(W*.64,H*.43);
 
     ctx.bezierCurveTo(
-        W*.76,H*.55,
-        W*.57,H*.75,
-        W*.58,H-125
+        W*.78,H*.63,
+        W*.58,H*.82,
+        W*.58,H
     );
 
     ctx.closePath();
 
-    ctx.fillStyle="#25251c";
+    ctx.fillStyle="#25251d";
     ctx.fill();
 
 
@@ -1252,16 +1225,16 @@ function drawBackground(){
 
     for(const s of stones){
 
-        ctx.fillStyle="#1c241e";
+        ctx.fillStyle="#202820";
 
         ctx.beginPath();
 
         ctx.ellipse(
             s.x,
             s.y,
-            s.r*1.5,
+            s.r*1.4,
             s.r,
-            .2,
+            .1,
             0,
             Math.PI*2
         );
@@ -1271,69 +1244,71 @@ function drawBackground(){
 
 
     /*
-       trees
+       Main forest.
+       ВАЖНО: никакого Math.random() здесь.
+       Именно это убирает тряску деревьев.
     */
 
     for(const t of trees){
 
-        const trunk=25*t.scale;
+        const trunk=24*t.scale;
 
         ctx.save();
 
-        ctx.translate(t.x,t.y);
-
-        /*
-           trunk
-        */
+        ctx.translate(
+            t.x,
+            t.y
+        );
 
         ctx.fillStyle="#17150f";
 
         ctx.fillRect(
-            -trunk*.18,
+            -trunk*.17,
             -trunk*1.7,
-            trunk*.36,
+            trunk*.34,
             trunk*1.7
         );
 
-        /*
-           branches
-        */
-
-        ctx.strokeStyle="#13170f";
-        ctx.lineWidth=7*t.scale;
+        ctx.strokeStyle="#12160f";
+        ctx.lineWidth=6*t.scale;
 
         ctx.beginPath();
 
-        ctx.moveTo(0,-trunk*1.3);
+        ctx.moveTo(0,-trunk*1.2);
         ctx.lineTo(-trunk*.8,-trunk*2);
-        ctx.moveTo(0,-trunk*1.15);
-        ctx.lineTo(trunk*.9,-trunk*1.9);
-        ctx.moveTo(0,-trunk*1.7);
-        ctx.lineTo(-trunk*.4,-trunk*2.5);
+
+        ctx.moveTo(0,-trunk*1.1);
+        ctx.lineTo(trunk*.8,-trunk*1.9);
 
         ctx.stroke();
 
 
-        /*
-           foliage
-        */
-
         ctx.fillStyle="#0b130e";
 
-        for(let i=0;i<5;i++){
+        /*
+           Фиксированные положения крон.
+        */
+
+        const crowns=[
+            [-.45,-2.05,.65],
+            [.35,-2.25,.75],
+            [-.05,-2.65,.7],
+            [.55,-1.75,.55]
+        ];
+
+        for(const c of crowns){
 
             ctx.beginPath();
 
             ctx.arc(
-                rand(-trunk*.8,trunk*.8),
-                rand(-trunk*2.7,-trunk*1.5),
-                trunk*(.5+Math.random()*.4),
+                c[0]*trunk,
+                c[1]*trunk,
+                c[2]*trunk,
                 0,
                 Math.PI*2
             );
 
             ctx.fill();
-
         }
 
         ctx.restore();
@@ -1341,7 +1316,7 @@ function drawBackground(){
 
 
     /*
-       fog
+       Fog
     */
 
     for(const f of fog){
@@ -1353,12 +1328,12 @@ function drawBackground(){
 
         g.addColorStop(
             0,
-            `rgba(150,160,145,${f.alpha})`
+            `rgba(160,170,155,${f.alpha})`
         );
 
         g.addColorStop(
             1,
-            "rgba(150,160,145,0)"
+            "rgba(160,170,155,0)"
         );
 
         ctx.fillStyle=g;
@@ -1366,13 +1341,15 @@ function drawBackground(){
         ctx.beginPath();
 
         ctx.arc(
-            f.x,f.y,f.size,
-            0,Math.PI*2
+            f.x,
+            f.y,
+            f.size,
+            0,
+            Math.PI*2
         );
 
         ctx.fill();
     }
-
 }
 
 
@@ -1382,242 +1359,323 @@ function drawBackground(){
 
 function drawCastle(){
 
-    const wallTop=H-125;
+    const y=wallY();
 
     /*
-       Wall shadow
+       Большая крепостная стена.
     */
 
-    ctx.fillStyle="#050605";
-
-    ctx.fillRect(
-        0,
-        wallTop+15,
-        W,
-        150
-    );
-
-
-    /*
-       Main wall
-    */
-
-    const wallGrad=ctx.createLinearGradient(
-        0,wallTop,
+    const grad=ctx.createLinearGradient(
+        0,y,
         0,H
     );
 
-    wallGrad.addColorStop(0,"#4a4940");
-    wallGrad.addColorStop(.35,"#343731");
-    wallGrad.addColorStop(1,"#1d211e");
+    grad.addColorStop(0,"#55544a");
+    grad.addColorStop(.25,"#41423b");
+    grad.addColorStop(1,"#222621");
 
-    ctx.fillStyle=wallGrad;
+    ctx.fillStyle=grad;
 
     ctx.fillRect(
         0,
-        wallTop,
+        y,
         W,
-        150
+        H-y
     );
 
 
     /*
-       stone blocks
+       Каменные блоки.
     */
 
-    ctx.strokeStyle="#171a17";
+    ctx.strokeStyle="#22241f";
     ctx.lineWidth=2;
 
-    for(let y=wallTop+20;y<H;y+=28){
+    const blockW=90;
+    const blockH=30;
 
-        const offset=(Math.floor(y/28)%2)*40;
+    for(let row=0;row<9;row++){
 
-        for(let x=-offset;x<W;x+=80){
+        const yy=y+row*blockH;
+
+        const offset=
+            row%2 ? blockW/2 : 0;
+
+        for(
+            let x=-offset;
+            x<W+blockW;
+            x+=blockW
+        ){
 
             ctx.strokeRect(
                 x,
-                y,
-                80,
-                28
+                yy,
+                blockW,
+                blockH
             );
-
         }
     }
 
 
     /*
-       crenellations
+       Верхняя площадка.
     */
 
-    const crenelW=55;
-    const crenelH=32;
+    ctx.fillStyle="#66645a";
 
-    ctx.fillStyle="#4b4b42";
+    ctx.fillRect(
+        0,
+        y-9,
+        W,
+        12
+    );
 
-    for(let x=0;x<W;x+=crenelW*2){
+
+    /*
+       ЗУБЦЫ.
+       Они идут по всей длине стены.
+    */
+
+    const crenelWidth=54;
+    const gap=28;
+    const crenelHeight=42;
+
+    ctx.fillStyle="#505047";
+
+    for(
+        let x=0;
+        x<W;
+        x+=crenelWidth+gap
+    ){
 
         ctx.fillRect(
             x,
-            wallTop-crenelH,
-            crenelW,
-            crenelH
+            y-crenelHeight,
+            crenelWidth,
+            crenelHeight
         );
 
     }
 
 
     /*
-       towers
+       Тёмные внутренние щели
+       между зубцами.
     */
 
-    drawTower(75,wallTop);
-    drawTower(W-75,wallTop);
+    ctx.fillStyle="#171b18";
+
+    for(
+        let x=crenelWidth;
+        x<W;
+        x+=crenelWidth+gap
+    ){
+
+        ctx.fillRect(
+            x,
+            y-crenelHeight,
+            gap,
+            crenelHeight
+        );
+
+    }
 
 
     /*
-       torches
+       БАШНИ ПО КРАЯМ.
     */
 
-    drawTorch(125,wallTop+15);
-    drawTorch(W-125,wallTop+15);
+    drawTower(80,y);
+    drawTower(W-80,y);
 
 
     /*
-       central banner
+       Факелы.
     */
 
-    ctx.fillStyle="#27261f";
-
-    ctx.fillRect(
-        W/2-20,
-        wallTop-70,
-        40,
-        65
+    drawTorch(
+        150,
+        y-30
     );
 
-    ctx.fillStyle="#544b35";
-
-    ctx.beginPath();
-
-    ctx.moveTo(W/2-20,wallTop-70);
-    ctx.lineTo(W/2+20,wallTop-70);
-    ctx.lineTo(W/2+20,wallTop-35);
-    ctx.lineTo(W/2,wallTop-25);
-    ctx.lineTo(W/2-20,wallTop-35);
-    ctx.closePath();
-
-    ctx.fill();
-
+    drawTorch(
+        W-150,
+        y-30
+    );
 }
 
+
+/* ============================================================
+   TOWERS
+   ============================================================ */
 
 function drawTower(x,y){
 
-    const w=95;
-    const h=100;
-
-    ctx.fillStyle="#252923";
-
-    ctx.fillRect(
-        x-w/2,
-        y-h,
-        w,
-        h+80
-    );
-
-    ctx.fillStyle="#42433a";
-
-    ctx.fillRect(
-        x-w/2,
-        y-h,
-        w,
-        20
-    );
+    const width=115;
+    const height=135;
 
     /*
-       tower crenels
+       Основное тело башни.
     */
 
-    for(let i=0;i<4;i++){
+    const grad=ctx.createLinearGradient(
+        0,
+        y-height,
+        0,
+        y+100
+    );
+
+    grad.addColorStop(0,"#57564d");
+    grad.addColorStop(1,"#272a25");
+
+    ctx.fillStyle=grad;
+
+    ctx.fillRect(
+        x-width/2,
+        y-height,
+        width,
+        height+130
+    );
+
+
+    /*
+       Верхняя площадка.
+    */
+
+    ctx.fillStyle="#67665b";
+
+    ctx.fillRect(
+        x-width/2-5,
+        y-height,
+        width+10,
+        15
+    );
+
+
+    /*
+       Башенные зубцы.
+    */
+
+    ctx.fillStyle="#55544b";
+
+    const bw=23;
+
+    for(let i=0;i<5;i++){
 
         ctx.fillRect(
-            x-w/2+i*24,
-            y-h-20,
-            18,
-            20
+            x-width/2+i*bw,
+            y-height-30,
+            17,
+            30
         );
 
     }
 
+
     /*
-       window
+       Окно-бойница.
     */
 
-    ctx.fillStyle="#0a0b08";
+    ctx.fillStyle="#080b09";
 
     ctx.fillRect(
-        x-10,
-        y-65,
-        20,
-        35
+        x-11,
+        y-height+45,
+        22,
+        42
     );
 
-    ctx.fillStyle="rgba(225,135,55,.25)";
+
+    /*
+       слабый свет внутри.
+    */
+
+    ctx.fillStyle="rgba(214,153,67,.25)";
 
     ctx.fillRect(
         x-6,
-        y-60,
+        y-height+50,
         12,
-        25
+        30
     );
+
+
+    /*
+       Каменные швы.
+    */
+
+    ctx.strokeStyle="#242620";
+    ctx.lineWidth=2;
+
+    for(let yy=y-height+15;yy<y+100;yy+=28){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x-width/2,
+            yy
+        );
+
+        ctx.lineTo(
+            x+width/2,
+            yy
+        );
+
+        ctx.stroke();
+    }
 }
 
 
+/* ============================================================
+   TORCH
+   ============================================================ */
+
 function drawTorch(x,y){
 
-    ctx.strokeStyle="#25221a";
-    ctx.lineWidth=4;
-
-    ctx.beginPath();
-
-    ctx.moveTo(x,y);
-    ctx.lineTo(x,y+35);
-
-    ctx.stroke();
-
-
     const glow=ctx.createRadialGradient(
-        x,y,2,
-        x,y,70
+        x,y,
+        2,
+        x,y,
+        70
     );
 
     glow.addColorStop(
         0,
-        "rgba(255,190,75,.35)"
+        "rgba(255,180,65,.30)"
     );
 
     glow.addColorStop(
         1,
-        "rgba(255,130,40,0)"
+        "rgba(255,120,30,0)"
     );
 
     ctx.fillStyle=glow;
 
     ctx.beginPath();
 
-    ctx.arc(x,y,70,0,Math.PI*2);
+    ctx.arc(
+        x,y,
+        70,
+        0,
+        Math.PI*2
+    );
 
     ctx.fill();
 
 
-    ctx.fillStyle="#e6a345";
+    ctx.fillStyle="#e19a3d";
 
     ctx.beginPath();
 
-    ctx.arc(x,y,6+Math.random()*3,0,Math.PI*2);
+    ctx.arc(
+        x,
+        y,
+        6,
+        0,
+        Math.PI*2
+    );
 
     ctx.fill();
-
 }
 
 
@@ -1627,56 +1685,74 @@ function drawTorch(x,y){
 
 function drawPlayer(){
 
-    const x=player.x;
-    const y=H-150;
+    const y=wallY()-47;
 
     ctx.save();
 
-    ctx.translate(x,y);
+    ctx.translate(
+        player.x,
+        y
+    );
 
 
     /*
-       cloak
+       Ноги находятся за стеной.
+       Нижняя часть тела скрыта.
     */
 
-    ctx.fillStyle="#171c19";
+    ctx.fillStyle="#151a17";
+
+    ctx.fillRect(
+        -15,
+        5,
+        30,
+        40
+    );
+
+
+    /*
+       Плащ.
+    */
+
+    ctx.fillStyle="#181e1a";
 
     ctx.beginPath();
 
-    ctx.moveTo(-17,5);
-    ctx.lineTo(17,5);
-    ctx.lineTo(22,58);
-    ctx.lineTo(-22,58);
+    ctx.moveTo(-20,0);
+    ctx.lineTo(20,0);
+    ctx.lineTo(24,55);
+    ctx.lineTo(-24,55);
+
     ctx.closePath();
 
     ctx.fill();
 
 
     /*
-       shoulders
+       Плечи.
     */
 
     ctx.fillStyle="#34372f";
 
     ctx.fillRect(
-        -17,
-        -10,
-        34,
+        -18,
+        -15,
+        36,
         25
     );
 
 
     /*
-       head
+       Голова.
     */
 
-    ctx.fillStyle="#403a30";
+    ctx.fillStyle="#443d31";
 
     ctx.beginPath();
 
     ctx.arc(
         0,
-        -25,
+        -29,
         13,
         0,
         Math.PI*2
@@ -1686,23 +1762,30 @@ function drawPlayer(){
 
 
     /*
-       hood
+       Капюшон.
     */
 
-    ctx.fillStyle="#111613";
+    ctx.fillStyle="#101512";
 
     ctx.beginPath();
 
     ctx.arc(
         0,
-        -27,
-        17,
+        -31,
+        18,
         Math.PI,
         Math.PI*2
     );
 
-    ctx.lineTo(17,-10);
-    ctx.lineTo(-17,-10);
+    ctx.lineTo(
+        18,
+        -10
+    );
+
+    ctx.lineTo(
+        -18,
+        -10
+    );
 
     ctx.closePath();
 
@@ -1710,16 +1793,16 @@ function drawPlayer(){
 
 
     /*
-       face shadow
+       Тень лица.
     */
 
-    ctx.fillStyle="#0b0c0b";
+    ctx.fillStyle="#080b09";
 
     ctx.beginPath();
 
     ctx.arc(
         0,
-        -23,
+        -27,
         9,
         0,
         Math.PI*2
@@ -1729,17 +1812,17 @@ function drawPlayer(){
 
 
     /*
-       bow
+       Лук.
     */
 
-    ctx.strokeStyle="#705538";
+    ctx.strokeStyle="#76583a";
     ctx.lineWidth=3;
 
     ctx.beginPath();
 
     ctx.arc(
         22,
-        -18,
+        -20,
         25,
         -Math.PI*.9,
         Math.PI*.9
@@ -1749,7 +1832,7 @@ function drawPlayer(){
 
 
     /*
-       bowstring
+       Тетива.
     */
 
     ctx.strokeStyle="#aaa18b";
@@ -1758,73 +1841,127 @@ function drawPlayer(){
     ctx.beginPath();
 
     ctx.moveTo(
-        14,-41
+        14,
+        -43
     );
 
     ctx.lineTo(
-        22,-18
+        22,
+        -20
     );
 
     ctx.lineTo(
-        14,5
+        14,
+        3
     );
 
     ctx.stroke();
 
 
     /*
-       arrow in hand
+       Стрела.
     */
 
-    ctx.strokeStyle="#d0c19d";
+    ctx.strokeStyle="#d0c09a";
     ctx.lineWidth=2;
 
     ctx.beginPath();
 
-    ctx.moveTo(5,-18);
-    ctx.lineTo(31,-18);
+    ctx.moveTo(
+        5,
+        -20
+    );
+
+    ctx.lineTo(
+        33,
+        -20
+    );
 
     ctx.stroke();
 
 
     /*
-       quiver
+       Колчан.
     */
 
     ctx.fillStyle="#382a20";
 
     ctx.fillRect(
         -27,
-        -5,
-        9,
-        28
+        -2,
+        10,
+        29
     );
 
-    for(let i=0;i<4;i++){
 
-        ctx.strokeStyle="#9e8b62";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -25+i*2,
-            -8
-        );
-
-        ctx.lineTo(
-            -25+i*2,
-            -20
-        );
-
-        ctx.stroke();
-    }
+    /*
+       ВАЖНО:
+       передняя часть стены рисуется поверх нижней
+       части лучника. Это создаёт эффект,
+       будто он действительно находится ЗА зубцами.
+    */
 
     ctx.restore();
+
+    /*
+       Передняя линия стены.
+    */
+
+    drawWallForeground();
 }
 
 
 /* ============================================================
-   ENEMY DRAWING
+   WALL FOREGROUND
+   ============================================================ */
+
+function drawWallForeground(){
+
+    const y=wallY();
+
+    /*
+       Низ зубцов.
+       Только небольшая часть перекрывает лучника.
+    */
+
+    ctx.fillStyle="#505047";
+
+    const crenelWidth=54;
+    const gap=28;
+    const h=18;
+
+    for(
+        let x=0;
+        x<W;
+        x+=crenelWidth+gap
+    ){
+
+        ctx.fillRect(
+            x,
+            y-h,
+            crenelWidth,
+            h
+        );
+
+    }
+
+    /*
+       Каменная верхушка.
+    */
+
+    ctx.fillStyle="#646258";
+
+    ctx.fillRect(
+        0,
+        y-5,
+        W,
+        8
+    );
+}
+
+
+/* ============================================================
+   ENEMY DRAW
    ============================================================ */
 
 function drawEnemy(e){
@@ -1833,23 +1970,19 @@ function drawEnemy(e){
 
     ctx.translate(
         e.x,
-        e.y + Math.sin(e.wobble)*2
+        e.y
     );
 
     const s=e.size;
 
-    /*
-       shadow
-    */
-
-    ctx.fillStyle="rgba(0,0,0,.5)";
+    ctx.fillStyle="rgba(0,0,0,.45)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         0,
-        7,
-        s*.9,
+        10,
+        s,
         s*.3,
         0,
         0,
@@ -1859,44 +1992,50 @@ function drawEnemy(e){
     ctx.fill();
 
 
-    /*
-       body
-    */
-
-    ctx.fillStyle =
-        e.boss ? "#332f27" :
-        e.type==="heavy" ? "#34372e" :
-        e.type==="runner" ? "#28332a" :
-        "#30352c";
+    ctx.fillStyle=
+        e.boss ? "#373126":
+        e.type==="heavy" ? "#37382e":
+        e.type==="runner" ? "#29352c":
+        "#30362d";
 
     ctx.fillRect(
         -s*.45,
-        -s*.15,
+        -s*.1,
         s*.9,
-        s*1.1
+        s*1.05
     );
 
 
-    /*
-       arms
-    */
-
-    ctx.strokeStyle="#252a22";
+    ctx.strokeStyle="#242920";
     ctx.lineWidth=s*.2;
 
     ctx.beginPath();
 
-    ctx.moveTo(-s*.3,0);
-    ctx.lineTo(-s*.75,s*.55);
+    ctx.moveTo(
+        -s*.3,
+        0
+    );
 
-    ctx.moveTo(s*.3,0);
-    ctx.lineTo(s*.75,s*.55);
+    ctx.lineTo(
+        -s*.75,
+        s*.5
+    );
+
+    ctx.moveTo(
+        s*.3,
+        0
+    );
+
+    ctx.lineTo(
+        s*.75,
+        s*.5
+    );
 
     ctx.stroke();
 
 
     /*
-       head
+       Голова.
     */
 
     ctx.fillStyle="#4d5942";
@@ -1905,7 +2044,7 @@ function drawEnemy(e){
 
     ctx.arc(
         0,
-        -s*.5,
+        -s*.48,
         s*.48,
         0,
         Math.PI*2
@@ -1915,48 +2054,70 @@ function drawEnemy(e){
 
 
     /*
-       ears
+       Уши.
     */
 
     ctx.beginPath();
 
-    ctx.moveTo(-s*.35,-s*.55);
-    ctx.lineTo(-s*.7,-s*.75);
-    ctx.lineTo(-s*.38,-s*.35);
+    ctx.moveTo(
+        -s*.35,
+        -s*.55
+    );
 
-    ctx.moveTo(s*.35,-s*.55);
-    ctx.lineTo(s*.7,-s*.75);
-    ctx.lineTo(s*.38,-s*.35);
+    ctx.lineTo(
+        -s*.7,
+        -s*.75
+    );
+
+    ctx.lineTo(
+        -s*.38,
+        -s*.35
+    );
+
+    ctx.moveTo(
+        s*.35,
+        -s*.55
+    );
+
+    ctx.lineTo(
+        s*.7,
+        -s*.75
+    );
+
+    ctx.lineTo(
+        s*.38,
+        -s*.35
+    );
 
     ctx.fill();
 
 
     /*
-       eyes
+       Глаза.
     */
 
-    ctx.fillStyle="#d1a14a";
+    ctx.fillStyle="#d2a14b";
 
     ctx.fillRect(
         -s*.22,
-        -s*.56,
+        -s*.55,
         s*.12,
         s*.1
     );
 
     ctx.fillRect(
         s*.1,
-        -s*.56,
+        -s*.55,
         s*.12,
         s*.1
     );
 
 
     /*
-       weapon
+       Оружие.
     */
 
-    ctx.strokeStyle="#4d3825";
+    ctx.strokeStyle="#533b25";
     ctx.lineWidth=s*.12;
 
     ctx.beginPath();
@@ -1975,7 +2136,7 @@ function drawEnemy(e){
 
 
     /*
-       shield
+       Щит.
     */
 
     if(e.shield){
@@ -1985,8 +2146,8 @@ function drawEnemy(e){
         ctx.beginPath();
 
         ctx.arc(
-            s*.58,
-            .1,
+            s*.55,
+            .05,
             s*.45,
             -Math.PI*.7,
             Math.PI*.7
@@ -1995,87 +2156,75 @@ function drawEnemy(e){
         ctx.fill();
 
         ctx.strokeStyle="#817558";
-        ctx.lineWidth=2;
 
         ctx.stroke();
-
     }
 
 
     /*
-       boss horns
+       Босс.
     */
 
     if(e.boss){
 
-        ctx.strokeStyle="#776447";
+        ctx.strokeStyle="#796449";
         ctx.lineWidth=5;
 
         ctx.beginPath();
 
-        ctx.moveTo(-s*.25,-s*.82);
-        ctx.lineTo(-s*.7,-s*1.25);
+        ctx.moveTo(
+            -s*.25,
+            -s*.8
+        );
 
-        ctx.moveTo(s*.25,-s*.82);
-        ctx.lineTo(s*.7,-s*1.25);
+        ctx.lineTo(
+            -s*.7,
+            -s*1.25
+        );
+
+        ctx.moveTo(
+            s*.25,
+            -s*.8
+        );
+
+        ctx.lineTo(
+            s*.7,
+            -s*1.25
+        );
 
         ctx.stroke();
-
     }
 
 
     /*
-       health bar
+       HP.
     */
-
-    const barW=s*1.6;
 
     ctx.fillStyle="#160e0e";
 
     ctx.fillRect(
-        -barW/2,
+        -s*.8,
         -s*1.35,
-        barW,
-        6
+        s*1.6,
+        5
     );
 
-    ctx.fillStyle="#8e443d";
+    ctx.fillStyle="#98453c";
 
     ctx.fillRect(
-        -barW/2,
+        -s*.8,
         -s*1.35,
-        barW*(e.hp/e.maxHp),
-        6
+        s*1.6*(e.hp/e.maxHp),
+        5
     );
 
-
-    /*
-       hit flash
-    */
-
-    if(e.hitFlash>0){
-
-        ctx.fillStyle="rgba(255,255,220,.35)";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            0,
-            -s*.4,
-            s,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-    }
 
     ctx.restore();
 }
 
 
 /* ============================================================
-   ARROWS
+   ARROW DRAW
    ============================================================ */
 
 function drawArrow(a){
@@ -2086,13 +2235,9 @@ function drawArrow(a){
 
     ctx.rotate(a.rotation);
 
-    /*
-       trail
-    */
-
-    ctx.strokeStyle =
+    ctx.strokeStyle=
         a.fire ?
-        "rgba(255,130,40,.45)" :
+        "rgba(255,120,30,.45)" :
         "rgba(200,200,170,.25)";
 
     ctx.lineWidth=2;
@@ -2105,80 +2250,32 @@ function drawArrow(a){
     ctx.stroke();
 
 
-    /*
-       shaft
-    */
-
-    ctx.strokeStyle="#d1c09a";
-    ctx.lineWidth=2;
+    ctx.strokeStyle="#d0c09a";
 
     ctx.beginPath();
 
     ctx.moveTo(-12,0);
-    ctx.lineTo(14,0);
+    ctx.lineTo(15,0);
 
     ctx.stroke();
 
 
-    /*
-       tip
-    */
-
-    ctx.fillStyle =
-        a.fire ? "#e87b31" : "#b9b19b";
+    ctx.fillStyle=
+        a.fire ?
+        "#e77c32":
+        "#b9b19b";
 
     ctx.beginPath();
 
-    ctx.moveTo(18,0);
-    ctx.lineTo(9,-4);
-    ctx.lineTo(9,4);
+    ctx.moveTo(19,0);
+    ctx.lineTo(10,-4);
+    ctx.lineTo(10,4);
 
     ctx.closePath();
 
     ctx.fill();
 
-
     ctx.restore();
-}
-
-
-/* ============================================================
-   PARTICLE DRAW
-   ============================================================ */
-
-function drawParticles(){
-
-    for(const p of particles){
-
-        ctx.globalAlpha=Math.max(0,p.life);
-
-        if(p.type==="blood")
-            ctx.fillStyle="#74342e";
-
-        if(p.type==="spark")
-            ctx.fillStyle="#c7b26d";
-
-        if(p.type==="block")
-            ctx.fillStyle="#b4a77d";
-
-        if(p.type==="fire")
-            ctx.fillStyle="#df6d2b";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            p.x,
-            p.y,
-            p.size,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-    ctx.globalAlpha=1;
 }
 
 
@@ -2188,7 +2285,11 @@ function drawParticles(){
 
 function drawRain(dt){
 
-    ctx.strokeStyle="rgba(150,170,160,.09)";
+    /*
+       Лёгкий дождь.
+    */
+
+    ctx.strokeStyle="rgba(150,170,165,.12)";
     ctx.lineWidth=1;
 
     for(const r of rain){
@@ -2196,6 +2297,7 @@ function drawRain(dt){
         r.y+=r.speed*dt;
 
         if(r.y>H){
+
             r.y=-20;
             r.x=Math.random()*W;
         }
@@ -2218,7 +2320,107 @@ function drawRain(dt){
 
 
 /* ============================================================
-   GAME UPDATE
+   LIGHTNING
+   ============================================================ */
+
+function drawLightning(){
+
+    if(lightningFlash<=0)
+        return;
+
+    /*
+       Сильная, но очень короткая вспышка.
+    */
+
+    ctx.fillStyle=
+        `rgba(205,220,215,${lightningFlash*2})`;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+       Сам разряд.
+    */
+
+    ctx.strokeStyle=
+        "rgba(220,230,220,.8)";
+
+    ctx.lineWidth=2;
+
+    const x=W*.25+
+        Math.random()*W*.5;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x,
+        0
+    );
+
+    let currentX=x;
+
+    for(let y=0;y<H*.35;y+=35){
+
+        currentX+=
+            rand(-25,25);
+
+        ctx.lineTo(
+            currentX,
+            y+35
+        );
+    }
+
+    ctx.stroke();
+}
+
+
+/* ============================================================
+   PARTICLES
+   ============================================================ */
+
+function drawParticles(){
+
+    for(const p of particles){
+
+        ctx.globalAlpha=
+            Math.max(0,p.life);
+
+        if(p.type==="blood")
+            ctx.fillStyle="#74342e";
+
+        else if(p.type==="spark")
+            ctx.fillStyle="#c7b26d";
+
+        else if(p.type==="fire")
+            ctx.fillStyle="#df6d2b";
+
+        else
+            ctx.fillStyle="#d8e0dc";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+
+    ctx.globalAlpha=1;
+}
+
+
+/* ============================================================
+   UPDATE
    ============================================================ */
 
 function update(dt){
@@ -2230,39 +2432,36 @@ function update(dt){
     updateEnemies(dt);
     updateArrows(dt);
     updateParticles(dt);
+    updateWeather(dt);
 
 
-    /*
-       Spawn queue
-    */
-
-    if(waveActive && enemiesToSpawn>0){
+    if(
+        waveActive &&
+        enemiesToSpawn>0
+    ){
 
         spawnTimer-=dt;
 
         if(spawnTimer<=0){
 
-            const type =
+            const type=
                 currentComposition[
-                    currentComposition.length-enemiesToSpawn
+                    currentComposition.length-
+                    enemiesToSpawn
                 ];
 
             spawnEnemy(type);
 
             enemiesToSpawn--;
 
-            spawnTimer=spawnInterval;
-
+            spawnTimer=.75;
         }
-
     }
 
 
-    /*
-       Wave finished
-    */
+    const alive=
+        enemies.some(e=>!e.dead);
 
-    const alive=enemies.some(e=>!e.dead);
 
     if(
         waveActive &&
@@ -2274,7 +2473,9 @@ function update(dt){
 
         gold+=30+wave*5;
 
-        document.getElementById("nextWaveBtn").disabled=false;
+        document.getElementById(
+            "nextWaveBtn"
+        ).disabled=false;
 
         showVictoryWave();
 
@@ -2282,36 +2483,36 @@ function update(dt){
     }
 
 
-    /*
-       Cleanup
-    */
-
-    enemies=enemies.filter(e=>
-        !e.dead
+    enemies=enemies.filter(
+        e=>!e.dead
     );
-
 }
 
 
 /* ============================================================
-   WAVE COMPLETE MESSAGE
+   WAVE COMPLETE
    ============================================================ */
 
 function showVictoryWave(){
 
-    const msg=document.getElementById("message");
+    document.getElementById(
+        "waveText"
+    ).textContent="WAVE CLEARED";
 
-    document.getElementById("waveText").textContent=
-        "WAVE CLEARED";
-
-    document.getElementById("enemyText").textContent=
+    document.getElementById(
+        "enemyText"
+    ).textContent=
         "+ "+(30+wave*5)+" GOLD";
 
-    msg.classList.add("visible");
+    document.getElementById(
+        "message"
+    ).classList.add("visible");
 
     setTimeout(()=>{
-        msg.classList.remove("visible");
-    },2200);
+        document.getElementById(
+            "message"
+        ).classList.remove("visible");
+    },2000);
 }
 
 
@@ -2328,32 +2529,51 @@ function draw(){
     drawBackground();
 
     /*
-       Enemies behind wall
+       Орки находятся перед стеной.
     */
 
     for(const e of enemies)
         drawEnemy(e);
 
+
+    /*
+       Сама стена.
+    */
+
     drawCastle();
+
+
+    /*
+       Лучник стоит ЗА зубцами.
+    */
 
     drawPlayer();
 
+
+    /*
+       Стрелы.
+    */
+
     for(const a of arrows)
         drawArrow(a);
+
 
     drawParticles();
 
     drawRain();
 
+    drawLightning();
+
 
     /*
-       Vignette
+       Vignette.
     */
 
-    const vignette=ctx.createRadialGradient(
-        W/2,H/2,H*.25,
-        W/2,H/2,H*.8
-    );
+    const vignette=
+        ctx.createRadialGradient(
+            W/2,H/2,H*.2,
+            W/2,H/2,H*.8
+        );
 
     vignette.addColorStop(
         0,
@@ -2366,17 +2586,20 @@ function draw(){
     );
 
     ctx.fillStyle=vignette;
-    ctx.fillRect(0,0,W,H);
 
+    ctx.fillRect(
+        0,0,W,H
+    );
 
-    /*
-       Pause
-    */
 
     if(paused && gameRunning){
 
-        ctx.fillStyle="rgba(0,0,0,.5)";
-        ctx.fillRect(0,0,W,H);
+        ctx.fillStyle=
+            "rgba(0,0,0,.55)";
+
+        ctx.fillRect(
+            0,0,W,H
+        );
 
         ctx.textAlign="center";
 
@@ -2390,42 +2613,16 @@ function draw(){
         );
 
         ctx.font="15px Georgia";
-
         ctx.fillStyle="#888";
 
         ctx.fillText(
-            "Нажми ESC, чтобы продолжить",
+            "ESC — продолжить",
             W/2,
             H/2+35
         );
 
         ctx.textAlign="left";
     }
-
-}
-
-
-/* ============================================================
-   UI
-   ============================================================ */
-
-function updateUI(){
-
-    document.getElementById("wave").textContent=wave;
-    document.getElementById("wall").textContent=Math.ceil(wallHP);
-    document.getElementById("gold").textContent=gold;
-    document.getElementById("damage").textContent=damage;
-    document.getElementById("rate").textContent=fireRate.toFixed(1);
-
-    document.getElementById("costDamage").textContent=
-        damageUpgradeCost;
-
-    document.getElementById("costSpeed").textContent=
-        speedUpgradeCost;
-
-    document.getElementById("costWall").textContent=
-        wallUpgradeCost;
-
 }
 
 
@@ -2436,34 +2633,18 @@ function updateUI(){
 let damageUpgradeCost=50;
 let speedUpgradeCost=75;
 let wallUpgradeCost=80;
-let pierceCost=180;
-let fireCost=250;
-
 
 function openUpgrades(){
 
-    const panel=document.getElementById("upgradePanel");
+    const p=
+        document.getElementById(
+            "upgradePanel"
+        );
 
-    panel.style.display =
-        panel.style.display==="flex" ?
-        "none" :
+    p.style.display=
+        p.style.display==="flex" ?
+        "none":
         "flex";
-
-    updateUpgradeButtons();
-}
-
-
-function updateUpgradeButtons(){
-
-    document.querySelectorAll(".upgrade").forEach(b=>{
-        b.disabled=false;
-    });
-
-    if(pierce)
-        document.querySelectorAll(".upgrade")[3].disabled=true;
-
-    if(fireArrows)
-        document.querySelectorAll(".upgrade")[4].disabled=true;
 }
 
 
@@ -2479,8 +2660,14 @@ function buyUpgrade(type){
         damage+=8;
 
         damageUpgradeCost=
-            Math.round(damageUpgradeCost*1.55);
+            Math.round(
+                damageUpgradeCost*1.55
+            );
 
+        document.getElementById(
+            "costDamage"
+        ).textContent=
+            damageUpgradeCost;
     }
 
 
@@ -2494,8 +2681,14 @@ function buyUpgrade(type){
         fireRate*=1.25;
 
         speedUpgradeCost=
-            Math.round(speedUpgradeCost*1.6);
+            Math.round(
+                speedUpgradeCost*1.6
+            );
 
+        document.getElementById(
+            "costSpeed"
+        ).textContent=
+            speedUpgradeCost;
     }
 
 
@@ -2507,40 +2700,71 @@ function buyUpgrade(type){
         gold-=wallUpgradeCost;
 
         wallMax+=25;
-
         wallHP+=25;
 
         wallUpgradeCost=
-            Math.round(wallUpgradeCost*1.65);
+            Math.round(
+                wallUpgradeCost*1.65
+            );
 
+        document.getElementById(
+            "costWall"
+        ).textContent=
+            wallUpgradeCost;
     }
 
 
     if(type==="pierce"){
 
-        if(pierce || gold<pierceCost)
+        if(pierce || gold<180)
             return;
 
-        gold-=pierceCost;
-
+        gold-=180;
         pierce=true;
 
+        document.querySelectorAll(
+            ".upgrade"
+        )[3].disabled=true;
     }
 
 
     if(type==="fire"){
 
-        if(fireArrows || gold<fireCost)
+        if(fireArrows || gold<250)
             return;
 
-        gold-=fireCost;
-
+        gold-=250;
         fireArrows=true;
 
+        document.querySelectorAll(
+            ".upgrade"
+        )[4].disabled=true;
     }
 
     updateUI();
-    updateUpgradeButtons();
+}
+
+
+/* ============================================================
+   UI
+   ============================================================ */
+
+function updateUI(){
+
+    document.getElementById("wave")
+        .textContent=wave;
+
+    document.getElementById("wall")
+        .textContent=Math.ceil(wallHP);
+
+    document.getElementById("gold")
+        .textContent=gold;
+
+    document.getElementById("damage")
+        .textContent=damage;
+
+    document.getElementById("rate")
+        .textContent=fireRate.toFixed(1);
 }
 
 
@@ -2550,11 +2774,13 @@ function buyUpgrade(type){
 
 function startGame(){
 
-    document.getElementById("menuScreen")
-        .classList.add("hidden");
+    document.getElementById(
+        "menuScreen"
+    ).classList.add("hidden");
 
-    document.getElementById("resultScreen")
-        .classList.add("hidden");
+    document.getElementById(
+        "resultScreen"
+    ).classList.add("hidden");
 
     gameRunning=true;
     paused=false;
@@ -2585,22 +2811,27 @@ function startGame(){
 
     waveActive=false;
 
-    document.getElementById("nextWaveBtn").disabled=false;
+    lightningTimer=0;
+    lightningFlash=0;
 
     updateUI();
 
-    /*
-       Start with first wave ready.
-    */
+    document.getElementById(
+        "nextWaveBtn"
+    ).disabled=false;
 
-    setTimeout(startNextWave,600);
+    setTimeout(
+        startNextWave,
+        600
+    );
 }
 
 
 function restartGame(){
 
-    document.getElementById("resultScreen")
-        .classList.add("hidden");
+    document.getElementById(
+        "resultScreen"
+    ).classList.add("hidden");
 
     startGame();
 }
@@ -2614,25 +2845,30 @@ function gameOver(){
 
     gameRunning=false;
 
-    document.getElementById("resultScreen")
-        .classList.remove("hidden");
+    document.getElementById(
+        "resultScreen"
+    ).classList.remove("hidden");
 
-    document.getElementById("resultTitle")
-        .textContent="THE WALL FALLS";
+    document.getElementById(
+        "resultText"
+    ).innerHTML=`
 
-    document.getElementById("resultText").innerHTML=
-        `
-        Орда прорвалась через древнюю крепость.<br><br>
-        Последняя стена пала на <b>волне ${wave}</b>.<br>
-        Уничтожено орков: <b>${totalKills}</b><br>
-        Собрано золота: <b>${gold}</b>
-        `;
+        Орда прорвала оборону.<br><br>
 
+        Стена пала на
+        <b>волне ${wave}</b>.<br>
+
+        Уничтожено орков:
+        <b>${totalKills}</b><br>
+
+        Собрано золота:
+        <b>${gold}</b>
+    `;
 }
 
 
 /* ============================================================
-   MAIN LOOP
+   LOOP
    ============================================================ */
 
 let lastTime=performance.now();
@@ -2652,14 +2888,9 @@ function loop(now){
     requestAnimationFrame(loop);
 }
 
-requestAnimationFrame(loop);
-
-
-/* ============================================================
-   INITIAL UI
-   ============================================================ */
-
+resize();
 updateUI();
+requestAnimationFrame(loop);
 
 </script>
 
