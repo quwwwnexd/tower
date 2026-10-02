@@ -1,773 +1,1122 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE LAST WALL</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            background: #0a0a0a;
-            font-family: 'Georgia', serif;
-            color: #e0d4b8;
-        }
-        canvas {
-            display: block;
-        }
-        #ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 10;
-        }
-        .panel {
-            position: absolute;
-            background: rgba(20, 15, 10, 0.85);
-            border: 3px solid #8b5a2b;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(139, 90, 43, 0.6);
-            font-size: 22px;
-            text-shadow: 2px 2px 4px #000;
-        }
-        #wavePanel {
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 30px;
-        }
-        #castlePanel {
-            bottom: 30px;
-            left: 30px;
-            font-size: 18px;
-        }
-        #orcsPanel {
-            bottom: 30px;
-            right: 30px;
-        }
-        #gameOver, #victory {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(10, 5, 5, 0.95);
-            border: 6px solid #8b0000;
-            padding: 40px 60px;
-            text-align: center;
-            border-radius: 12px;
-            box-shadow: 0 0 60px #8b0000;
-            display: none;
-            z-index: 20;
-        }
-        #gameOver h1, #victory h1 {
-            color: #8b0000;
-            margin: 0 0 20px 0;
-            font-size: 42px;
-            text-shadow: 0 0 15px #8b0000;
-        }
-        button {
-            margin-top: 30px;
-            padding: 12px 40px;
-            font-size: 22px;
-            background: #4a2c0f;
-            color: #e0d4b8;
-            border: 3px solid #8b5a2b;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        button:hover {
-            background: #6b3f1a;
-            transform: scale(1.05);
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>DARK WALL — The Last Archer</title>
+<style>
+  html,body{margin:0;padding:0;background:#000;height:100%;overflow:hidden;
+    font-family:'Courier New',monospace;color:#c9b98f;
+    -webkit-tap-highlight-color:transparent;user-select:none;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;
+    display:block;background:#000;touch-action:none;
+    box-shadow:0 0 40px rgba(0,0,0,0.9);}
+</style>
 </head>
 <body>
-    <canvas id="canvas" width="1280" height="720"></canvas>
-    
-    <div id="ui">
-        <!-- WAVE -->
-        <div id="wavePanel" class="panel">WAVE <span id="waveNum">1</span></div>
-        
-        <!-- CASTLE HP -->
-        <div id="castlePanel" class="panel">
-            CASTLE HP: <span id="castleHP">1000</span> / 1000
-        </div>
-        
-        <!-- ORCS -->
-        <div id="orcsPanel" class="panel">
-            ORCS: <span id="orcsCount">0</span>
-        </div>
-    </div>
-    
-    <!-- GAME OVER -->
-    <div id="gameOver">
-        <h1>CASTLE FALLEN</h1>
-        <p>WAVE REACHED: <span id="finalWave">1</span></p>
-        <p>ORCS SLAIN: <span id="finalSlain">0</span></p>
-        <button onclick="restartGame()">RESTART</button>
-    </div>
-    
-    <!-- VICTORY -->
-    <div id="victory">
-        <h1>CASTLE DEFENDED</h1>
-        <p>WAVE REACHED: <span id="finalWave2">1</span></p>
-        <p>ORCS SLAIN: <span id="finalSlain2">0</span></p>
-        <p>GOLD GAINED: <span id="finalGold2">0</span></p>
-        <button onclick="restartGame()">NEW GAME</button>
-    </div>
+<div id="wrap"><canvas id="game"></canvas></div>
+<script>
+/* =========================================================================
+   DARK WALL — The Last Archer
+   Single-file pixel-art dark fantasy castle defense.
+   ========================================================================= */
+'use strict';
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 1280;
-        canvas.height = 720;
+/* ------------------------------ CONSTANTS ------------------------------- */
+const W = 480, H = 270;
+const WALL_TOP_Y    = 145;   // поверхность стены (ноги лучника)
+const WALL_RIGHT_X  = 150;   // правый край стены
+const GROUND_Y      = 200;   // уровень земли (ноги орков)
+const ARCHER_MIN_X  = 22;
+const ARCHER_MAX_X  = 134;
+const SPAWN_X       = 476;
+const GRAVITY       = 210;   // гравитация стрелы
 
-        // Game constants
-        const WIDTH = canvas.width;
-        const HEIGHT = canvas.height;
-        const GROUND_Y = HEIGHT - 160;
+const COLORS = {
+  sky1:'#07070e', sky2:'#111120', sky3:'#1c1c30',
+  moon:'#e0e0ee', moonGlow:'#3a3a55', moonDark:'#b8b8cc',
+  star1:'#ffffff', star2:'#a8a8c8', star3:'#6a6a8a',
+  mtnFar:'#0e0e18', mtnMid:'#13131f',
+  forestFar:'#0a1219', forestMid:'#0d1a14', forestNear:'#091210',
+  grass:'#16211a', grassDark:'#0f180f', grassLight:'#1e2c1e',
+  path:'#241f16', pathDark:'#1a1610',
+  wallTop:'#5c5c6c', wallTopHi:'#74748a',
+  wallA:'#3a3a48', wallB:'#333340', wallC:'#2e2e3a',
+  wallD:'#353542', wallE:'#303038',
+  wallEdge:'#15151c',
+  merlon:'#4a4a5a', merlonHi:'#6a6a7c', merlonDark:'#2a2a34',
+  torchWood:'#4a3018', torchFlame:'#ff9944', torchCore:'#ffee88',
+  cloakA:'#3a2530', cloakB:'#241620',
+  leather:'#5a3a20', leatherDark:'#3a2510',
+  skin:'#b88868', boot:'#2a1a10', eye:'#e8d8a0',
+  bow:'#6a4a20', bowDark:'#4a3010', bowString:'#c8b898',
+  orcSkin:'#4a6a30', orcSkinDark:'#324a20', orcArmor:'#4a3a2a',
+  orcEye:'#ffaa00', orcTusk:'#e8d8b0', orcBlood:'#6a2020',
+  arrowShaft:'#a08050', arrowHead:'#c8c8c8', arrowFletch:'#a03030',
+  hpGreen:'#4a8a3a', hpYellow:'#a08a2a', hpRed:'#a03030',
+  uiBg:'#0a0a12', uiBorder:'#6a5a3a', uiText:'#c9b98f', uiTextDim:'#7a6a4a',
+  gold:'#d8a848', danger:'#c04040',
+};
 
-        // Game variables
-        let castleHP = 1000;
-        let maxCastleHP = 1000;
-        let currentWave = 1;
-        let orcsSlain = 0;
-        let gold = 0;
-        let gameState = 'playing'; // playing, gameOver, victory
-        let paused = false;
+/* -------------------------------- UTILS --------------------------------- */
+const clamp = (v,a,b)=> v<a?a:(v>b?b:v);
+const rand  = (a,b)=> a + Math.random()*(b-a);
+const randi = (a,b)=> Math.floor(rand(a,b+1));
+const lerp  = (a,b,t)=> a + (b-a)*t;
 
-        // Player
-        let playerX = WIDTH / 2;
-        let playerAimX = WIDTH / 2;
-        let playerAimY = 380;
-        let playerHealth = 1;
-        let bowCharge = 0;
-        let isCharging = false;
+function hexToRgb(h){ const n=parseInt(h.slice(1),16); return {r:(n>>16)&255,g:(n>>8)&255,b:n&255}; }
+function rgbToHex(r,g,b){ return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1); }
+function lerpColor(a,b,t){
+  const A=hexToRgb(a), B=hexToRgb(b);
+  return rgbToHex(Math.round(lerp(A.r,B.r,t)),Math.round(lerp(A.g,B.g,t)),Math.round(lerp(A.b,B.b,t)));
+}
 
-        // Objects
-        let arrows = [];
-        let orcs = [];
-        let particles = [];
-        let towers = [];
-        let trees = [];
+function pixelCircle(c,x,y,r,color){
+  c.fillStyle = color;
+  for(let dy=-r; dy<=r; dy++){
+    const dx = Math.floor(Math.sqrt(Math.max(0,r*r-dy*dy)));
+    c.fillRect(x-dx, y+dy, dx*2+1, 1);
+  }
+}
 
-        // Input
-        let keys = {};
-        let mouseDown = false;
-        let lastAimUpdate = 0;
+/* ------------------------------- CANVAS --------------------------------- */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = W; canvas.height = H;
+ctx.imageSmoothingEnabled = false;
 
-        // Audio
-        let audioCtx;
-        function initAudio() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function resizeCanvas(){
+  const s = Math.min(window.innerWidth / W, window.innerHeight / H);
+  canvas.style.width  = Math.floor(W*s)+'px';
+  canvas.style.height = Math.floor(H*s)+'px';
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+/* -------------------------------- AUDIO --------------------------------- */
+const Audio2 = {
+  ctx:null, master:null, sfxGain:null, musicGain:null,
+  enabled:true, musicTimer:null,
+  init(){
+    if(this.ctx) return;
+    try{
+      this.ctx = new (window.AudioContext||window.webkitAudioContext)();
+      this.master = this.ctx.createGain(); this.master.gain.value = 0.5;
+      this.master.connect(this.ctx.destination);
+      this.sfxGain = this.ctx.createGain(); this.sfxGain.gain.value = 0.55;
+      this.sfxGain.connect(this.master);
+      this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.10;
+      this.musicGain.connect(this.master);
+    }catch(e){ this.enabled = false; }
+  },
+  resume(){ if(this.ctx && this.ctx.state==='suspended') this.ctx.resume(); },
+  tone(freq,dur,type='square',vol=0.2,slideTo=null,delay=0){
+    if(!this.ctx || !this.enabled) return;
+    const t0 = this.ctx.currentTime + delay;
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t0);
+    if(slideTo!==null){
+      o.frequency.exponentialRampToValueAtTime(Math.max(20,slideTo), t0+dur);
+    }
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0+dur);
+    o.connect(g); g.connect(this.sfxGain);
+    o.start(t0); o.stop(t0+dur+0.02);
+  },
+  noise(dur,vol=0.2,filterFreq=1200,q=1){
+    if(!this.ctx || !this.enabled) return;
+    const sr = this.ctx.sampleRate;
+    const len = Math.max(1,Math.floor(sr*dur));
+    const buf = this.ctx.createBuffer(1, len, sr);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = (Math.random()*2-1) * (1 - i/len);
+    const src = this.ctx.createBufferSource(); src.buffer = buf;
+    const f = this.ctx.createBiquadFilter();
+    f.type='lowpass'; f.frequency.value=filterFreq; f.Q.value=q;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol, this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0008, this.ctx.currentTime+dur);
+    src.connect(f); f.connect(g); g.connect(this.sfxGain);
+    src.start(); src.stop(this.ctx.currentTime+dur+0.02);
+  },
+  bowDraw(){ this.tone(180,0.18,'sawtooth',0.08,320); },
+  shoot(){ this.tone(700,0.10,'square',0.10,180); this.noise(0.06,0.10,3500); },
+  hit(){ this.noise(0.09,0.30,2200,2); this.tone(160,0.08,'square',0.12,60); },
+  wallHit(){ this.noise(0.13,0.32,600,1.2); this.tone(70,0.14,'sine',0.28,35); },
+  enemyDeath(){ this.tone(190,0.22,'sawtooth',0.16,50);
+                this.noise(0.16,0.20,900,1.5); },
+  ui(){ this.tone(600,0.05,'square',0.10,900); },
+  uiBig(){ this.tone(400,0.10,'square',0.14,900);
+           setTimeout(()=>this.tone(700,0.12,'square',0.12,1200),80); },
+  waveStart(){ this.tone(220,0.35,'sawtooth',0.18,160);
+               setTimeout(()=>this.tone(330,0.4,'sawtooth',0.16,120),180); },
+  defeat(){ this.tone(180,1.6,'sawtooth',0.28,60);
+            this.noise(1.4,0.22,300,1); },
+  gold(){ this.tone(880,0.06,'triangle',0.14,1100);
+          setTimeout(()=>this.tone(1320,0.08,'triangle',0.10,1500),60); },
+  startMusic(){
+    if(!this.ctx || this.musicTimer) return;
+    // Мрачный процедурный эмбиент: редкие низкие ноты минорной гаммы
+    const scale = [110, 130.81, 146.83, 164.81, 196, 220, 261.63];
+    const playNote = ()=>{
+      if(!this.enabled) return;
+      const f = scale[Math.floor(Math.random()*scale.length)];
+      const o = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const t0 = this.ctx.currentTime;
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.linearRampToValueAtTime(0.5,t0+1.2);
+      g.gain.linearRampToValueAtTime(0.0001,t0+3.6);
+      o.connect(g); g.connect(this.musicGain);
+      o.start(t0); o.stop(t0+3.8);
+      // редкая гармоника
+      if(Math.random()<0.4){
+        const o2=this.ctx.createOscillator(); const g2=this.ctx.createGain();
+        o2.type='triangle'; o2.frequency.value=f*2;
+        g2.gain.setValueAtTime(0.0001,t0);
+        g2.gain.linearRampToValueAtTime(0.15,t0+1.5);
+        g2.gain.linearRampToValueAtTime(0.0001,t0+3.2);
+        o2.connect(g2); g2.connect(this.musicGain);
+        o2.start(t0); o2.stop(t0+3.5);
+      }
+    };
+    this.musicTimer = setInterval(playNote, 2400);
+    setTimeout(playNote, 100);
+  },
+  stopMusic(){
+    if(this.musicTimer){ clearInterval(this.musicTimer); this.musicTimer=null; }
+  }
+};
+
+/* ------------------------------- INPUT ---------------------------------- */
+const Input = {
+  keys:{},
+  mouseX:W*0.75, mouseY:H*0.55,
+  mouseDown:false,
+  touches:{ left:false, right:false, aimId:null },
+  clickListeners:[],
+  init(){
+    window.addEventListener('keydown', e=>{
+      Input.keys[e.key.toLowerCase()] = true;
+      if(['arrowleft','arrowright','arrowup','arrowdown',' '].includes(e.key.toLowerCase())) e.preventDefault();
+      if(e.key==='Escape'||e.key.toLowerCase()==='p'){
+        if(Game.state==='playing') Game.pause();
+        else if(Game.state==='paused') Game.resume();
+      }
+    });
+    window.addEventListener('keyup', e=>{ Input.keys[e.key.toLowerCase()] = false; });
+
+    canvas.addEventListener('mousemove', e=>{
+      const p = Input.canvasPos(e);
+      Input.mouseX = p.x; Input.mouseY = p.y;
+    });
+    canvas.addEventListener('mousedown', e=>{
+      Audio2.init(); Audio2.resume();
+      const p = Input.canvasPos(e);
+      Input.mouseX = p.x; Input.mouseY = p.y;
+      Input.mouseDown = true;
+      Input.dispatchClick(p.x, p.y);
+    });
+    window.addEventListener('mouseup', ()=>{ Input.mouseDown = false; });
+    canvas.addEventListener('contextmenu', e=>e.preventDefault());
+
+    // Touch
+    canvas.addEventListener('touchstart', e=>{
+      Audio2.init(); Audio2.resume();
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      for(const t of e.changedTouches){
+        const x = (t.clientX-rect.left)/rect.width * W;
+        const y = (t.clientY-rect.top )/rect.height * H;
+        if(y > H*0.72){
+          // нижняя зона — движение
+          if(x < W/2) Input.touches.left = true;
+          else        Input.touches.right = true;
+        } else {
+          Input.touches.aimId = t.identifier;
+          Input.mouseX = x; Input.mouseY = y;
+          Input.dispatchClick(x,y);
+          Input.mouseDown = true;
         }
-        function playSound(type) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            
-            if (type === 'shoot') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-                gain.gain.value = 0.6;
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.12);
-                osc.frequency.linearRampToValueAtTime(80, audioCtx.currentTime + 0.12);
-            } else if (type === 'hit') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(420, audioCtx.currentTime);
-                gain.gain.value = 0.4;
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.08);
-            } else if (type === 'death') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
-                gain.gain.value = 0.5;
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-            } else if (type === 'waveStart') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(240, audioCtx.currentTime);
-                gain.gain.value = 0.3;
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
-            } else if (type === 'victory') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(520, audioCtx.currentTime);
-                gain.gain.value = 0.7;
-                gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.2);
-            }
-            osc.start();
-            osc.stop(audioCtx.currentTime + 2);
+      }
+    }, {passive:false});
+    canvas.addEventListener('touchmove', e=>{
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      for(const t of e.changedTouches){
+        if(t.identifier === Input.touches.aimId){
+          const x = (t.clientX-rect.left)/rect.width * W;
+          const y = (t.clientY-rect.top )/rect.height * H;
+          Input.mouseX = x; Input.mouseY = y;
         }
-
-        // Classes
-        class Arrow {
-            constructor(x, y, tx, ty) {
-                this.x = x;
-                this.y = y;
-                this.tx = tx;
-                this.ty = ty;
-                this.vx = (tx - x) / 18;
-                this.vy = (ty - y) / 18;
-                this.angle = Math.atan2(ty - y, tx - x);
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.angle = Math.atan2(this.vy, this.vx);
-            }
+      }
+    }, {passive:false});
+    const endTouch = e=>{
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      for(const t of e.changedTouches){
+        const x = (t.clientX-rect.left)/rect.width * W;
+        const y = (t.clientY-rect.top )/rect.height * H;
+        if(y > H*0.72){
+          if(x < W/2) Input.touches.left = false;
+          else        Input.touches.right = false;
         }
-
-        class Orc {
-            constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.type = type || 'normal';
-                this.health = type === 'elite' ? 280 : type === 'heavy' ? 180 : type === 'fast' ? 90 : 120;
-                this.maxHealth = this.health;
-                this.speed = type === 'fast' ? 2.8 : type === 'heavy' ? 1.1 : type === 'elite' ? 2.2 : 1.9;
-                this.damage = type === 'heavy' ? 12 : type === 'elite' ? 18 : 8;
-                this.width = type === 'heavy' ? 68 : 48;
-                this.height = type === 'heavy' ? 92 : 68;
-                this.attackTimer = 0;
-                this.isAttackingWall = false;
-                this.alive = true;
-            }
-            update() {
-                if (!this.alive) return;
-                
-                // Check if reached wall (gate area)
-                if (this.x > WIDTH * 0.68 && this.x < WIDTH * 0.78) {
-                    this.isAttackingWall = true;
-                }
-                
-                if (this.isAttackingWall) {
-                    // Attack wall
-                    this.attackTimer++;
-                    if (this.attackTimer > 55) {
-                        this.attackTimer = 0;
-                        castleHP -= this.damage;
-                        if (castleHP < 0) castleHP = 0;
-                        playSound('hit');
-                    }
-                    return;
-                }
-                
-                // Move forward
-                this.x += this.speed;
-                
-                // Check collision with arrows
-                for (let i = arrows.length - 1; i >= 0; i--) {
-                    let a = arrows[i];
-                    let dx = a.x - this.x;
-                    let dy = a.y - this.y;
-                    let dist = Math.hypot(dx, dy);
-                    if (dist < 32) {
-                        this.health -= 35;
-                        arrows.splice(i, 1);
-                        particles.push(new Particle(this.x, this.y, '#ff2222', 12));
-                        playSound('hit');
-                        if (this.health <= 0) {
-                            this.alive = false;
-                            orcsSlain++;
-                            gold += 12;
-                            particles.push(new Particle(this.x, this.y - 20, '#ffdd00', 25));
-                            playSound('death');
-                        }
-                        break;
-                    }
-                }
-            }
+        if(t.identifier === Input.touches.aimId){
+          Input.touches.aimId = null;
+          Input.mouseDown = false;
         }
+      }
+    };
+    canvas.addEventListener('touchend', endTouch, {passive:false});
+    canvas.addEventListener('touchcancel', endTouch, {passive:false});
+  },
+  canvasPos(e){
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX-rect.left)/rect.width * W,
+      y: (e.clientY-rect.top )/rect.height * H
+    };
+  },
+  addClickListener(fn){ this.clickListeners.push(fn); },
+  dispatchClick(x,y){ this.clickListeners.forEach(fn=>fn(x,y)); }
+};
 
-        class Particle {
-            constructor(x, y, color, life) {
-                this.x = x;
-                this.y = y;
-                this.vx = Math.random() * 6 - 3;
-                this.vy = Math.random() * -6 - 2;
-                this.life = life;
-                this.maxLife = life;
-                this.color = color;
-                this.size = 6 + Math.random() * 7;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.18;
-                this.life--;
-            }
-            draw() {
-                const alpha = this.life / this.maxLife;
-                ctx.save();
-                ctx.globalAlpha = alpha * 0.9;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * alpha, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
+/* ---------------------------- STATIC BACKGROUND ------------------------- */
+const bgCanvas = document.createElement('canvas');
+bgCanvas.width = W; bgCanvas.height = H;
+const bgx = bgCanvas.getContext('2d');
+bgx.imageSmoothingEnabled = false;
+
+function buildBackground(){
+  // Небо (вертикальный градиент полосками)
+  for(let y=0;y<H;y++){
+    let c;
+    if(y<70)      c = lerpColor(COLORS.sky1, COLORS.sky2, y/70);
+    else if(y<150)c = lerpColor(COLORS.sky2, COLORS.sky3, (y-70)/80);
+    else          c = COLORS.sky3;
+    bgx.fillStyle = c;
+    bgx.fillRect(0,y,W,1);
+  }
+  // Звёзды
+  for(let i=0;i<110;i++){
+    const sx = (i*137.5)%W;
+    const sy = (i*53.7)%110;
+    const k = i%4;
+    bgx.fillStyle = k===0?COLORS.star1 : k===1?COLORS.star2 : k===2?COLORS.star3 : COLORS.star2;
+    bgx.fillRect(Math.floor(sx), Math.floor(sy), 1, 1);
+    if(k===0) bgx.fillRect(Math.floor(sx), Math.floor(sy)+1, 1, 1);
+  }
+  // Луна
+  const mx=392, my=48, mr=20;
+  pixelCircle(bgx, mx, my, mr+5, 'rgba(70,70,110,0.18)');
+  pixelCircle(bgx, mx, my, mr+2, COLORS.moonGlow);
+  pixelCircle(bgx, mx, my, mr,   COLORS.moon);
+  pixelCircle(bgx, mx, my, mr-1, COLORS.moon);
+  // Кратеры
+  bgx.fillStyle = COLORS.moonDark;
+  bgx.fillRect(mx-8, my-5, 4, 3);
+  bgx.fillRect(mx+4, my-2, 5, 4);
+  bgx.fillRect(mx-2, my+6, 3, 3);
+  bgx.fillRect(mx+8, my+7, 3, 2);
+  bgx.fillRect(mx-9, my+4, 3, 2);
+
+  // Дальние горы
+  drawMountain(bgx, -10, 118, 80, 40, COLORS.mtnFar);
+  drawMountain(bgx, 60, 120, 100, 46, COLORS.mtnFar);
+  drawMountain(bgx, 150, 115, 90, 42, COLORS.mtnFar);
+  drawMountain(bgx, 220, 122, 120, 50, COLORS.mtnMid);
+  drawMountain(bgx, 310, 118, 110, 44, COLORS.mtnFar);
+  drawMountain(bgx, 400, 120, 100, 46, COLORS.mtnMid);
+
+  // Туманная полоса у подножия гор
+  bgx.fillStyle = 'rgba(80,80,110,0.10)';
+  bgx.fillRect(0,120,W,10);
+
+  // Дальний лес (силуэты ёлок)
+  for(let x=-4;x<W+8;x+=6){
+    const h = 30 + Math.floor(Math.random()*22);
+    const bw = 3 + Math.floor(Math.random()*3);
+    drawPine(bgx, x, 150, h, bw, COLORS.forestFar);
+  }
+  // Средний лес
+  for(let x=-6;x<W+10;x+=9){
+    const h = 40 + Math.floor(Math.random()*26);
+    const bw = 4 + Math.floor(Math.random()*3);
+    drawPine(bgx, x, 158, h, bw, COLORS.forestMid);
+  }
+}
+
+function drawMountain(c, x, baseY, w, h, color){
+  c.fillStyle = color;
+  const cx = x + w/2;
+  for(let dy=0; dy<h; dy++){
+    const t = dy/h;
+    const halfW = Math.floor(w/2 * (1 - t*0.98));
+    c.fillRect(cx-halfW, baseY-h+dy, halfW*2, 1);
+  }
+}
+
+function drawPine(c, x, baseY, h, baseW, color){
+  c.fillStyle = color;
+  const trunkW = 1;
+  // Ствол
+  c.fillRect(x, baseY-4, trunkW, 5);
+  // Крона — треугольник из ярусов
+  for(let layer=0; layer<4; layer++){
+    const ly = baseY - 4 - layer*(h/5);
+    const lw = baseW + (3-layer)*1.2;
+    const lh = h/4.2;
+    for(let dy=0; dy<lh; dy++){
+      const t = dy/lh;
+      const w = Math.floor(lw*(1-t));
+      c.fillRect(Math.floor(x + trunkW/2) - w, Math.floor(ly - dy), w*2+1, 1);
+    }
+  }
+}
+
+/* -------------------------------- PLAYER -------------------------------- */
+const Player = {
+  x: 80, y: WALL_TOP_Y,
+  facing: 1,
+  anim: 'idle', animTime: 0,
+  drawTimer: 0,
+  cooldown: 0,
+  baseDamage: 26,
+  baseCooldown: 0.55,
+  baseMoveSpeed: 95,
+  critChance: 0.05,
+  hitFlash: 0,
+  reset(){
+    this.x = 80;
+    this.y = WALL_TOP_Y;
+    this.facing = 1;
+    this.anim = 'idle';
+    this.animTime = 0;
+    this.drawTimer = 0;
+    this.cooldown = 0;
+    this.hitFlash = 0;
+  },
+  bowPos(){
+    return { x: this.x + this.facing*9, y: this.y - 19 };
+  },
+  update(dt){
+    // Движение
+    let mv = 0;
+    if(Input.keys['a']||Input.keys['arrowleft']||Input.touches.left) mv -= 1;
+    if(Input.keys['d']||Input.keys['arrowright']||Input.touches.right) mv += 1;
+    const spd = this.baseMoveSpeed * Game.upgrades.moveSpeedMult;
+    if(mv !== 0){
+      this.x += mv * spd * dt;
+      this.x = clamp(this.x, ARCHER_MIN_X, ARCHER_MAX_X);
+      if(this.anim !== 'draw') this.anim = 'walk';
+      this.animTime += dt;
+    } else {
+      if(this.anim !== 'draw') this.anim = 'idle';
+      this.animTime += dt*0.6;
+    }
+
+    // Прицел
+    const bow = this.bowPos();
+    const dx = Input.mouseX - bow.x;
+    const dy = Input.mouseY - bow.y;
+    const dist = Math.hypot(dx,dy);
+    // Направление — куда смотрит
+    this.facing = (dx >= 0) ? 1 : -1;
+
+    // Кулдаун
+    if(this.cooldown > 0) this.cooldown -= dt;
+    if(this.hitFlash > 0) this.hitFlash -= dt;
+
+    // Автоматический спуск при удержании — нет. Стреляем по клику.
+    // Но при удержании кнопки — рисуем натяжение
+    this.anim = (Input.mouseDown && this.cooldown <= 0) ? 'draw' : (mv!==0?'walk':'idle');
+  },
+  tryShoot(){
+    if(Game.state !== 'playing') return;
+    if(this.cooldown > 0) return;
+    const bow = this.bowPos();
+    let dx = Input.mouseX - bow.x;
+    let dy = Input.mouseY - bow.y;
+    let dist = Math.hypot(dx,dy);
+    if(dist < 4) return;
+    const nx = dx/dist, ny = dy/dist;
+
+    // Скорость зависит от «натяжения» — расстояние до курсора
+    const speed = clamp(240 + dist*1.6, 320, 760);
+
+    let dmg = this.baseDamage;
+    let crit = false;
+    if(Math.random() < this.critChance){
+      dmg = Math.round(dmg*2.2);
+      crit = true;
+    }
+    // разброс
+    const spread = 0.012;
+    const ang = Math.atan2(ny,nx) + rand(-spread,spread);
+
+    Game.arrows.push({
+      x: bow.x, y: bow.y,
+      px: bow.x, py: bow.y,
+      vx: Math.cos(ang)*speed,
+      vy: Math.sin(ang)*speed,
+      damage: dmg, crit,
+      life: 4,
+      stuck: false,
+    });
+    this.cooldown = this.baseCooldown / Game.upgrades.drawSpeedMult;
+    Audio2.shoot();
+  },
+  takeDamage(d){
+    if(Game.state !== 'playing') return;
+    Game.playerHP = Math.max(0, Game.playerHP - d);
+    this.hitFlash = 0.3;
+    Game.shake = Math.max(Game.shake, 3);
+    Audio2.hit();
+    if(Game.playerHP <= 0) Game.triggerGameOver('archer');
+  }
+};
+
+/* -------------------------------- ORCS ---------------------------------- */
+const ENEMY_TYPES = {
+  orc:    { hp: 34,  speed: 17, dmg: 5,  attackRate: 2.0, w: 14, h: 24, gold: 5,
+            skin:'#4a6a30', skinDark:'#324a20', armor:'#4a3a2a', weapon:'club' },
+  fast:   { hp: 18,  speed: 34, dmg: 3,  attackRate: 1.5, w: 12, h: 22, gold: 4,
+            skin:'#5a7a3a', skinDark:'#3a5220', armor:'#3a2a1a', weapon:'dagger' },
+  warrior:{ hp: 90,  speed: 12, dmg: 11, attackRate: 2.4, w: 17, h: 28, gold: 11,
+            skin:'#3a5a28', skinDark:'#25401a', armor:'#5a4a3a', weapon:'axe' },
+  heavy:  { hp: 240, speed: 7.5,dmg: 22, attackRate: 3.0, w: 21, h: 33, gold: 22,
+            skin:'#2e4a20', skinDark:'#1e3415', armor:'#4a3a2a', weapon:'hammer' },
+  chief:  { hp: 420, speed: 10, dmg: 30, attackRate: 3.0, w: 23, h: 35, gold: 45,
+            skin:'#5a3a2a', skinDark:'#3a2218', armor:'#6a3a2a', weapon:'axe',
+            boss:true, thrower:true },
+};
+
+function makeEnemy(type, x){
+  const t = ENEMY_TYPES[type];
+  const hpScale = 1 + Math.max(0, (Game.wave - 1)) * 0.08;
+  return {
+    type, x, y: GROUND_Y,
+    w: t.w, h: t.h,
+    hp: Math.round(t.hp*hpScale), maxHp: Math.round(t.hp*hpScale),
+    speed: t.speed * (1 + Math.max(0,(Game.wave-1))*0.015),
+    dmg: t.dmg, attackRate: t.attackRate,
+    attackTimer: 0, animTime: Math.random()*10,
+    facing: -1,
+    hitFlash: 0, dead: false,
+    gold: t.gold,
+    atWall: false,
+    throwTimer: 2 + Math.random()*2,
+    color: t,
+    wobble: Math.random()*Math.PI*2,
+  };
+}
+
+function updateEnemies(dt){
+  for(let i=Game.enemies.length-1; i>=0; i--){
+    const e = Game.enemies[i];
+    if(e.dead){ Game.enemies.splice(i,1); continue; }
+    e.animTime += dt;
+    if(e.hitFlash > 0) e.hitFlash -= dt;
+
+    if(!e.atWall){
+      e.x -= e.speed * dt;
+      if(e.x - e.w/2 <= WALL_RIGHT_X + 2){
+        e.x = WALL_RIGHT_X + 2 + e.w/2;
+        e.atWall = true;
+        e.attackTimer = 0.3;
+      }
+    } else {
+      // Атака стены
+      e.attackTimer -= dt;
+      if(e.attackTimer <= 0){
+        e.attackTimer = e.attackRate;
+        Game.wallHP = Math.max(0, Game.wallHP - e.dmg);
+        Audio2.wallHit();
+        Game.shake = Math.max(Game.shake, 2.2);
+        // Каменные частицы у стены
+        for(let k=0;k<6;k++){
+          Game.particles.push({
+            x: WALL_RIGHT_X + rand(-2,3),
+            y: rand(WALL_TOP_Y+10, GROUND_Y),
+            vx: rand(-40,-10), vy: rand(-60,-10),
+            life: rand(0.4,0.9), maxLife: 0.9,
+            color: ['#6a6a78','#4a4a58','#3a3a48'][randi(0,2)],
+            size: randi(1,2),
+            gravity: 180,
+          });
         }
-
-        class Tree {
-            constructor(x) {
-                this.x = x;
-                this.y = GROUND_Y - 70;
-                this.height = 180 + Math.random() * 60;
-            }
-            draw() {
-                // Trunk
-                ctx.fillStyle = '#3f2a1e';
-                ctx.fillRect(this.x - 9, this.y - 8, 18, this.height);
-                // Foliage
-                ctx.fillStyle = '#1a3f1a';
-                ctx.beginPath();
-                ctx.ellipse(this.x, this.y - this.height / 2, 42, 55, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(this.x + 22, this.y - this.height * 0.35, 38, 48, 0, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.ellipse(this.x - 22, this.y - this.height * 0.4, 35, 45, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        if(Game.wallHP <= 0){ Game.triggerGameOver('wall'); return; }
+      }
+      // Вожак бросает топор в лучника
+      if(e.color.thrower){
+        e.throwTimer -= dt;
+        if(e.throwTimer <= 0){
+          e.throwTimer = 3.5 + Math.random()*2;
+          // Бросок в лучника
+          const dx = Player.x - e.x;
+          const dy = (Player.y-14) - (e.y - e.h*0.6);
+          const dist = Math.hypot(dx,dy);
+          const t = dist / 180;
+          const vx = dx / t;
+          const vy = dy / t - 0.5*140*t;
+          Game.enemyProjectiles.push({
+            x: e.x - e.w*0.4, y: e.y - e.h*0.7,
+            vx, vy, gravity: 140, damage: 14, life: 4, rot: 0
+          });
+          Audio2.tone(280,0.15,'square',0.10,120);
         }
+      }
+    }
+  }
+}
 
-        // Create initial objects
-        function createCastle() {
-            towers = [
-                {x: 180, h: 220, w: 42, y: GROUND_Y - 220},
-                {x: WIDTH - 220, h: 220, w: 42, y: GROUND_Y - 220}
-            ];
+/* -------------------------------- ARROWS -------------------------------- */
+function updateArrows(dt){
+  for(let i=Game.arrows.length-1; i>=0; i--){
+    const a = Game.arrows[i];
+    if(a.stuck){
+      a.life -= dt;
+      if(a.life <= 0) Game.arrows.splice(i,1);
+      continue;
+    }
+    a.life -= dt;
+    if(a.life <= 0){ Game.arrows.splice(i,1); continue; }
+
+    a.px = a.x; a.py = a.y;
+
+    // Подшаг для точных коллизий
+    const steps = Math.max(1, Math.ceil(Math.hypot(a.vx,a.vy)*dt / 4));
+    const sdt = dt/steps;
+    let hit = false;
+    for(let s=0; s<steps && !hit; s++){
+      a.x += a.vx*sdt;
+      a.y += a.vy*sdt;
+      a.vy += GRAVITY*sdt;
+
+      // Проверка врагов
+      for(const e of Game.enemies){
+        if(e.dead) continue;
+        const ex0 = e.x - e.w/2 - 2, ex1 = e.x + e.w/2 + 2;
+        const ey0 = e.y - e.h - 2,   ey1 = e.y + 2;
+        if(a.x >= ex0 && a.x <= ex1 && a.y >= ey0 && a.y <= ey1){
+          // Попадание
+          e.hp -= a.damage;
+          e.hitFlash = 0.15;
+          Audio2.hit();
+          spawnHitParticles(a.x, a.y, e);
+          if(a.crit){
+            Game.floatTexts.push({x:a.x, y:a.y-4, text:'CRIT!', life:0.9, color:'#ffcc44'});
+          }
+          if(e.hp <= 0){
+            killEnemy(e);
+          }
+          a.stuck = true; a.life = 0.05;
+          hit = true;
+          break;
         }
+      }
+      if(hit) break;
 
-        function createTrees() {
-            trees = [];
-            for (let i = 0; i < 13; i++) {
-                trees.push(new Tree(80 + i * 78));
-            }
-            for (let i = 0; i < 9; i++) {
-                trees.push(new Tree(WIDTH - 260 - i * 82));
-            }
-        }
+      // Земля
+      if(a.y >= GROUND_Y - 1 && a.x > WALL_RIGHT_X){
+        spawnDirtParticles(a.x, GROUND_Y);
+        a.stuck = true; a.life = 0.6; a.y = GROUND_Y-1;
+        Audio2.noise(0.08,0.14,900);
+        break;
+      }
+      // Стена (внутренняя часть)
+      if(a.x <= WALL_RIGHT_X && a.y > WALL_TOP_Y){
+        spawnStoneParticles(a.x, a.y);
+        a.stuck = true; a.life = 0.6;
+        Audio2.noise(0.06,0.12,1400);
+        break;
+      }
+      // Границы
+      if(a.x < -20 || a.x > W+30 || a.y > H+40){
+        Game.arrows.splice(i,1);
+        hit = true; // чтобы выйти из циклов
+        break;
+      }
+    }
+    if(hit && Game.arrows[i] && Game.arrows[i].life <= 0) Game.arrows.splice(i,1);
+  }
+}
 
-        function spawnOrc(type = 'normal') {
-            const spawnX = 80 + Math.random() * (WIDTH * 0.55);
-            orcs.push(new Orc(spawnX, 180, type));
-        }
+function killEnemy(e){
+  e.dead = true;
+  Game.kills++;
+  Game.gold += e.gold;
+  Audio2.enemyDeath();
+  Audio2.gold();
+  // Частицы смерти
+  const col = e.color.skin;
+  for(let i=0;i<14;i++){
+    Game.particles.push({
+      x: e.x + rand(-4,4), y: e.y - e.h*0.5 + rand(-6,6),
+      vx: rand(-70,70), vy: rand(-90,10),
+      life: rand(0.4,0.9), maxLife: 0.9,
+      color: i%3===0 ? '#6a2020' : col,
+      size: randi(1,2), gravity: 260,
+    });
+  }
+  Game.floatTexts.push({x:e.x, y:e.y-e.h-4, text:'+'+e.gold, life:0.8, color:'#d8a848'});
+}
 
-        // Game loop
-        function gameLoop() {
-            if (gameState === 'gameOver' || gameState === 'victory') {
-                requestAnimationFrame(gameLoop);
-                return;
-            }
+/* ------------------------------ PROJECTILES ----------------------------- */
+function updateEnemyProjectiles(dt){
+  for(let i=Game.enemyProjectiles.length-1; i>=0; i--){
+    const p = Game.enemyProjectiles[i];
+    p.life -= dt;
+    if(p.life <= 0){ Game.enemyProjectiles.splice(i,1); continue; }
+    p.vy += p.gravity*dt;
+    p.x += p.vx*dt;
+    p.y += p.vy*dt;
+    p.rot += dt*10;
 
-            // Clear
-            ctx.fillStyle = '#0f1a14';
-            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    // Попадание в лучника
+    const px0 = Player.x - 6, px1 = Player.x + 6;
+    const py0 = Player.y - 28, py1 = Player.y;
+    if(p.x >= px0 && p.x <= px1 && p.y >= py0 && p.y <= py1){
+      Player.takeDamage(p.damage);
+      spawnHitParticles(p.x, p.y, null);
+      Game.enemyProjectiles.splice(i,1);
+      continue;
+    }
+    // Промах — упал
+    if(p.y > H+20 || p.x < -20 || p.x > W+40){
+      Game.enemyProjectiles.splice(i,1);
+    }
+  }
+}
 
-            // Background field
-            ctx.fillStyle = '#2a3a2a';
-            ctx.fillRect(0, GROUND_Y + 20, WIDTH, HEIGHT - GROUND_Y - 30);
+/* ------------------------------- PARTICLES ------------------------------ */
+function spawnHitParticles(x,y,e){
+  for(let i=0;i<8;i++){
+    Game.particles.push({
+      x, y,
+      vx: rand(-70,70), vy: rand(-90,-10),
+      life: rand(0.25,0.6), maxLife: 0.6,
+      color: i%3===0 ? '#6a2020' : (e ? e.color.skin : '#a08050'),
+      size: randi(1,2), gravity: 240,
+    });
+  }
+  // Искра
+  Game.particles.push({
+    x, y, vx:0, vy:0, life:0.12, maxLife:0.12,
+    color:'#ffee88', size:3, gravity:0, flash:true
+  });
+}
+function spawnDirtParticles(x,y){
+  for(let i=0;i<6;i++){
+    Game.particles.push({
+      x, y,
+      vx: rand(-40,40), vy: rand(-60,-10),
+      life: rand(0.3,0.6), maxLife:0.6,
+      color: ['#3a3020','#241f16','#2a2418'][randi(0,2)],
+      size: randi(1,2), gravity: 220,
+    });
+  }
+}
+function spawnStoneParticles(x,y){
+  for(let i=0;i<6;i++){
+    Game.particles.push({
+      x, y,
+      vx: rand(-50,20), vy: rand(-60,10),
+      life: rand(0.3,0.7), maxLife:0.7,
+      color: ['#4a4a58','#3a3a48','#2e2e3a'][randi(0,2)],
+      size: randi(1,2), gravity: 220,
+    });
+  }
+}
 
-            // Road
-            ctx.fillStyle = '#1c1c1c';
-            ctx.fillRect(WIDTH * 0.42, GROUND_Y + 35, WIDTH * 0.38, 38);
-            ctx.fillStyle = '#555';
-            ctx.fillRect(WIDTH * 0.44, GROUND_Y + 42, WIDTH * 0.34, 24);
+function updateParticles(dt){
+  for(let i=Game.particles.length-1; i>=0; i--){
+    const p = Game.particles[i];
+    p.life -= dt;
+    if(p.life <= 0){ Game.particles.splice(i,1); continue; }
+    if(!p.flash){
+      p.vy += (p.gravity||200)*dt;
+      p.x += p.vx*dt;
+      p.y += p.vy*dt;
+      // столкновение с землёй
+      if(p.y > GROUND_Y && p.x > WALL_RIGHT_X){
+        p.y = GROUND_Y; p.vy *= -0.3; p.vx *= 0.6;
+      }
+    }
+  }
+  for(let i=Game.floatTexts.length-1; i>=0; i--){
+    const f = Game.floatTexts[i];
+    f.life -= dt;
+    f.y -= 18*dt;
+    if(f.life <= 0) Game.floatTexts.splice(i,1);
+  }
+}
 
-            // Trees
-            trees.forEach(t => t.draw());
+/* --------------------------------- WAVES -------------------------------- */
+function waveComposition(n){
+  const list = [];
+  let orcs = 3 + Math.floor(n*1.4);
+  let fast = n>=3 ? Math.floor((n-2)*1.1) : 0;
+  let war  = n>=5 ? Math.floor((n-4)*0.75) : 0;
+  let heavy= n>=7 ? Math.floor((n-6)*0.55) : 0;
+  let chief= n>=10? Math.floor((n-9)*0.35) : 0;
 
-            // Towers
-            towers.forEach(t => {
-                ctx.fillStyle = '#6b4e2a';
-                ctx.fillRect(t.x, t.y, t.w, t.h);
-                ctx.fillStyle = '#3f2a1e';
-                ctx.fillRect(t.x + 4, t.y + 12, t.w - 8, 30);
-            });
+  orcs  = Math.min(orcs, 18);
+  fast  = Math.min(fast, 12);
+  war   = Math.min(war, 8);
+  heavy = Math.min(heavy, 5);
+  chief = Math.min(chief, 3);
 
-            // Update and draw orcs
-            for (let i = orcs.length - 1; i >= 0; i--) {
-                let o = orcs[i];
-                o.update();
-                if (!o.alive) {
-                    orcs.splice(i, 1);
-                    continue;
-                }
-                
-                // Draw orc
-                const bob = Math.sin(Date.now() / 180) * 3;
-                
-                // Body
-                ctx.fillStyle = o.type === 'heavy' ? '#4a2f1f' : '#2a1f14';
-                ctx.fillRect(o.x - o.width / 2, o.y + 12 + bob, o.width, o.height - 22);
-                
-                // Head
-                ctx.fillStyle = '#3a2a1e';
-                ctx.beginPath();
-                ctx.arc(o.x, o.y - 18 + bob, 19, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Eyes
-                ctx.fillStyle = '#ffdd88';
-                ctx.fillRect(o.x - 8, o.y - 24 + bob, 5, 5);
-                ctx.fillRect(o.x + 3, o.y - 24 + bob, 5, 5);
-                
-                // Legs
-                ctx.strokeStyle = '#2a1f14';
-                ctx.lineWidth = 6;
-                ctx.beginPath();
-                ctx.moveTo(o.x - 12, o.y + 32 + bob);
-                ctx.lineTo(o.x - 18, o.y + 52 + bob);
-                ctx.moveTo(o.x + 12, o.y + 32 + bob);
-                ctx.lineTo(o.x + 18, o.y + 52 + bob);
-                ctx.stroke();
-            }
+  for(let i=0;i<orcs;i++)  list.push('orc');
+  for(let i=0;i<fast;i++)  list.push('fast');
+  for(let i=0;i<war;i++)   list.push('warrior');
+  for(let i=0;i<heavy;i++) list.push('heavy');
+  for(let i=0;i<chief;i++) list.push('chief');
 
-            // Update and draw arrows
-            for (let i = arrows.length - 1; i >= 0; i--) {
-                let a = arrows[i];
-                a.update();
-                ctx.save();
-                ctx.translate(a.x, a.y);
-                ctx.rotate(a.angle);
-                ctx.fillStyle = '#e0c080';
-                ctx.fillRect(-12, -3, 24, 6);
-                ctx.fillStyle = '#aa6644';
-                ctx.fillRect(8, -4, 14, 8);
-                ctx.restore();
-                
-                // Check wall hit
-                if (a.y < GROUND_Y - 80) {
-                    arrows.splice(i, 1);
-                }
-            }
+  // перемешать
+  for(let i=list.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [list[i],list[j]] = [list[j],list[i]];
+  }
+  return list;
+}
 
-            // Update and draw particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.update();
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                    continue;
-                }
-                p.draw();
-            }
+/* --------------------------------- GAME --------------------------------- */
+const Game = {
+  state: 'menu', // menu | playing | paused | shop | gameover | howto | credits
+  prevState: 'menu',
+  time: 0,
+  wave: 0,
+  wallHP: 1000,
+  maxWallHP: 1000,
+  playerHP: 100,
+  maxPlayerHP: 100,
+  kills: 0,
+  gold: 0,
+  enemies: [],
+  arrows: [],
+  particles: [],
+  enemyProjectiles: [],
+  floatTexts: [],
+  spawnQueue: [],
+  spawnTimer: 0,
+  waveState: 'idle', // idle|intro|spawning|fighting
+  waveTimer: 0,
+  banner: { text:'', sub:'', timer:0 },
+  shake: 0,
+  fogOffset: 0,
+  upgrades: {
+    damage: 0, drawSpeed: 0, repair: 0, moveSpeed: 0, crit: 0,
+    // множители
+    damageMult: 1, drawSpeedMult: 1, moveSpeedMult: 1,
+  },
+  shopButtons: [],
+  pauseButtons: [],
+  menuButtons: [],
+  gameoverButtons: [],
+  howtoBack: false,
+  creditsBack: false,
 
-            // Draw player (archer on wall)
-            const playerY = GROUND_Y - 110;
-            const bobPlayer = Math.sin(Date.now() / 140) * 2;
-            
-            // Wall part under player
-            ctx.fillStyle = '#5c4635';
-            ctx.fillRect(playerX - 28, GROUND_Y - 110, 56, 110);
-            
-            // Legs
-            ctx.strokeStyle = '#2a1f14';
-            ctx.lineWidth = 8;
-            ctx.beginPath();
-            ctx.moveTo(playerX - 14, playerY + 48);
-            ctx.lineTo(playerX - 18, playerY + 68);
-            ctx.moveTo(playerX + 14, playerY + 48);
-            ctx.lineTo(playerX + 18, playerY + 68);
-            ctx.stroke();
-            
-            // Body
-            ctx.fillStyle = '#2a1f14';
-            ctx.fillRect(playerX - 19, playerY + 18, 38, 48);
-            
-            // Head
-            ctx.fillStyle = '#f5d0a0';
-            ctx.beginPath();
-            ctx.arc(playerX, playerY + 8, 17, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Hood
-            ctx.fillStyle = '#1a120f';
-            ctx.beginPath();
-            ctx.moveTo(playerX - 13, playerY - 4);
-            ctx.quadraticCurveTo(playerX, playerY - 26, playerX + 13, playerY - 4);
-            ctx.fill();
-            
-            // Bow
-            ctx.strokeStyle = '#3a2a1e';
-            ctx.lineWidth = 7;
-            ctx.beginPath();
-            ctx.moveTo(playerX - 22, playerY + 12);
-            ctx.lineTo(playerX - 42, playerY - 8 + Math.sin(bowCharge / 5) * 12);
-            ctx.moveTo(playerX + 22, playerY + 12);
-            ctx.lineTo(playerX + 42, playerY - 8 + Math.sin(bowCharge / 5) * 12);
-            ctx.stroke();
-            
-            // Arrow on bow (if charging)
-            if (isCharging && bowCharge > 5) {
-                ctx.fillStyle = '#e0c080';
-                ctx.fillRect(playerX - 38, playerY - 22 + Math.sin(bowCharge / 5) * 8, 16, 7);
-            }
+  reset(){
+    this.time = 0;
+    this.wave = 0;
+    this.wallHP = this.maxWallHP = 1000;
+    this.playerHP = this.maxPlayerHP = 100;
+    this.kills = 0;
+    this.gold = 0;
+    this.enemies.length = 0;
+    this.arrows.length = 0;
+    this.particles.length = 0;
+    this.enemyProjectiles.length = 0;
+    this.floatTexts.length = 0;
+    this.spawnQueue.length = 0;
+    this.spawnTimer = 0;
+    this.waveState = 'idle';
+    this.waveTimer = 0;
+    this.shake = 0;
+    this.banner = { text:'', sub:'', timer:0 };
+    this.upgrades = {
+      damage: 0, drawSpeed: 0, repair: 0, moveSpeed: 0, crit: 0,
+      damageMult: 1, drawSpeedMult: 1, moveSpeedMult: 1,
+    };
+    Player.reset();
+    Player.baseDamage = 26;
+    Player.baseCooldown = 0.55;
+    Player.baseMoveSpeed = 95;
+    Player.critChance = 0.05;
+  },
 
-            // Aim crosshair
-            ctx.strokeStyle = '#ff2222';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(playerAimX - 18, playerAimY);
-            ctx.lineTo(playerAimX + 18, playerAimY);
-            ctx.moveTo(playerAimX, playerAimY - 18);
-            ctx.lineTo(playerAimX, playerAimY + 18);
-            ctx.stroke();
+  startGame(){
+    this.reset();
+    this.state = 'playing';
+    this.nextWave();
+    Audio2.startMusic();
+  },
 
-            // Health bars for orcs that are attacking wall
-            for (let o of orcs) {
-                if (!o.alive || !o.isAttackingWall) continue;
-                const barWidth = o.width * (o.health / o.maxHealth);
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(o.x - o.width / 2 - 2, o.y - 42, o.width + 4, 7);
-                ctx.fillStyle = '#ff2222';
-                ctx.fillRect(o.x - o.width / 2, o.y - 40, barWidth, 4);
-            }
+  nextWave(){
+    this.wave++;
+    this.waveState = 'intro';
+    this.waveTimer = 2.2;
+    this.banner = {
+      text: 'WAVE ' + this.wave,
+      sub: this.wave % 5 === 0 ? 'THE HORDE GROWS' : '',
+      timer: 2.2
+    };
+    Audio2.waveStart();
+    // Очередь спавна
+    this.spawnQueue = waveComposition(this.wave);
+    this.spawnTimer = 0.6; // пауза перед первым спавном
+  },
 
-            // Update UI
-            document.getElementById('waveNum').textContent = currentWave;
-            document.getElementById('castleHP').textContent = Math.max(0, Math.floor(castleHP));
-            document.getElementById('orcsCount').textContent = orcs.length;
-
-            // Check game over
-            if (castleHP <= 0 && gameState === 'playing') {
-                gameState = 'gameOver';
-                document.getElementById('gameOver').style.display = 'block';
-                document.getElementById('finalWave').textContent = currentWave;
-                document.getElementById('finalSlain').textContent = orcsSlain;
-                playSound('death');
-            }
-
-            // Check victory
-            if (currentWave >= 12 && orcs.length === 0 && gameState === 'playing') {
-                gameState = 'victory';
-                document.getElementById('victory').style.display = 'block';
-                document.getElementById('finalWave2').textContent = currentWave;
-                document.getElementById('finalSlain2').textContent = orcsSlain;
-                document.getElementById('finalGold2').textContent = gold;
-                playSound('victory');
-            }
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Input handling
-        function handleInput() {
-            // Keyboard
-            window.addEventListener('keydown', e => {
-                keys[e.key.toLowerCase()] = true;
-                if (e.key === ' ' && gameState === 'playing') {
-                    mouseDown = true;
-                    isCharging = true;
-                    bowCharge = 0;
-                }
-            });
-            
-            window.addEventListener('keyup', e => {
-                keys[e.key.toLowerCase()] = false;
-                if (e.key === ' ' && gameState === 'playing') {
-                    mouseDown = false;
-                    isCharging = false;
-                    if (bowCharge > 12) shootArrow();
-                    bowCharge = 0;
-                }
-            });
-
-            // Mouse
-            canvas.addEventListener('mousemove', e => {
-                const rect = canvas.getBoundingClientRect();
-                playerAimX = e.clientX - rect.left;
-                playerAimY = e.clientY - rect.top;
-            });
-
-            canvas.addEventListener('mousedown', e => {
-                if (gameState !== 'playing') return;
-                if (e.button === 0) {
-                    mouseDown = true;
-                    isCharging = true;
-                    bowCharge = 0;
-                }
-            });
-
-            canvas.addEventListener('mouseup', e => {
-                if (gameState !== 'playing') return;
-                if (e.button === 0) {
-                    mouseDown = false;
-                    isCharging = false;
-                    if (bowCharge > 12) shootArrow();
-                    bowCharge = 0;
-                }
-            });
-
-            // Touch support
-            canvas.addEventListener('touchstart', e => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                playerAimX = touch.clientX - rect.left;
-                playerAimY = touch.clientY - rect.top;
-                mouseDown = true;
-                isCharging = true;
-                bowCharge = 0;
-            });
-
-            canvas.addEventListener('touchmove', e => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                playerAimX = touch.clientX - rect.left;
-                playerAimY = touch.clientY - rect.top;
-            });
-
-            canvas.addEventListener('touchend', e => {
-                e.preventDefault();
-                mouseDown = false;
-                isCharging = false;
-                if (bowCharge > 12) shootArrow();
-                bowCharge = 0;
-            });
-        }
-
-        function shootArrow() {
-            const dx = playerAimX - playerX;
-            const dy = playerAimY - (GROUND_Y - 110);
-            const dist = Math.hypot(dx, dy);
-            const speed = 14;
-            
-            const vx = (dx / dist) * speed;
-            const vy = (dy / dist) * speed;
-            
-            arrows.push(new Arrow(playerX - 18, GROUND_Y - 95, playerAimX, playerAimY));
-            playSound('shoot');
-        }
-
-        // Wave system
-        function startWave() {
-            playSound('waveStart');
-            document.getElementById('waveNum').textContent = currentWave;
-            
-            // Spawn orcs based on wave
-            const base = 8 + currentWave * 5;
-            const fast = Math.floor(currentWave * 1.2);
-            const heavy = Math.floor(currentWave * 0.8);
-            const elite = Math.floor(currentWave * 0.6);
-            
-            for (let i = 0; i < base; i++) {
-                setTimeout(() => {
-                    if (gameState === 'playing') spawnOrc('normal');
-                }, i * 180);
-            }
-            for (let i = 0; i < fast; i++) {
-                setTimeout(() => {
-                    if (gameState === 'playing') spawnOrc('fast');
-                }, i * 180 + 60);
-            }
-            for (let i = 0; i < heavy; i++) {
-                setTimeout(() => {
-                    if (gameState === 'playing') spawnOrc('heavy');
-                }, i * 180 + 120);
-            }
-            for (let i = 0; i < elite; i++) {
-                setTimeout(() => {
-                    if (gameState === 'playing') spawnOrc('elite');
-                }, i * 180 + 200);
-            }
-        }
-
-        // Main game loop logic
-        function updateGame() {
-            if (gameState !== 'playing') return;
-
-            // Movement
-            if (keys['a'] || keys['arrowleft']) playerX = Math.max(80, playerX - 4.5);
-            if (keys['d'] || keys['arrowright']) playerX = Math.min(WIDTH - 80, playerX + 4.5);
-
-            // Aim smoothing
-            if (Date.now() - lastAimUpdate > 18) {
-                playerAimX = playerX + (playerAimX - playerX) * 0.35;
-                lastAimUpdate = Date.now();
-            }
-
-            // Charging
-            if (isCharging) {
-                bowCharge = Math.min(40, bowCharge + 1.8);
-            }
-
-            // Castle damage over time if orcs are attacking
-            let wallAttackCount = 0;
-            for (let o of orcs) {
-                if (o.isAttackingWall) wallAttackCount++;
-            }
-            if (wallAttackCount > 0) {
-                castleHP -= 0.65 * wallAttackCount;
-                if (castleHP < 0) castleHP = 0;
-            }
-
-            // Spawn next wave
-            if (orcs.length === 0 && gameState === 'playing') {
-                currentWave++;
-                if (currentWave > 12) {
-                    gameState = 'victory';
-                    document.getElementById('victory').style.display = 'block';
-                    document.getElementById('finalWave2').textContent = currentWave - 1;
-                    document.getElementById('finalSlain2').textContent = orcsSlain;
-                    document.getElementById('finalGold2').textContent = gold;
-                } else {
-                    startWave();
-                }
-            }
-        }
-
-        // Animation loop
-        function animate() {
-            updateGame();
-            gameLoop();
-        }
-
-        // Start game
-        function startGame() {
-            castleHP = 1000;
-            currentWave = 1;
-            orcsSlain = 0;
-            gold = 0;
-            gameState = 'playing';
-            document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('victory').style.display = 'none';
-            
-            playerX = WIDTH / 2;
-            playerAimX = WIDTH / 2;
-            arrows = [];
-            orcs = [];
-            particles = [];
-            createCastle();
-            createTrees();
-            
-            // First wave immediately
-            setTimeout(() => {
-                if (gameState === 'playing') startWave();
-            }, 300);
-        }
-
-        window.restartGame = function() {
-            startGame();
+  updateWave(dt){
+    if(this.waveState === 'intro'){
+      this.waveTimer -= dt;
+      if(this.waveTimer <= 0) this.waveState = 'spawning';
+    }
+    else if(this.waveState === 'spawning'){
+      this.spawnTimer -= dt;
+      if(this.spawnTimer <= 0 && this.spawnQueue.length > 0){
+        const type = this.spawnQueue.shift();
+        const x = SPAWN_X + rand(-6, 6);
+        this.enemies.push(makeEnemy(type, x));
+        // Интервал уменьшается с ростом волны
+        const base = Math.max(0.45, 1.15 - this.wave*0.03);
+        this.spawnTimer = base * rand(0.75, 1.35);
+      }
+      if(this.spawnQueue.length === 0) this.waveState = 'fighting';
+    }
+    else if(this.waveState === 'fighting'){
+      if(this.enemies.length === 0 && this.spawnQueue.length === 0){
+        // Волна пройдена
+        this.waveState = 'idle';
+        const bonus = 20 + this.wave*6;
+        this.gold += bonus;
+        this.banner = {
+          text:'WAVE CLEARED', sub:'+'+bonus+' GOLD', timer: 2.0
         };
+        Audio2.uiBig();
+        setTimeout(()=>{ if(Game.state==='playing') Game.openShop(); }, 1800);
+      }
+    }
+  },
 
-        // Initialize
-        function init() {
-            initAudio();
-            startGame();
-            handleInput();
-            animate();
+  openShop(){
+    this.state = 'shop';
+    this.buildShopButtons();
+  },
+  closeShop(){
+    this.state = 'playing';
+    this.nextWave();
+  },
+
+  buildShopButtons(){
+    const items = [
+      { key:'damage',    label:'ARROW DMG',   desc:'+5 damage',           base:30, mult:1.55 },
+      { key:'drawSpeed', label:'DRAW SPEED',  desc:'+12% fire rate',      base:40, mult:1.5  },
+      { key:'repair',    label:'REPAIR WALL', desc:'+180 wall HP',        base:25, mult:1.35 },
+      { key:'moveSpeed', label:'MOVE SPEED',  desc:'+10% movement',       base:30, mult:1.5  },
+      { key:'crit',      label:'CRIT CHANCE', desc:'+5% critical hit',    base:50, mult:1.6  },
+    ];
+    const bx = 60, by = 92, bw = 165, bh = 26, gap = 6;
+    this.shopButtons = [];
+    for(let i=0;i<items.length;i++){
+      const it = items[i];
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = bx + col*(bw+gap);
+      const y = by + row*(bh+gap);
+      const lvl = this.upgrades[it.key];
+      const cost = Math.floor(it.base * Math.pow(it.mult, lvl));
+      this.shopButtons.push({
+        x, y, w:bw, h:bh,
+        key: it.key, label: it.label, desc: it.desc,
+        lvl, cost,
+      });
+    }
+    // Кнопка NEXT WAVE
+    this.shopButtons.push({
+      x: W/2 - 70, y: 232, w:140, h:26,
+      key:'__next', label:'NEXT WAVE', desc:''
+    });
+  },
+
+  buyUpgrade(key){
+    const btn = this.shopButtons.find(b=>b.key===key);
+    if(!btn) return;
+    if(this.gold < btn.cost){ Audio2.tone(150,0.15,'square',0.15,80); return; }
+    this.gold -= btn.cost;
+    Audio2.uiBig();
+    switch(key){
+      case 'damage':
+        this.upgrades.damage++;
+        Player.baseDamage += 5;
+        break;
+      case 'drawSpeed':
+        this.upgrades.drawSpeed++;
+        this.upgrades.drawSpeedMult *= 1.12;
+        break;
+      case 'repair':
+        this.upgrades.repair++;
+        this.maxWallHP += 180;
+        this.wallHP = Math.min(this.maxWallHP, this.wallHP + 180);
+        break;
+      case 'moveSpeed':
+        this.upgrades.moveSpeed++;
+        this.upgrades.moveSpeedMult *= 1.10;
+        break;
+      case 'crit':
+        this.upgrades.crit++;
+        Player.critChance += 0.05;
+        break;
+    }
+    // Пересобрать цены
+    this.buildShopButtons();
+    // Найти и обновить кнопку NEXT
+  },
+
+  pause(){
+    if(this.state !== 'playing') return;
+    this.prevState = this.state;
+    this.state = 'paused';
+    this.buildPauseButtons();
+    Audio2.ui();
+  },
+  resume(){
+    if(this.state !== 'paused') return;
+    this.state = 'playing';
+    Audio2.ui();
+  },
+  buildPauseButtons(){
+    this.pauseButtons = [
+      { x: W/2-70, y:130, w:140, h:24, key:'resume', label:'RESUME' },
+      { x: W/2-70, y:160, w:140, h:24, key:'menu',   label:'MAIN MENU' },
+    ];
+  },
+
+  triggerGameOver(reason){
+    if(this.state === 'gameover') return;
+    this.state = 'gameover';
+    this.gameOverReason = reason;
+    Audio2.defeat();
+    Audio2.stopMusic();
+    this.gameoverButtons = [
+      { x: W/2-150, y:200, w:140, h:26, key:'retry', label:'TRY AGAIN' },
+      { x: W/2+10,  y:200, w:140, h:26, key:'menu',  label:'MAIN MENU' },
+    ];
+  },
+
+  buildMenuButtons(){
+    const bw = 180, bh = 24, bx = W/2 - bw/2;
+    this.menuButtons = [
+      { x:bx, y:158, w:bw, h:bh, key:'start',    label:'START GAME'  },
+      { x:bx, y:188, w:bw, h:bh, key:'howto',    label:'HOW TO PLAY' },
+      { x:bx, y:218, w:bw, h:bh, key:'settings', label:'SETTINGS'    },
+      { x:bx, y:248, w:bw, h:bh, key:'credits',  label:'CREDITS'     },
+    ];
+    // чуть вверх — чтобы влезли
+  },
+};
+
+/* --------------------------- MAIN MENU BUTTONS --------------------------- */
+Game.buildMenuButtons();
+Game.buildPauseButtons();
+
+/* ------------------------------ CLICK HANDLER ---------------------------- */
+Input.addClickListener((x,y)=>{
+  if(Game.state === 'menu'){
+    for(const b of Game.menuButtons){
+      if(x>=b.x && x<=b.x+b.w && y>=b.y && y<=b.y+b.h){
+        Audio2.uiBig();
+        if(b.key==='start')      Game.startGame();
+        else if(b.key==='howto'){ Game.state='howto'; }
+        else if(b.key==='settings'){
+          Audio2.enabled = !Audio2.enabled;
+          if(Audio2.enabled) Audio2.uiBig(); else Audio2.ui();
         }
+        else if(b.key==='credits'){ Game.state='credits'; }
+        return;
+      }
+    }
+  }
+  else if(Game.state === 'playing'){
+    // Стрельба — только если клик по полю (не по UI-зоне сверху)
+    if(y > 30) Player.tryShoot();
+  }
+  else if(Game.state === 'paused'){
+    for(const b of Game.pauseButtons){
+      if(x>=b.x && x<=b.x+b.w && y>=b.y && y<=b.y+b.h){
+        Audio2.ui();
+        if(b.key==='resume') Game.resume();
+        else if(b.key==='menu'){ Game.state='menu'; Audio2.stopMusic(); Game.buildMenuButtons(); }
+        return;
+      }
+    }
+  }
+  else if(Game.state === 'shop'){
+    for(const b of Game.shopButtons){
+      if(x>=b.x && x<=b.x+b.w && y>=b.y && y<=b.y+b.h){
+        if(b.key === '__next'){ Audio2.uiBig(); Game.closeShop(); }
+        else Game.buyUpgrade(b.key);
+        return;
+      }
+    }
+  }
+  else if(Game.state === 'gameover'){
+    for(const b of Game.gameoverButtons){
+      if(x>=b.x && x<=b.x+b.w && y>=b.y && y<=b.y+b.h){
+        Audio2.uiBig();
+        if(b.key==='retry'){ Game.startGame(); }
+        else if(b.key==='menu'){ Game.state='menu'; Game.buildMenuButtons(); }
+        return;
+      }
+    }
+  }
+  else if(Game.state === 'howto' || Game.state === 'credits'){
+    Audio2.ui();
+    Game.state = 'menu';
+  }
+});
 
-        window.onload = init;
-    </script>
-</body>
-</html>
+/* -------------------------------- RENDERING ----------------------------- */
+function drawField(){
+  // Земля
+  ctx.fillStyle = COLORS.grass;
+  ctx.fillRect(WALL_RIGHT_X, GROUND_Y, W-WALL_RIGHT_X, H-GROUND_Y);
+  // Тёмный край
+  ctx.fillStyle = COLORS.grassDark;
+  ctx.fillRect(WALL_RIGHT_X, GROUND_Y, W-WALL_RIGHT_X, 3);
+  // Тропа, по которой идут орки
+  ctx.fillStyle = COLORS.pathDark;
+  ctx.fillRect(WALL_RIGHT_X, GROUND_Y+8, W-WALL_RIGHT_X, 10);
+  ctx.fillStyle = COLORS.path;
+  ctx.fillRect(WALL_RIGHT_X, GROUND_Y+9, W-WALL_RIGHT_X, 8);
+  // Пунктирные следы на тропе
+  ctx.fillStyle = COLORS.pathDark;
+  for(let x=WALL_RIGHT_X+8; x<W; x+=22){
+    ctx.fillRect(x, GROUND_Y+12, 8, 1);
+    ctx.fillRect(x+6, GROUND_Y+14, 4, 1);
+  }
+  // Травинки
+  ctx.fillStyle = COLORS.grassLight;
+  for(let i=0;i<70;i++){
+    const gx = WALL_RIGHT_X + ((i*67)%(W-WALL_RIGHT_X));
+    const gy = GROUND_Y + 4 + ((i*29)%14);
+    ctx.fillRect(gx, gy, 1, 2);
+  }
+  // Камни и кустики на поле
+  for(let i=0;i<10;i++){
+    const rx = 190 + ((i*53)%280);
+    const ry = GROUND_Y + 3 + ((i*17)%10);
+    ctx.fillStyle = '#2a2a30';
+    ctx.fillRect(rx, ry, 3, 2);
+    ctx.fillStyle = '#3a3a44';
+    ctx.fillRect(rx, ry, 3, 1);
+  }
+}
+
+function drawNearTrees(){
+  // Несколько крупных ё
