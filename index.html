@@ -1,2510 +1,2516 @@
 <!DOCTYPE html>
-<html lang="ru"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
 <title>THE LAST WALL</title>
+
 <style>
-html,body{margin:0;height:100%;background:#05070a;overflow:hidden;font-family:'Courier New',Courier,monospace;font-weight:bold;color:#cfc8b0;user-select:none;-webkit-user-select:none;touch-action:none;overscroll-behavior:none}
-canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block;width:100%;height:100%;cursor:none}
-.ov{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,rgba(8,12,16,.78),rgba(2,3,5,.95));text-align:center;z-index:5;padding:14px;overflow:auto;box-sizing:border-box}
-.ov.on{display:flex}
-h1{font-size:clamp(30px,8vw,70px);letter-spacing:.18em;margin:0 0 10px;color:#d9d0ae;text-shadow:0 0 26px #000,0 0 40px rgba(160,60,30,.35);font-weight:normal}
-h2{font-size:clamp(22px,5vw,38px);letter-spacing:.14em;margin:0 0 8px;color:#d9d0ae;font-weight:normal}
-p{margin:6px 0;line-height:1.5;max-width:560px;color:#a9a48f;font-size:clamp(13px,2.6vw,17px)}
-button{font-family:inherit;background:linear-gradient(#2b2d2e,#17191a);color:#e0d6b4;border:1px solid #6a6350;padding:12px 26px;font-size:clamp(14px,3vw,19px);letter-spacing:.12em;cursor:pointer;margin:7px;border-radius:2px;box-shadow:0 0 14px rgba(0,0,0,.7)}
-button:hover:not(:disabled){border-color:#c9a45a;color:#fff2c8}
-button:disabled{opacity:.35;cursor:default}
-.up{display:flex;justify-content:space-between;gap:16px;width:min(520px,92vw);text-align:left;font-size:clamp(13px,2.8vw,16px)}
-.up small{display:block;color:#8d8a78}
-.st{font-size:clamp(15px,3.2vw,22px);margin:4px 0;color:#cfc8b0}
-.gold{color:#d8b24c}
-#tc{position:fixed;left:0;right:0;bottom:0;display:none;justify-content:space-between;padding:0 14px calc(14px + env(safe-area-inset-bottom));pointer-events:none;z-index:3}
-#tc div{pointer-events:auto;display:flex;gap:12px}
-#tc b{width:64px;height:64px;border-radius:50%;background:rgba(20,22,22,.6);border:2px solid rgba(200,180,120,.5);color:#e0d6b4;font-size:26px;display:flex;align-items:center;justify-content:center;touch-action:none}
-#tc b.f{width:84px;height:84px;font-size:15px;letter-spacing:.1em;background:rgba(110,30,20,.55)}
-</style></head><body>
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#05070a;
+    font-family:"Courier New",monospace;
+    color:#d6cfb6;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+}
 
-<canvas id="c"></canvas>
+canvas{
+    display:block;
+    width:100%;
+    height:100%;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+}
 
-<div id="tc">
-  <div><b id="bL">◀</b><b id="bR">▶</b></div>
-  <div><b id="bF" class="f">FIRE</b></div>
+.overlay{
+    position:fixed;
+    inset:0;
+    z-index:10;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(15,20,25,.82),
+            rgba(2,3,5,.97)
+        );
+
+    text-align:center;
+    padding:20px;
+}
+
+.overlay.hidden{
+    display:none;
+}
+
+h1{
+    margin:0 0 18px;
+    font-size:clamp(32px,8vw,72px);
+    font-weight:normal;
+    letter-spacing:.15em;
+    color:#d9d0ae;
+    text-shadow:
+        3px 3px #000,
+        0 0 30px rgba(170,100,50,.35);
+}
+
+.subtitle{
+    max-width:650px;
+    line-height:1.6;
+    font-size:clamp(13px,2.5vw,18px);
+    color:#aaa58f;
+    margin-bottom:25px;
+}
+
+button{
+    font-family:inherit;
+    font-weight:bold;
+
+    padding:14px 30px;
+
+    color:#e1d5ad;
+    background:
+        linear-gradient(
+            #343738,
+            #17191a
+        );
+
+    border:2px solid #69614e;
+
+    cursor:pointer;
+
+    letter-spacing:.1em;
+    font-size:16px;
+
+    box-shadow:
+        0 5px 0 #080909,
+        0 0 18px rgba(0,0,0,.7);
+}
+
+button:hover{
+    color:#fff1bc;
+    border-color:#c4a45c;
+}
+
+button:active{
+    transform:translateY(3px);
+    box-shadow:
+        0 2px 0 #080909;
+}
+
+#touchControls{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+
+    z-index:5;
+
+    display:none;
+    justify-content:space-between;
+
+    padding:
+        10px
+        15px
+        calc(15px + env(safe-area-inset-bottom));
+}
+
+.touchGroup{
+    display:flex;
+    gap:10px;
+}
+
+.touchButton{
+    width:65px;
+    height:65px;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#ddd2b1;
+
+    background:rgba(20,22,22,.75);
+    border:2px solid rgba(190,170,110,.5);
+
+    font-size:24px;
+}
+
+.fireButton{
+    width:85px;
+    height:85px;
+
+    font-size:14px;
+
+    background:rgba(100,30,20,.65);
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+
+<!-- ================= MENU ================= -->
+
+<div id="mainMenu" class="overlay">
+
+    <h1>THE LAST WALL</h1>
+
+    <div class="subtitle">
+        Из тёмного леса идут орки.<br>
+        Ты — последний лучник на стене.<br><br>
+
+        Наводи мышь и стреляй по врагам.<br>
+        A / D или ← / → — движение по стене.<br>
+        Space — выстрел.
+    </div>
+
+    <button id="startButton">
+        DEFEND THE WALL
+    </button>
+
 </div>
 
-<div id="menu" class="ov on">
-<h1>THE LAST WALL</h1>
-<p>Из тёмного леса идёт армия орков. Ты — последний лучник на стене замка. Целься мышью, держи ЛКМ — натягивай тетиву, отпусти — стреляй.</p>
-<p>A / D или ← / → — движение по стене · Space — выстрел · M — звук<br>
-Телефон: тяни по экрану — прицел, FIRE — выстрел, ◀ ▶ — движение</p>
-<button id="bStart">DEFEND THE WALL</button>
+
+<!-- ================= TOUCH ================= -->
+
+<div id="touchControls">
+
+    <div class="touchGroup">
+        <div id="leftButton" class="touchButton">◀</div>
+        <div id="rightButton" class="touchButton">▶</div>
+    </div>
+
+    <div class="touchGroup">
+        <div id="fireButton" class="touchButton fireButton">
+            FIRE
+        </div>
+    </div>
+
 </div>
 
-<div id="shop" class="ov"></div>
-<div id="end" class="ov"></div>
 
 <script>
-(()=>{
-'use strict';
-
-const $=id=>document.getElementById(id),
-cv=$('c'),
-out=cv.getContext('2d'),
-lo=document.createElement('canvas'),
-g=lo.getContext('2d');
-
-let ps=3;
-
-const clamp=(v,a,b)=>v<a?a:v>b?b:v,
-lerp=(a,b,t)=>a+(b-a)*t,
-rnd=(a,b)=>a+Math.random()*(b-a);
-
-let W,H,U,PX,HOR,WALLY,DPR=1,bg,back,front,vig,fogS,items=[];
-
-const K=.045,
-sc=z=>1/(1+z*K),
-lx=z=>Math.pow(sc(z),.55),
-PY=z=>HOR+(WALLY-HOR)*sc(z),
-PXs=(x,z)=>W/2+x*PX*lx(z),
-roadX=z=>Math.sin(z*.055)*9*Math.min(1,z/40),
-roadW=z=>5.5+z*.012;
-
-const mixc=(a,b,t)=>
-`rgb(${a.map((v,i)=>(v+(b[i]-v)*t)|0).join(',')})`;
-
-const mk=(w,h)=>{
-const c=document.createElement('canvas');
-c.width=w*DPR;
-c.height=h*DPR;
-const x=c.getContext('2d');
-x.scale(DPR,DPR);
-return[c,x]
-};
+"use strict";
 
 
-/* ================= AUDIO ================= */
+/* =========================================================
+   CANVAS
+   ========================================================= */
 
-let AC,master,nbuf,mute=false,lastHit=0,lastWall=0;
+const canvas =
+    document.getElementById("gameCanvas");
 
-function initAudio(){
-if(AC){
-if(AC.state==='suspended')AC.resume();
-return
-}
+const ctx =
+    canvas.getContext("2d");
 
-try{
-AC=new(window.AudioContext||window.webkitAudioContext)();
-master=AC.createGain();
-master.gain.value=.55;
-master.connect(AC.destination);
+const menu =
+    document.getElementById("mainMenu");
 
-const n=AC.sampleRate*2;
-nbuf=AC.createBuffer(1,n,AC.sampleRate);
-const d=nbuf.getChannelData(0);
+const startButton =
+    document.getElementById("startButton");
 
-for(let i=0;i<n;i++)
-d[i]=Math.random()*2-1;
 
-ambient();
+/* =========================================================
+   GAME STATE
+   ========================================================= */
 
-}catch(e){
-AC=null
-}
-}
+let width = 0;
+let height = 0;
 
-function noise(dur,f1,f2,type,vol,q){
-if(!AC||mute)return;
+let scale = 1;
 
-const T=AC.currentTime,
-s=AC.createBufferSource();
+let gameStarted = false;
+let gameOver = false;
 
-s.buffer=nbuf;
+let wave = 1;
 
-const f=AC.createBiquadFilter();
-f.type=type;
-f.frequency.setValueAtTime(f1,T);
-f.frequency.exponentialRampToValueAtTime(f2,T+dur);
+let wallHP = 1000;
+let maxWallHP = 1000;
 
-if(q)f.Q.value=q;
+let gold = 0;
+let score = 0;
+let kills = 0;
 
-const gn=AC.createGain();
-gn.gain.setValueAtTime(vol,T);
-gn.gain.exponentialRampToValueAtTime(.001,T+dur);
+let spawnTimer = 0;
 
-s.connect(f);
-f.connect(gn);
-gn.connect(master);
+let mouseX = 0;
+let mouseY = 0;
 
-s.start(T,Math.random());
-s.stop(T+dur+.05)
-}
+let mouseDown = false;
 
-function tone(type,f1,f2,dur,vol,delay,lp){
-if(!AC||mute)return;
+let moveLeft = false;
+let moveRight = false;
 
-const T=AC.currentTime+(delay||0),
-o=AC.createOscillator(),
-gn=AC.createGain();
+let lastTime = performance.now();
 
-o.type=type;
-o.frequency.setValueAtTime(f1,T);
-o.frequency.exponentialRampToValueAtTime(Math.max(20,f2),T+dur);
 
-gn.gain.setValueAtTime(.001,T);
-gn.gain.linearRampToValueAtTime(vol,T+Math.min(.04,dur/4));
-gn.gain.exponentialRampToValueAtTime(.001,T+dur);
+/* =========================================================
+   PLAYER
+   ========================================================= */
 
-let n=o;
+const player = {
 
-if(lp){
-const f=AC.createBiquadFilter();
-f.type='lowpass';
-f.frequency.value=lp;
-o.connect(f);
-n=f
-}
+    x:0,
 
-n.connect(gn);
-gn.connect(master);
+    y:0,
 
-o.start(T);
-o.stop(T+dur+.05)
-}
+    speed:420,
 
-function ambient(){
+    damage:20,
 
-const s=AC.createBufferSource();
-s.buffer=nbuf;
-s.loop=true;
+    fireCooldown:0,
 
-const f=AC.createBiquadFilter();
-f.type='bandpass';
-f.frequency.value=420;
-f.Q.value=.7;
+    fireRate:.48,
 
-const gn=AC.createGain();
-gn.gain.value=.05;
-
-const l=AC.createOscillator(),
-lg=AC.createGain();
-
-l.frequency.value=.11;
-lg.gain.value=.035;
-
-l.connect(lg);
-lg.connect(gn.gain);
-
-s.connect(f);
-f.connect(gn);
-gn.connect(master);
-
-s.start();
-l.start();
-
-[55,82.5].forEach(fr=>{
-const o=AC.createOscillator(),
-q=AC.createGain();
-
-o.type='sine';
-o.frequency.value=fr;
-q.gain.value=.018;
-
-o.connect(q);
-q.connect(master);
-o.start()
-});
-
-setInterval(()=>{
-if(Math.random()<.6)
-tone('sine',rnd(260,340),rnd(150,200),2.2,.03,0,600)
-},17000)
-}
-
-const SFX={
-
-shoot(){
-noise(.18,3500,500,'highpass',.22);
-tone('triangle',240,90,.16,.18)
-},
-
-draw(){
-noise(.25,300,700,'bandpass',.05,3)
-},
-
-hit(){
-const n=performance.now();
-
-if(n-lastHit<35)return;
-
-lastHit=n;
-
-noise(.12,1400,200,'lowpass',.35);
-tone('triangle',180,70,.1,.25)
-},
-
-kill(){
-tone('sawtooth',150,45,.35,.2,0,500);
-noise(.25,700,120,'lowpass',.25)
-},
-
-wall(){
-const n=performance.now();
-
-if(n-lastWall<80)return;
-
-lastWall=n;
-
-noise(.28,350,60,'lowpass',.6);
-tone('sine',70,35,.25,.4)
-},
-
-miss(){
-noise(.08,900,300,'lowpass',.1)
-},
-
-wave(){
-tone('sawtooth',98,98,1.5,.18,0,420);
-tone('sawtooth',147,140,1.5,.14,.05,420);
-tone('sawtooth',196,190,1.2,.1,.5,420)
-},
-
-win(){
-[392,494,587,784].forEach((f,i)=>
-tone('triangle',f,f,.6,.2,i*.18))
-},
-
-lose(){
-[330,262,220,165,110].forEach((f,i)=>
-tone('sawtooth',f,f*.95,.8,.16,i*.28,500));
-
-noise(1.6,400,40,'lowpass',.5)
-},
-
-drum(){
-tone('sine',70,40,.3,.22)
-}
+    drawPower:0
 
 };
 
 
-/* ================= STATE ================= */
+/* =========================================================
+   ENEMIES
+   ========================================================= */
 
-const TY={
+const enemyTypes = {
 
-orc:{
-hp:28,
-spd:5,
-dmg:5,
-cd:1.3,
-sz:1,
-gold:5,
-col:'#4e6e3b',
-arm:'#3b2d20',
-armor:0,
-w:2.3
-},
+    normal:{
+        hp:28,
+        speed:52,
+        damage:5,
+        attackTime:1.3,
+        size:1,
+        color:"#657451"
+    },
 
-fast:{
-hp:16,
-spd:10.5,
-dmg:3,
-cd:.8,
-sz:.82,
-gold:7,
-col:'#6f8f3e',
-arm:'#6b2b22',
-armor:0,
-w:1.8
-},
+    fast:{
+        hp:16,
+        speed:88,
+        damage:3,
+        attackTime:1,
+        size:.8,
+        color:"#7d804b"
+    },
 
-heavy:{
-hp:85,
-spd:2.8,
-dmg:16,
-cd:2,
-sz:1.4,
-gold:18,
-col:'#40593a',
-arm:'#5a5f66',
-armor:1,
-w:3.2
-},
+    heavy:{
+        hp:85,
+        speed:32,
+        damage:16,
+        attackTime:1.7,
+        size:1.3,
+        color:"#4e5b46"
+    },
 
-elite:{
-hp:140,
-spd:3.7,
-dmg:24,
-cd:1.8,
-sz:1.25,
-gold:35,
-col:'#36422f',
-arm:'#2b1a1d',
-armor:4,
-w:2.8
-}
+    elite:{
+        hp:140,
+        speed:42,
+        damage:24,
+        attackTime:1.5,
+        size:1.4,
+        color:"#625642"
+    }
+
 };
 
-const UP=[
-['dmg','Arrow Damage','+15% damage per level',40],
-['rate','Draw Speed','faster bow draw',45],
-['hp','Castle Walls','+150 max HP and repair',50],
-['crit','Critical Power','+chance and +damage',45],
-['spd','Archer Agility','faster movement',30]
-];
 
-const MAXLV=8,
-WAVES=10;
+let enemies = [];
+let arrows = [];
 
-let st='menu',
-wave=0,
-hp=1000,
-maxHP=1000,
-kills=0,
-shots=0,
-hits=0,
-gold=0,
-goldTotal=0,
-up,
-orcs,
-arrows,
-parts,
-queue,
-spT,
-banT,
-banTxt,
-shake,
-t=0,
-ax,
-avx,
-p,
-drawing,
-rec,
-ct,
-drumT,
-mx,
-my,
-touchDir=0,
-nextIn;
+let particles = [];
 
-const mot=Array.from({length:50},()=>({
-x:Math.random(),
-y:Math.random(),
-s:rnd(.2,1)
-}));
 
-const fogB=Array.from({length:8},()=>({
-x:Math.random(),
-y:rnd(.34,.78),
-r:rnd(.25,.5),
-v:rnd(.004,.012),
-a:rnd(.05,.11)
-}));
+/* =========================================================
+   WAVES
+   ========================================================= */
 
-function reset(){
+let waveEnemies = 0;
+let waveSpawned = 0;
 
-wave=0;
-hp=maxHP=1000;
-kills=shots=hits=gold=goldTotal=0;
+let waveActive = false;
 
-up={
-dmg:0,
-rate:0,
-hp:0,
-crit:0,
-spd:0
-};
 
-orcs=[];
-arrows=[];
-parts=[];
-queue=[];
-spT=0;
-banT=0;
-banTxt='';
-shake=0;
-ax=0;
-avx=0;
-p=0;
-drawing=false;
-rec=0;
-ct=0;
-drumT=0;
+function beginWave(number){
 
-mx=innerWidth/2/ps;
-my=innerHeight*.5/ps
+    wave = number;
+
+    waveEnemies =
+        5 + number * 3;
+
+    waveSpawned = 0;
+
+    spawnTimer = .5;
+
+    waveActive = true;
+
 }
 
-reset();
 
-const dmgBase=()=>12*(1+.15*up.dmg),
-critCh=()=>.1+.04*up.crit,
-critMul=()=>2+.3*up.crit,
-drawTime=()=>.55/(1+.2*up.rate),
-cost=k=>Math.round(
-UP.find(u=>u[0]===k)[3]*(1+up[k]*.75)
+function chooseEnemy(){
+
+    const r = Math.random();
+
+    if(wave >= 8 && r < .08)
+        return "elite";
+
+    if(wave >= 5 && r < .20)
+        return "heavy";
+
+    if(wave >= 3 && r < .35)
+        return "fast";
+
+    return "normal";
+}
+
+
+function spawnEnemy(){
+
+    if(waveSpawned >= waveEnemies)
+        return;
+
+    const type =
+        chooseEnemy();
+
+    const data =
+        enemyTypes[type];
+
+    enemies.push({
+
+        type:type,
+
+        x:
+            width / 2 +
+            (Math.random() - .5) * 80,
+
+        y:
+            height * .56,
+
+        hp:data.hp *
+            (1 + wave * .05),
+
+        maxHP:data.hp *
+            (1 + wave * .05),
+
+        speed:data.speed *
+            (1 + wave * .025),
+
+        damage:data.damage,
+
+        attackTime:data.attackTime,
+
+        attackTimer:0,
+
+        size:data.size,
+
+        dead:false
+
+    });
+
+    waveSpawned++;
+
+}
+
+
+/* =========================================================
+   START GAME
+   ========================================================= */
+
+function startGame(){
+
+    /* Important:
+       this function is completely independent
+       from the rendering loop.
+    */
+
+    gameStarted = true;
+    gameOver = false;
+
+    menu.classList.add("hidden");
+
+    resetGame();
+
+    beginWave(1);
+
+}
+
+
+startButton.addEventListener(
+    "click",
+    startGame
 );
 
 
-/* ================= WORLD BUILD ================= */
+/* =========================================================
+   RESET
+   ========================================================= */
 
-function mkTree(x,z){
+function resetGame(){
 
-const f=clamp((z-20)/150,0,.7),
-r=Math.random();
+    wallHP = 1000;
+    maxWallHP = 1000;
 
-return{
-k:r<.18?'d':'t',
-x,
-z,
-h:rnd(32,54),
-seed:Math.random()*9,
-c0:mixc([30,22,16],[34,54,64],f),
-c1:mixc([12,34,22],[34,54,64],f),
-c2:mixc([30,66,44],[34,54,64],f),
-c3:mixc([58,96,70],[34,54,64],f)
-}
-}
+    gold = 0;
+    score = 0;
+    kills = 0;
 
-function buildWorld(){
+    enemies = [];
+    arrows = [];
+    particles = [];
 
-items=[];
+    player.x =
+        width / 2;
 
-for(let i=0;i<360;i++){
+    player.y =
+        height * .735;
 
-const z=rnd(84,168),
-x=rnd(-240,240);
+    player.fireCooldown = 0;
 
-if(Math.abs(x-roadX(z))<roadW(z)+4.5)
-continue;
-
-items.push(mkTree(x,z))
-}
-
-for(let i=0;i<110;i++){
-
-const z=rnd(24,84),
-x=rnd(-130,130);
-
-if(Math.abs(x-roadX(z))<roadW(z)+9)
-continue;
-
-if(z<56&&Math.abs(x)<46)
-continue;
-
-items.push(mkTree(x,z))
-}
-
-for(let i=0;i<110;i++){
-
-const z=rnd(8,150),
-x=rnd(-150,150);
-
-if(Math.abs(x-roadX(z))<roadW(z)+3)
-continue;
-
-const f=clamp(z/150,0,.6);
-
-items.push({
-k:'b',
-x,
-z,
-h:rnd(3.5,7),
-seed:Math.random()*9,
-c1:mixc([14,38,24],[34,54,64],f),
-c2:mixc([30,62,40],[34,54,64],f)
-})
-}
-
-for(let i=0;i<40;i++){
-
-const z=rnd(8,140),
-x=rnd(-150,150);
-
-if(Math.abs(x-roadX(z))<roadW(z)+2)
-continue;
-
-items.push({
-k:'r',
-x,
-z,
-h:rnd(2,5),
-c1:mixc([60,66,70],[34,54,64],clamp(z/160,0,.6)),
-c2:mixc([96,104,108],[34,54,64],clamp(z/160,0,.6))
-})
-}
-
-for(let i=0;i<260;i++){
-
-const z=rnd(3,110),
-x=rnd(-120,120);
-
-if(Math.abs(x-roadX(z))<roadW(z)+1.5)
-continue;
-
-items.push({
-k:'g',
-x,
-z,
-h:rnd(2,4),
-seed:Math.random()*9,
-c1:mixc([44,74,48],[34,54,64],clamp(z/130,0,.6))
-})
-}
-
-items.sort((a,b)=>b.z-a.z)
 }
 
 
-/* ================= RESIZE ================= */
+/* =========================================================
+   RESIZE
+   ========================================================= */
 
 function resize(){
 
-DPR=1;
+    width =
+        Math.max(
+            320,
+            window.innerWidth
+        );
 
-ps=Math.max(
-3,
-Math.round(Math.min(innerWidth,innerHeight)/175)
-);
+    height =
+        Math.max(
+            240,
+            window.innerHeight
+        );
 
-W=Math.ceil(innerWidth/ps);
-H=Math.ceil(innerHeight/ps);
+    scale =
+        Math.max(
+            2,
+            Math.round(
+                Math.min(width,height) / 240
+            )
+        );
 
-lo.width=W;
-lo.height=H;
+    canvas.width =
+        width;
 
-cv.width=W*ps;
-cv.height=H*ps;
+    canvas.height =
+        height;
 
-g.setTransform(1,0,0,1,0,0);
-g.imageSmoothingEnabled=false;
+    player.y =
+        height * .735;
 
-U=Math.min(H,W*.75);
-PX=W/100;
-HOR=H*.3;
-WALLY=H*.79;
+    if(!gameStarted){
 
-buildStatic();
-buildVig()
+        player.x =
+            width / 2;
+
+    }
+
 }
 
 
-/* ================= STATIC WORLD ================= */
-
-function buildStatic(){
-
-[bg,g]=mk(W,H);
-[back,g2]=mk(W,H);
-[front,g3]=mk(W,H);
-
-g2.imageSmoothingEnabled=false;
-g3.imageSmoothingEnabled=false;
-
-
-/* SKY */
-
-g.fillStyle='#080c13';
-g.fillRect(0,0,W,H*.55);
-
-g.fillStyle='#0c121b';
-g.fillRect(0,H*.22,W,H*.33);
-
-g.fillStyle='#111a21';
-g.fillRect(0,H*.45,W,H*.2);
-
-
-/* MOON */
-
-const moonX=W*.78,
-moonY=H*.18;
-
-g.fillStyle='#aeb5ad';
-
-g.fillRect(
-moonX-8,
-moonY-13,
-16,
-26
+window.addEventListener(
+    "resize",
+    resize
 );
 
-g.fillRect(
-moonX-13,
-moonY-8,
-26,
-16
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        if(e.code === "ArrowLeft" ||
+           e.code === "KeyA"){
+
+            moveLeft = true;
+            e.preventDefault();
+
+        }
+
+        if(e.code === "ArrowRight" ||
+           e.code === "KeyD"){
+
+            moveRight = true;
+            e.preventDefault();
+
+        }
+
+        if(e.code === "Space"){
+
+            e.preventDefault();
+
+            shoot();
+
+        }
+
+    }
 );
 
-g.fillStyle='#858d88';
 
-g.fillRect(moonX-5,moonY-7,4,4);
-g.fillRect(moonX+4,moonY+4,4,4);
-g.fillRect(moonX-2,moonY+8,3,3);
+window.addEventListener(
+    "keyup",
+    e=>{
+
+        if(e.code === "ArrowLeft" ||
+           e.code === "KeyA"){
+
+            moveLeft = false;
+
+        }
+
+        if(e.code === "ArrowRight" ||
+           e.code === "KeyD"){
+
+            moveRight = false;
+
+        }
+
+    }
+);
 
 
-/* STARS */
+canvas.addEventListener(
+    "mousemove",
+    e=>{
 
-for(let i=0;i<80;i++){
+        mouseX =
+            e.clientX;
 
-const x=Math.random()*W;
-const y=Math.random()*H*.43;
+        mouseY =
+            e.clientY;
 
-g.fillStyle=i%5===0?'#d0c7a4':'#6f7778';
+    }
+);
 
-const s=i%4===0?2:1;
 
-g.fillRect(
-Math.round(x),
-Math.round(y),
-s,
-s
-)
+canvas.addEventListener(
+    "mousedown",
+    e=>{
+
+        if(e.button === 0){
+
+            mouseDown = true;
+
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "mouseup",
+    e=>{
+
+        if(e.button === 0){
+
+            if(mouseDown)
+                shoot();
+
+            mouseDown = false;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   TOUCH
+   ========================================================= */
+
+function holdButton(
+    element,
+    down,
+    up
+){
+
+    element.addEventListener(
+        "pointerdown",
+        e=>{
+
+            e.preventDefault();
+
+            down();
+
+        }
+    );
+
+    element.addEventListener(
+        "pointerup",
+        e=>{
+
+            e.preventDefault();
+
+            up();
+
+        }
+    );
+
+    element.addEventListener(
+        "pointercancel",
+        up
+    );
+
 }
 
 
-/* DISTANT MOUNTAINS */
+holdButton(
+    document.getElementById("leftButton"),
 
-g.fillStyle='#111921';
+    ()=>{
+        moveLeft = true;
+    },
 
-g.beginPath();
-
-g.moveTo(0,H*.51);
-g.lineTo(W*.1,H*.38);
-g.lineTo(W*.19,H*.49);
-g.lineTo(W*.3,H*.34);
-g.lineTo(W*.41,H*.5);
-g.lineTo(W*.55,H*.36);
-g.lineTo(W*.68,H*.49);
-g.lineTo(W*.8,H*.37);
-g.lineTo(W,H*.51);
-g.lineTo(W,H*.67);
-g.lineTo(0,H*.67);
-g.closePath();
-
-g.fill();
+    ()=>{
+        moveLeft = false;
+    }
+);
 
 
-/* GROUND */
+holdButton(
+    document.getElementById("rightButton"),
 
-g.fillStyle='#171a16';
-g.fillRect(0,H*.53,W,H*.47);
+    ()=>{
+        moveRight = true;
+    },
 
-for(let i=0;i<500;i++){
+    ()=>{
+        moveRight = false;
+    }
+);
 
-const x=Math.random()*W;
-const y=H*.53+Math.random()*H*.43;
 
-g.fillStyle=[
-'#1c2019',
-'#22251c',
-'#292b20',
-'#121510',
-'#303125'
-][i%5];
+document
+.getElementById("fireButton")
+.addEventListener(
+    "pointerdown",
+    e=>{
 
-g.fillRect(
-Math.floor(x),
-Math.floor(y),
-2+Math.random()*7,
-2+Math.random()*5
-)
+        e.preventDefault();
+
+        shoot();
+
+    }
+);
+
+
+if(
+    "ontouchstart" in window ||
+    navigator.maxTouchPoints > 0
+){
+
+    document
+        .getElementById("touchControls")
+        .style.display = "flex";
+
 }
 
 
-/* ROAD */
+/* =========================================================
+   SHOOT
+   ========================================================= */
 
-const roadTop=H*.55;
+function shoot(){
 
-g.fillStyle='#24251f';
+    if(!gameStarted)
+        return;
 
-g.beginPath();
+    if(gameOver)
+        return;
 
-g.moveTo(W*.44,roadTop);
-g.lineTo(W*.56,roadTop);
-g.lineTo(W*.73,H*.78);
-g.lineTo(W*.27,H*.78);
+    if(player.fireCooldown > 0)
+        return;
 
-g.closePath();
-g.fill();
+    const sx =
+        player.x + 45;
 
-g.strokeStyle='#35362d';
-g.lineWidth=3;
+    const sy =
+        player.y - 25;
 
-g.beginPath();
-g.moveTo(W*.44,roadTop);
-g.lineTo(W*.27,H*.78);
-g.stroke();
+    let dx =
+        mouseX - sx;
 
-g.beginPath();
-g.moveTo(W*.56,roadTop);
-g.lineTo(W*.73,H*.78);
-g.stroke();
+    let dy =
+        mouseY - sy;
 
+    const len =
+        Math.hypot(dx,dy) || 1;
 
-/* ROAD DETAILS */
+    dx /= len;
+    dy /= len;
 
-for(let i=0;i<45;i++){
+    arrows.push({
 
-const y=roadTop+Math.random()*(H*.23);
-const center=lerp(W*.5,W*.5,(y-roadTop)/(H*.23));
+        x:sx,
+        y:sy,
 
-const spread=(y-roadTop)/(H*.23)*W*.22;
+        vx:dx * 850,
+        vy:dy * 850,
 
-g.fillStyle='#303129';
+        life:2,
 
-g.fillRect(
-center+(Math.random()-.5)*spread,
-y,
-3+Math.random()*10,
-2+Math.random()*3
-)
+        damage:player.damage
+
+    });
+
+    player.fireCooldown =
+        player.fireRate;
+
 }
 
 
-/* TREES */
+/* =========================================================
+   UPDATE
+   ========================================================= */
 
-for(let i=0;i<35;i++){
+function update(dt){
 
-const left=i%2===0;
+    if(!gameStarted)
+        return;
 
-const x=left
-?Math.random()*W*.28
-:W*.72+Math.random()*W*.28;
+    if(gameOver)
+        return;
 
-const y=H*.48+Math.random()*H*.17;
-const s=.5+Math.random()*.8;
 
-drawTreeStatic(g,x,y,s)
+    /* player movement */
+
+    let direction = 0;
+
+    if(moveLeft)
+        direction--;
+
+    if(moveRight)
+        direction++;
+
+    player.x +=
+        direction *
+        player.speed *
+        dt;
+
+    player.x =
+        Math.max(
+            70,
+            Math.min(
+                width - 70,
+                player.x
+            )
+        );
+
+
+    /* cooldown */
+
+    if(player.fireCooldown > 0){
+
+        player.fireCooldown -= dt;
+
+    }
+
+
+    /* spawn */
+
+    if(waveActive){
+
+        spawnTimer -= dt;
+
+        if(
+            spawnTimer <= 0 &&
+            waveSpawned < waveEnemies
+        ){
+
+            spawnEnemy();
+
+            spawnTimer =
+                Math.max(
+                    .3,
+                    .95 - wave * .035
+                );
+
+        }
+
+        if(
+            waveSpawned >= waveEnemies &&
+            enemies.filter(
+                e=>!e.dead
+            ).length === 0
+        ){
+
+            waveActive = false;
+
+            setTimeout(
+                ()=>{
+
+                    if(wave < 10){
+
+                        wallHP =
+                            Math.min(
+                                maxWallHP,
+                                wallHP + maxWallHP*.2
+                            );
+
+                        beginWave(
+                            wave + 1
+                        );
+
+                    }else{
+
+                        gameOver = true;
+
+                    }
+
+                },
+                1200
+            );
+
+        }
+
+    }
+
+
+    /* enemies */
+
+    for(const enemy of enemies){
+
+        if(enemy.dead)
+            continue;
+
+
+        const wallY =
+            height * .735;
+
+
+        if(enemy.y < wallY){
+
+            enemy.y +=
+                enemy.speed *
+                dt;
+
+            if(enemy.y > wallY)
+                enemy.y = wallY;
+
+        }else{
+
+            enemy.attackTimer -= dt;
+
+            if(enemy.attackTimer <= 0){
+
+                wallHP -=
+                    enemy.damage;
+
+                enemy.attackTimer =
+                    enemy.attackTime;
+
+                if(wallHP <= 0){
+
+                    wallHP = 0;
+
+                    gameOver = true;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    /* arrows */
+
+    for(
+        let i=arrows.length-1;
+        i>=0;
+        i--
+    ){
+
+        const arrow =
+            arrows[i];
+
+        arrow.x +=
+            arrow.vx * dt;
+
+        arrow.y +=
+            arrow.vy * dt;
+
+        arrow.life -= dt;
+
+
+        for(const enemy of enemies){
+
+            if(enemy.dead)
+                continue;
+
+
+            const dx =
+                arrow.x -
+                enemy.x;
+
+            const dy =
+                arrow.y -
+                (enemy.y - 25);
+
+            const distance =
+                Math.hypot(dx,dy);
+
+
+            if(
+                distance <
+                30 * enemy.size
+            ){
+
+                enemy.hp -=
+                    arrow.damage;
+
+                arrow.life = 0;
+
+                if(enemy.hp <= 0){
+
+                    enemy.dead = true;
+
+                    kills++;
+
+                    score +=
+                        enemy.type === "elite"
+                        ? 100
+                        : enemy.type === "heavy"
+                        ? 50
+                        : enemy.type === "fast"
+                        ? 30
+                        : 20;
+
+                    gold +=
+                        enemy.type === "elite"
+                        ? 30
+                        : enemy.type === "heavy"
+                        ? 15
+                        : 8;
+
+                }
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    arrows =
+        arrows.filter(
+            a=>
+                a.life > 0 &&
+                a.x > -100 &&
+                a.x < width + 100 &&
+                a.y > -100 &&
+                a.y < height + 100
+        );
+
+
+    enemies =
+        enemies.filter(
+            e=>
+                !e.dead ||
+                Math.random() > .02
+        );
+
 }
 
 
-/* ================= WALL BODY ================= */
+/* =========================================================
+   PIXEL DRAW HELPERS
+   ========================================================= */
 
-const wallTop=H*.735;
-const wallBottom=H*.955;
+function pixelRect(
+    x,y,w,h,color
+){
 
+    ctx.fillStyle = color;
 
-/*
-   MAIN WALL
-   ONLY THE WALL — NO CASTLE TOWERS
-*/
+    ctx.fillRect(
+        Math.round(x),
+        Math.round(y),
+        Math.max(1,Math.round(w)),
+        Math.max(1,Math.round(h))
+    );
 
-g3.fillStyle='#303437';
-
-g3.fillRect(
-0,
-wallTop,
-W,
-wallBottom-wallTop
-);
-
-
-/* stone rows */
-
-for(let y=wallTop+12;y<wallBottom;y+=24){
-
-g3.fillStyle='#1e2224';
-
-g3.fillRect(
-0,
-y,
-W,
-3
-)
 }
 
 
-/* brick vertical seams */
+/* =========================================================
+   BACKGROUND
+   ========================================================= */
 
-let row=0;
+function drawBackground(){
 
-for(let y=wallTop+3;y<wallBottom;y+=24){
+    /* sky */
 
-const off=row%2?34:0;
+    ctx.fillStyle =
+        "#080d15";
 
-for(let x=-off;x<W;x+=68){
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height * .55
+    );
 
-g3.fillStyle='#202427';
 
-g3.fillRect(
-x,
-y,
-3,
-21
-);
+    /* moon */
 
-g3.fillStyle='#424648';
+    const moonX =
+        width * .80;
 
-g3.fillRect(
-x+4,
-y+2,
-2,
-16
-)
-}
+    const moonY =
+        height * .16;
 
-row++
-}
+    ctx.fillStyle =
+        "#b9c0bd";
+
+    pixelRect(
+        moonX-22,
+        moonY-30,
+        44,
+        60,
+        "#b9c0bd"
+    );
+
+    pixelRect(
+        moonX-32,
+        moonY-20,
+        64,
+        40,
+        "#b9c0bd"
+    );
+
+
+    pixelRect(
+        moonX-15,
+        moonY-12,
+        8,
+        8,
+        "#8c9592"
+    );
 
+    pixelRect(
+        moonX+8,
+        moonY+10,
+        7,
+        7,
+        "#8c9592"
+    );
 
-/* stone highlights */
 
-for(let i=0;i<80;i++){
+    /* stars */
 
-const x=Math.random()*W;
-const y=wallTop+15+Math.random()*(wallBottom-wallTop-20);
+    for(let i=0;i<60;i++){
 
-g3.fillStyle=i%2?'#3b3f41':'#262a2c';
+        const x =
+            (i * 137) % width;
 
-g3.fillRect(
-x,
-y,
-4+Math.random()*9,
-2
-)
-}
+        const y =
+            30 +
+            ((i * 71) % Math.floor(height*.38));
 
+        pixelRect(
+            x,
+            y,
+            i%5===0?3:2,
+            i%5===0?3:2,
+            i%3===0
+                ? "#9ba5a6"
+                : "#566267"
+        );
 
-/* TOP COURSE */
+    }
 
-g3.fillStyle='#4b4e4f';
 
-g3.fillRect(
-0,
-wallTop-9,
-W,
-12
-);
+    /* mountains */
 
-g3.fillStyle='#666967';
+    ctx.fillStyle =
+        "#101923";
 
-g3.fillRect(
-0,
-wallTop-9,
-W,
-3
-);
+    ctx.beginPath();
 
-g3.fillStyle='#242729';
+    ctx.moveTo(
+        0,
+        height*.52
+    );
 
-g3.fillRect(
-0,
-wallTop+3,
-W,
-4
-);
+    ctx.lineTo(
+        width*.12,
+        height*.37
+    );
 
+    ctx.lineTo(
+        width*.22,
+        height*.49
+    );
 
-/* ================= CRenellations ================= */
+    ctx.lineTo(
+        width*.36,
+        height*.33
+    );
 
-const merlonW=42;
-const gap=18;
+    ctx.lineTo(
+        width*.50,
+        height*.49
+    );
 
-for(let x=8;x<W;x+=merlonW+gap){
+    ctx.lineTo(
+        width*.67,
+        height*.35
+    );
 
-/* block */
+    ctx.lineTo(
+        width*.82,
+        height*.48
+    );
 
-g3.fillStyle='#414547';
+    ctx.lineTo(
+        width,
+        height*.38
+    );
 
-g3.fillRect(
-x,
-wallTop-47,
-merlonW,
-39
-);
+    ctx.lineTo(
+        width,
+        height*.60
+    );
 
+    ctx.lineTo(
+        0,
+        height*.60
+    );
 
-/* top highlight */
+    ctx.closePath();
 
-g3.fillStyle='#5b5e5e';
+    ctx.fill();
 
-g3.fillRect(
-x,
-wallTop-47,
-merlonW,
-5
-);
 
+    /* ground */
 
-/* left shadow */
+    ctx.fillStyle =
+        "#151a15";
 
-g3.fillStyle='#303335';
+    ctx.fillRect(
+        0,
+        height*.52,
+        width,
+        height*.48
+    );
 
-g3.fillRect(
-x,
-wallTop-42,
-5,
-34
-);
 
+    /* ground pixels */
 
-/* right shadow */
+    for(let i=0;i<260;i++){
 
-g3.fillStyle='#292c2e';
+        const x =
+            Math.random()*width;
 
-g3.fillRect(
-x+merlonW-6,
-wallTop-42,
-6,
-34
-);
+        const y =
+            height*.54 +
+            Math.random()*height*.36;
 
+        pixelRect(
+            x,
+            y,
+            3 + Math.random()*8,
+            2 + Math.random()*5,
+            i%2
+                ? "#20251c"
+                : "#282b20"
+        );
 
-/* pixel damage */
+    }
 
-g3.fillStyle='#34383a';
 
-g3.fillRect(
-x+7,
-wallTop-32,
-7,
-4
-);
+    /* road */
 
-g3.fillRect(
-x+25,
-wallTop-20,
-9,
-4
-)
-}
+    ctx.fillStyle =
+        "#282720";
 
+    ctx.beginPath();
 
-/* MOSS */
+    ctx.moveTo(
+        width*.44,
+        height*.55
+    );
 
-for(let i=0;i<35;i++){
+    ctx.lineTo(
+        width*.56,
+        height*.55
+    );
 
-const x=Math.random()*W;
-const y=wallTop+20+Math.random()*(wallBottom-wallTop-20);
+    ctx.lineTo(
+        width*.74,
+        height*.78
+    );
 
-g3.fillStyle='#34402d';
+    ctx.lineTo(
+        width*.26,
+        height*.78
+    );
 
-g3.fillRect(
-x,
-y,
-3+Math.random()*7,
-3
-)
-}
+    ctx.closePath();
 
+    ctx.fill();
 
-/* TORCHES */
 
-drawTorchStatic(g3,70,wallTop-4);
-drawTorchStatic(g3,W-70,wallTop-4);
+    /* trees */
 
+    drawTree(
+        width*.10,
+        height*.60,
+        1
+    );
 
-/* EMPTY FRONT LAYER */
+    drawTree(
+        width*.18,
+        height*.56,
+        .8
+    );
 
-g.fillStyle='rgba(0,0,0,0)';
-g.fillRect(0,0,W,H)
-}
+    drawTree(
+        width*.28,
+        height*.61,
+        .7
+    );
 
+    drawTree(
+        width*.90,
+        height*.60,
+        1
+    );
 
-/* ================= STATIC TREE ================= */
+    drawTree(
+        width*.82,
+        height*.57,
+        .85
+    );
 
-function drawTreeStatic(c,x,y,s){
+    drawTree(
+        width*.72,
+        height*.61,
+        .7
+    );
 
-const trunkW=9*s,
-trunkH=35*s;
-
-c.fillStyle='#29241d';
-
-c.fillRect(
-x-trunkW/2,
-y-trunkH,
-trunkW,
-trunkH
-);
-
-c.fillStyle='#3a3024';
-
-c.fillRect(
-x-1.5*s,
-y-trunkH,
-3*s,
-trunkH
-);
-
-c.fillStyle='#101914';
-
-c.fillRect(
-x-25*s,
-y-65*s,
-50*s,
-20*s
-);
-
-c.fillStyle='#132019';
-
-c.fillRect(
-x-33*s,
-y-50*s,
-66*s,
-24*s
-);
-
-c.fillStyle='#17251c';
-
-c.fillRect(
-x-23*s,
-y-82*s,
-46*s,
-25*s
-);
-
-c.fillStyle='#1c2b20';
-
-c.fillRect(
-x-13*s,
-y-98*s,
-26*s,
-23*s
-);
-
-c.fillStyle='#26352a';
-
-c.fillRect(
-x-18*s,
-y-57*s,
-7*s,
-6*s
-);
-
-c.fillRect(
-x+10*s,
-y-73*s,
-8*s,
-7*s
-)
 }
 
 
-/* ================= TORCH ================= */
+function drawTree(
+    x,y,s
+){
 
-function drawTorchStatic(c,x,y){
+    pixelRect(
+        x-6*s,
+        y-55*s,
+        12*s,
+        55*s,
+        "#29251d"
+    );
 
-c.fillStyle='#151515';
+    pixelRect(
+        x-32*s,
+        y-85*s,
+        64*s,
+        25*s,
+        "#111b16"
+    );
 
-c.fillRect(
-x-5,
-y-4,
-10,
-7
-);
+    pixelRect(
+        x-42*s,
+        y-65*s,
+        84*s,
+        27*s,
+        "#142019"
+    );
 
-c.fillRect(
-x-3,
-y+2,
-6,
-13
-);
+    pixelRect(
+        x-30*s,
+        y-100*s,
+        60*s,
+        35*s,
+        "#17251b"
+    );
 
+    pixelRect(
+        x-17*s,
+        y-120*s,
+        34*s,
+        30*s,
+        "#1b291e"
+    );
 
-/* fire */
-
-c.fillStyle='#873619';
-
-c.fillRect(
-x-7,
-y-23,
-14,
-7
-);
-
-c.fillStyle='#b74c1e';
-
-c.fillRect(
-x-5,
-y-31,
-10,
-10
-);
-
-c.fillStyle='#df852b';
-
-c.fillRect(
-x-2,
-y-37,
-6,
-9
-);
-
-c.fillStyle='#f3c65d';
-
-c.fillRect(
-x,
-y-42,
-3,
-8
-)
 }
 
 
-/* ================= FOG ================= */
+/* =========================================================
+   CASTLE WALL
+   ========================================================= */
 
-function buildFog(){
+function drawWall(){
 
-[fogS,gf]=mk(W,H);
+    const top =
+        height * .735;
 
-gf.clearRect(0,0,W,H);
+    const bottom =
+        height * .955;
 
-const grad=gf.createRadialGradient(
-W*.5,
-H*.5,
-0,
-W*.5,
-H*.5,
-W*.5
-);
 
-grad.addColorStop(
-0,
-'rgba(120,130,130,.06)'
-);
+    /* wall body */
 
-grad.addColorStop(
-1,
-'rgba(30,40,45,0)'
-);
+    ctx.fillStyle =
+        "#34383a";
 
-gf.fillStyle=grad;
-gf.fillRect(0,0,W,H)
+    ctx.fillRect(
+        0,
+        top,
+        width,
+        bottom-top
+    );
+
+
+    /* horizontal stone rows */
+
+    for(
+        let y=top+24;
+        y<bottom;
+        y+=28
+    ){
+
+        pixelRect(
+            0,
+            y,
+            width,
+            3,
+            "#202427"
+        );
+
+    }
+
+
+    /* brick seams */
+
+    let row=0;
+
+    for(
+        let y=top+3;
+        y<bottom;
+        y+=28
+    ){
+
+        const offset =
+            row%2 ? 34 : 0;
+
+        for(
+            let x=-offset;
+            x<width;
+            x+=68
+        ){
+
+            pixelRect(
+                x,
+                y,
+                3,
+                24,
+                "#202427"
+            );
+
+        }
+
+        row++;
+
+    }
+
+
+    /* top course */
+
+    pixelRect(
+        0,
+        top-8,
+        width,
+        12,
+        "#4c5051"
+    );
+
+    pixelRect(
+        0,
+        top-8,
+        width,
+        3,
+        "#696c6b"
+    );
+
+
+    /* crenellations */
+
+    const merlonWidth =
+        Math.max(
+            25,
+            width*.035
+        );
+
+    const gap =
+        merlonWidth*.55;
+
+    for(
+        let x=8;
+        x<width;
+        x+=merlonWidth+gap
+    ){
+
+        pixelRect(
+            x,
+            top-48,
+            merlonWidth,
+            40,
+            "#414547"
+        );
+
+        pixelRect(
+            x,
+            top-48,
+            merlonWidth,
+            5,
+            "#5d6061"
+        );
+
+        pixelRect(
+            x+merlonWidth-6,
+            top-43,
+            6,
+            35,
+            "#292c2e"
+        );
+
+    }
+
+
+    /* torches */
+
+    drawTorch(
+        70,
+        top-4
+    );
+
+    drawTorch(
+        width-70,
+        top-4
+    );
+
 }
 
 
-/* ================= ITEMS ================= */
+function drawTorch(
+    x,y
+){
 
-function drawItem(it){
+    pixelRect(
+        x-5,
+        y-2,
+        10,
+        7,
+        "#171717"
+    );
 
-const x=PXs(it.x,it.z),
-y=PY(it.z),
-s=U*.006*lx(it.z);
+    pixelRect(
+        x-3,
+        y+4,
+        6,
+        14,
+        "#272727"
+    );
 
-if(it.k==='t'||it.k==='d'){
+    pixelRect(
+        x-7,
+        y-25,
+        14,
+        8,
+        "#873919"
+    );
 
-const h=it.h*s*5;
+    pixelRect(
+        x-5,
+        y-32,
+        10,
+        10,
+        "#b84d1d"
+    );
 
-g.fillStyle=it.c0;
+    pixelRect(
+        x-2,
+        y-38,
+        6,
+        9,
+        "#e18a2c"
+    );
 
-g.fillRect(
-x-s*1.2,
-y-h,
-s*2.4,
-h
-);
+    pixelRect(
+        x,
+        y-43,
+        3,
+        8,
+        "#f1c65d"
+    );
 
-g.fillStyle=it.c1;
-
-g.fillRect(
-x-s*5,
-y-h*.72,
-s*10,
-h*.32
-);
-
-g.fillStyle=it.c2;
-
-g.fillRect(
-x-s*4,
-y-h*.92,
-s*8,
-h*.35
-);
-
-g.fillStyle=it.c3;
-
-g.fillRect(
-x-s*2.5,
-y-h*1.05,
-s*5,
-h*.3
-)
-}
-
-else if(it.k==='b'){
-
-g.fillStyle=it.c1;
-
-g.fillRect(
-x,
-y-it.h*s*4,
-Math.max(1,s),
-it.h*s*4
-);
-
-g.fillStyle=it.c2;
-
-g.fillRect(
-x-s*2,
-y-it.h*s*4,
-s*4,
-s*2
-)
-}
-
-else if(it.k==='r'){
-
-g.fillStyle=it.c1;
-
-g.fillRect(
-x-s*2,
-y-s*2,
-s*4,
-s*3
-);
-
-g.fillStyle=it.c2;
-
-g.fillRect(
-x-s,
-y-s*3,
-s*2,
-s
-)
-}
-
-else if(it.k==='g'){
-
-g.fillStyle=it.c1;
-
-g.fillRect(
-x,
-y-it.h*s,
-Math.max(1,s),
-it.h*s
-);
-
-g.fillRect(
-x+s,
-y-it.h*s*.7,
-Math.max(1,s),
-it.h*s*.7
-)
-}
 }
 
 
-/* ================= ARCHER ================= */
+/* =========================================================
+   ARCHER
+   ========================================================= */
 
 function drawArcher(){
 
-const fy=H*.735;
-const x=W/2+ax;
+    const x =
+        player.x;
+
+    const y =
+        player.y;
+
+    /* shadow */
+
+    pixelRect(
+        x-30,
+        y+35,
+        60,
+        8,
+        "#090b0b"
+    );
+
+
+    /* boots */
+
+    pixelRect(
+        x-17,
+        y+20,
+        13,
+        17,
+        "#141718"
+    );
+
+    pixelRect(
+        x+4,
+        y+20,
+        13,
+        17,
+        "#141718"
+    );
+
+
+    /* legs */
+
+    pixelRect(
+        x-15,
+        y-5,
+        12,
+        28,
+        "#2b3030"
+    );
+
+    pixelRect(
+        x+4,
+        y-5,
+        12,
+        28,
+        "#2b3030"
+    );
+
+
+    /* body */
+
+    pixelRect(
+        x-25,
+        y-55,
+        50,
+        52,
+        "#27312e"
+    );
+
+    pixelRect(
+        x-18,
+        y-50,
+        9,
+        40,
+        "#3b4641"
+    );
+
+    pixelRect(
+        x+10,
+        y-49,
+        8,
+        38,
+        "#323b37"
+    );
+
+
+    /* belt */
+
+    pixelRect(
+        x-27,
+        y-6,
+        54,
+        9,
+        "#1b1714"
+    );
+
+    pixelRect(
+        x-4,
+        y-6,
+        9,
+        10,
+        "#a27b43"
+    );
+
+
+    /* shoulders */
+
+    pixelRect(
+        x-34,
+        y-43,
+        12,
+        15,
+        "#313936"
+    );
+
+    pixelRect(
+        x+22,
+        y-43,
+        12,
+        15,
+        "#313936"
+    );
+
+
+    /* arms */
+
+    pixelRect(
+        x-40,
+        y-37,
+        12,
+        30,
+        "#28302d"
+    );
+
+    pixelRect(
+        x+28,
+        y-37,
+        12,
+        30,
+        "#28302d"
+    );
+
+
+    /* neck */
+
+    pixelRect(
+        x-9,
+        y-60,
+        18,
+        10,
+        "#8e6c50"
+    );
+
+
+    /* hood */
+
+    pixelRect(
+        x-27,
+        y-91,
+        54,
+        38,
+        "#151c1b"
+    );
 
-const bs=avx<0?-1:1;
-const u=U*.11;
+    pixelRect(
+        x-20,
+        y-101,
+        40,
+        16,
+        "#121817"
+    );
 
-g.save();
 
+    /* face */
 
-/* shadow */
+    pixelRect(
+        x-18,
+        y-76,
+        36,
+        25,
+        "#9d7859"
+    );
 
-g.fillStyle='rgba(0,0,0,.55)';
+    pixelRect(
+        x-13,
+        y-70,
+        26,
+        18,
+        "#b08764"
+    );
 
-g.fillRect(
-x-3.5*u,
-fy-u*.2,
-7*u,
-u
-);
 
+    /* eyes */
 
-/* boots */
+    pixelRect(
+        x-9,
+        y-64,
+        5,
+        4,
+        "#101112"
+    );
 
-g.fillStyle='#171b1b';
+    pixelRect(
+        x+6,
+        y-64,
+        5,
+        4,
+        "#101112"
+    );
 
-g.fillRect(
-x-1.75*u,
-fy-4.1*u,
-1.45*u,
-3*u
-);
 
-g.fillRect(
-x+.3*u,
-fy-4.1*u,
-1.45*u,
-3*u
-);
+    /* scarf */
 
-g.fillStyle='#0d1111';
+    pixelRect(
+        x-21,
+        y-54,
+        42,
+        8,
+        "#161b1a"
+    );
 
-g.fillRect(
-x-1.9*u,
-fy-1.8*u,
-1.8*u,
-.55*u
-);
 
-g.fillRect(
-x+.15*u,
-fy-1.8*u,
-1.8*u,
-.55*u
-);
+    /* quiver */
 
+    pixelRect(
+        x+25,
+        y-50,
+        10,
+        36,
+        "#36291d"
+    );
 
-/* legs */
 
-g.fillStyle='#242a2b';
+    /* bow */
 
-g.fillRect(
-x-1.75*u,
-fy-4.1*u,
-1.45*u,
-3*u
-);
+    ctx.strokeStyle =
+        "#8d6337";
 
-g.fillRect(
-x+.3*u,
-fy-4.1*u,
-1.45*u,
-3*u
-);
+    ctx.lineWidth = 5;
 
+    ctx.beginPath();
 
-/* belt + tunic */
+    ctx.moveTo(
+        x+40,
+        y-55
+    );
 
-g.fillStyle='#3a281b';
+    ctx.quadraticCurveTo(
+        x+63,
+        y-15,
+        x+40,
+        y+25
+    );
 
-g.fillRect(
-x-2.8*u,
-fy-8.3*u,
-5.6*u,
-u
-);
+    ctx.stroke();
 
-g.fillStyle='#53605a';
 
-g.fillRect(
-x-2.65*u,
-fy-8*u,
-5.3*u,
-3.8*u
-);
+    /* bow string */
 
-g.fillStyle='#313b37';
+    ctx.strokeStyle =
+        "#bdb5a0";
 
-g.fillRect(
-x-2.25*u,
-fy-7.6*u,
-4.5*u,
-2.9*u
-);
+    ctx.lineWidth = 2;
 
-g.fillStyle='#171c1b';
+    ctx.beginPath();
 
-g.fillRect(
-x-2.65*u,
-fy-5*u,
-5.3*u,
-.7*u
-);
+    ctx.moveTo(
+        x+40,
+        y-55
+    );
 
-g.fillStyle='#b69a57';
+    ctx.lineTo(
+        x+43,
+        y-15
+    );
 
-g.fillRect(
-x-.35*u,
-fy-8*u,
-.7*u,
-u
-);
+    ctx.lineTo(
+        x+40,
+        y+25
+    );
 
+    ctx.stroke();
 
-/* shoulders */
 
-g.fillStyle='#1e2927';
+    /* arrow */
 
-g.fillRect(
-x-3.05*u,
-fy-9*u,
-6.1*u,
-1.4*u
-);
+    const dx =
+        mouseX -
+        (x+43);
 
-g.fillRect(
-x-2.55*u,
-fy-9.8*u,
-5.1*u,
-1.1*u
-);
+    const dy =
+        mouseY -
+        (y-15);
 
-g.fillStyle='#34433d';
+    const angle =
+        Math.atan2(
+            dy,
+            dx
+        );
 
-g.fillRect(
-x-2.25*u,
-fy-9.2*u,
-4.5*u,
-.65*u
-);
+    ctx.save();
 
+    ctx.translate(
+        x+43,
+        y-15
+    );
 
-/* neck */
+    ctx.rotate(angle);
 
-g.fillStyle='#a06d4f';
+    pixelRect(
+        0,
+        -1,
+        55,
+        3,
+        "#c4ad7b"
+    );
 
-g.fillRect(
-x-.7*u,
-fy-10*u,
-1.4*u,
-1.1*u
-);
+    pixelRect(
+        52,
+        -4,
+        9,
+        9,
+        "#d5d7d0"
+    );
 
+    ctx.restore();
 
-/* hood/head */
-
-g.fillStyle='#18201f';
-
-g.fillRect(
-x-1.65*u,
-fy-12.2*u,
-3.3*u,
-2.8*u
-);
-
-g.fillRect(
-x-1.15*u,
-fy-13*u,
-2.3*u,
-.9*u
-);
-
-g.fillStyle='#293633';
-
-g.fillRect(
-x-1.05*u,
-fy-12.5*u,
-1.9*u,
-1.35*u
-);
-
-
-/* face */
-
-g.fillStyle='#a87556';
-
-g.fillRect(
-x+bs*.15*u,
-fy-12*u,
-1.05*u,
-1.25*u
-);
-
-g.fillStyle='#161616';
-
-g.fillRect(
-x+bs*.8*u,
-fy-11.75*u,
-.42*u,
-.42*u
-);
-
-
-/* hood rim */
-
-g.fillStyle='#0e1413';
-
-g.fillRect(
-x-1.7*u,
-fy-11.1*u,
-3.5*u,
-.65*u
-);
-
-
-/* arm */
-
-g.strokeStyle='#37433e';
-g.lineWidth=Math.max(2,Math.floor(u*1.25));
-g.lineCap='butt';
-
-const handX=x+bs*2.35*u,
-handY=fy-7.7*u;
-
-g.beginPath();
-
-g.moveTo(
-x+bs*1.9*u,
-fy-8.1*u
-);
-
-g.lineTo(
-handX,
-handY
-);
-
-g.stroke();
-
-g.fillStyle='#a87556';
-
-g.fillRect(
-handX-.35*u,
-handY-.35*u,
-.7*u,
-.7*u
-);
-
-
-/* back arm */
-
-g.fillStyle='#202b28';
-
-g.fillRect(
-x-bs*3*u,
-fy-8.1*u,
-1.2*u,
-2.9*u
-);
-
-g.fillStyle='#76553a';
-
-g.fillRect(
-x-bs*3.05*u,
-fy-6.1*u,
-1.3*u,
-.65*u
-);
-
-
-/* bow */
-
-const bend=(1+1.1*p)*u,
-gx=handX,
-gy=handY;
-
-const pp=-1,
-pq=0;
-
-const t1=[
-gx+pp*3.4*u-avx*bend,
-gy+pq*3.4*u-0*bend
-];
-
-const t2=[
-gx-pp*3.4*u-avx*bend,
-gy-pq*3.4*u-0*bend
-];
-
-const cx=2*gx-(t1[0]+t2[0])/2,
-cy=2*gy-(t1[1]+t2[1])/2;
-
-g.strokeStyle='#5b3c22';
-g.lineWidth=Math.max(2,Math.floor(u*.72));
-
-g.beginPath();
-g.moveTo(t1[0],t1[1]);
-g.quadraticCurveTo(cx,cy,t2[0],t2[1]);
-g.stroke();
-
-g.strokeStyle='#a87b46';
-g.lineWidth=1;
-
-g.beginPath();
-g.moveTo(t1[0],t1[1]);
-g.quadraticCurveTo(cx,cy,t2[0],t2[1]);
-g.stroke();
-
-
-/* bowstring */
-
-g.strokeStyle='#c9c0a6';
-g.lineWidth=1;
-
-g.beginPath();
-
-g.moveTo(
-t1[0],
-t1[1]
-);
-
-g.lineTo(
-gx,
-gy
-);
-
-g.lineTo(
-t2[0],
-t2[1]
-);
-
-g.stroke();
-
-
-/* arrow */
-
-if(rec<=0||p>0){
-
-const ax2=gx+avx*3.5*u,
-ay2=gy;
-
-g.strokeStyle='#b68b55';
-g.lineWidth=Math.max(1,Math.floor(u*.22));
-
-g.beginPath();
-
-g.moveTo(gx,gy);
-g.lineTo(ax2,ay2);
-
-g.stroke();
-
-g.fillStyle='#cbd0cf';
-
-g.beginPath();
-
-g.moveTo(
-ax2+avx*.9*u,
-ay2
-);
-
-g.lineTo(
-ax2-avx*.35*u,
-ay2+.35*u
-);
-
-g.lineTo(
-ax2+avx*.35*u,
-ay2-.35*u
-);
-
-g.fill();
-
-g.fillStyle='#9b3028';
-
-g.fillRect(
-gx-avx*.8*u-.25*u,
-gy-.25*u,
-.5*u,
-.5*u
-)
 }
 
 
-/* highlights */
+/* =========================================================
+   ORC
+   ========================================================= */
 
-g.fillStyle='#66736d';
+function drawEnemy(enemy){
 
-g.fillRect(
-x-1.9*u,
-fy-8.95*u,
-.6*u,
-.5*u
-);
+    const data =
+        enemyTypes[
+            enemy.type
+        ];
 
-g.fillStyle='#9b7658';
+    const x =
+        enemy.x;
 
-g.fillRect(
-x+bs*1*u,
-fy-12*u,
-.35*u,
-.35*u
-);
+    const y =
+        enemy.y;
 
-g.restore()
+    const s =
+        enemy.size;
+
+
+    /* shadow */
+
+    pixelRect(
+        x-22*s,
+        y+28*s,
+        44*s,
+        7*s,
+        "#090b0a"
+    );
+
+
+    /* legs */
+
+    pixelRect(
+        x-13*s,
+        y-2*s,
+        10*s,
+        30*s,
+        "#272a25"
+    );
+
+    pixelRect(
+        x+3*s,
+        y-2*s,
+        10*s,
+        30*s,
+        "#272a25"
+    );
+
+
+    /* body */
+
+    pixelRect(
+        x-22*s,
+        y-45*s,
+        44*s,
+        48*s,
+        data.color
+    );
+
+
+    /* armor */
+
+    pixelRect(
+        x-28*s,
+        y-40*s,
+        10*s,
+        18*s,
+        data.type==="heavy"
+            ? "#6b7074"
+            : "#403c2e"
+    );
+
+    pixelRect(
+        x+18*s,
+        y-40*s,
+        10*s,
+        18*s,
+        data.type==="heavy"
+            ? "#6b7074"
+            : "#403c2e"
+    );
+
+
+    /* head */
+
+    pixelRect(
+        x-24*s,
+        y-72*s,
+        48*s,
+        32*s,
+        "#687352"
+    );
+
+
+    /* ears */
+
+    pixelRect(
+        x-31*s,
+        y-63*s,
+        9*s,
+        14*s,
+        "#566143"
+    );
+
+    pixelRect(
+        x+22*s,
+        y-63*s,
+        9*s,
+        14*s,
+        "#566143"
+    );
+
+
+    /* hair */
+
+    pixelRect(
+        x-21*s,
+        y-77*s,
+        42*s,
+        10*s,
+        "#20241d"
+    );
+
+
+    /* eyes */
+
+    pixelRect(
+        x-12*s,
+        y-54*s,
+        6*s,
+        5*s,
+        "#d9c45f"
+    );
+
+    pixelRect(
+        x+7*s,
+        y-54*s,
+        6*s,
+        5*s,
+        "#d9c45f"
+    );
+
+
+    /* tusks */
+
+    pixelRect(
+        x-10*s,
+        y-43*s,
+        5*s,
+        9*s,
+        "#e0d7b1"
+    );
+
+    pixelRect(
+        x+5*s,
+        y-43*s,
+        5*s,
+        9*s,
+        "#e0d7b1"
+    );
+
+
+    /* weapon */
+
+    pixelRect(
+        x+27*s,
+        y-22*s,
+        6*s,
+        50*s,
+        "#503722"
+    );
+
+
+    /* HP */
+
+    if(enemy.hp < enemy.maxHP){
+
+        const bar =
+            45*s;
+
+        pixelRect(
+            x-bar/2,
+            y-87*s,
+            bar,
+            5*s,
+            "#111313"
+        );
+
+        pixelRect(
+            x-bar/2+1,
+            y-86*s,
+            (bar-2) *
+            Math.max(
+                0,
+                enemy.hp/enemy.maxHP
+            ),
+            3*s,
+            "#a4463d"
+        );
+
+    }
+
 }
 
 
-/* ================= ARROWS ================= */
+/* =========================================================
+   ARROWS
+   ========================================================= */
 
-function drawArrow(a){
+function drawArrow(arrow){
 
-const L=(U*.045)*a.sc+4,
-an=Math.atan2(a.vy,a.vx);
+    const angle =
+        Math.atan2(
+            arrow.vy,
+            arrow.vx
+        );
 
-g.save();
+    ctx.save();
 
-g.translate(a.x,a.y);
-g.rotate(an);
+    ctx.translate(
+        arrow.x,
+        arrow.y
+    );
 
-g.globalAlpha=a.stuck
-?Math.min(1,a.sl)
-:1;
+    ctx.rotate(angle);
 
-g.strokeStyle='#6f4f2c';
-g.lineWidth=Math.max(1,1.2*a.sc);
+    pixelRect(
+        -15,
+        -1,
+        35,
+        3,
+        "#b89b69"
+    );
 
-g.beginPath();
-g.moveTo(-L,0);
-g.lineTo(0,0);
-g.stroke();
+    pixelRect(
+        17,
+        -5,
+        9,
+        10,
+        "#d3d6cf"
+    );
 
-g.fillStyle='#c4c8cc';
+    ctx.restore();
 
-g.beginPath();
-
-g.moveTo(L*.22,0);
-g.lineTo(-L*.02,-2.4*a.sc-.6);
-g.lineTo(-L*.02,2.4*a.sc+.6);
-
-g.fill();
-
-g.fillStyle='#b9b09a';
-
-g.beginPath();
-
-g.moveTo(-L,0);
-g.lineTo(-L*.8,-3*a.sc-.6);
-g.lineTo(-L*.72,0);
-g.lineTo(-L*.8,3*a.sc+.6);
-
-g.fill();
-
-g.restore()
 }
 
 
-/* ================= FLAME ================= */
+/* =========================================================
+   UI
+   ========================================================= */
 
-function flame(x,y,s,i){
+function drawUI(){
 
-const fl=.9+.1*Math.sin(t*14+i*2);
-const sway=Math.sin(t*9+i)*s*.18;
-
-g.fillStyle='#17110d';
-
-g.fillRect(
-Math.round(x-s),
-Math.round(y),
-Math.max(1,Math.round(s*2)),
-Math.max(1,Math.round(s*.5))
-);
-
-g.fillStyle='#4a3220';
-
-g.fillRect(
-Math.round(x-s*.35),
-Math.round(y),
-Math.max(1,Math.round(s*.7)),
-Math.max(1,Math.round(s*3.2))
-);
+    if(!gameStarted)
+        return;
 
 
-/* block flame */
+    ctx.fillStyle =
+        "rgba(5,7,9,.82)";
 
-g.fillStyle='#a83c20';
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        62
+    );
 
-g.fillRect(
-Math.round(x-s*.55+sway),
-Math.round(y-s*.15),
-Math.max(1,Math.round(s*1.1)),
-Math.max(1,Math.round(s*1.6*fl))
-);
 
-g.fillRect(
-Math.round(x-s*.3+sway),
-Math.round(y-s*1.7),
-Math.max(1,Math.round(s*.6)),
-Math.max(1,Math.round(s*1.2))
-);
+    ctx.fillStyle =
+        "#d4c9a7";
 
-g.fillStyle='#f0a33c';
+    ctx.font =
+        "bold 18px monospace";
 
-g.fillRect(
-Math.round(x-s*.3+sway),
-Math.round(y-s*.2),
-Math.max(1,Math.round(s*.6)),
-Math.max(1,Math.round(s*1.15*fl))
-);
+    ctx.textAlign =
+        "left";
 
-g.fillStyle='#ffe08a';
+    ctx.fillText(
+        "THE LAST WALL",
+        20,
+        25
+    );
 
-g.fillRect(
-Math.round(x-s*.16+sway),
-Math.round(y-s*.25),
-Math.max(1,Math.round(s*.32)),
-Math.max(1,Math.round(s*.7))
-)
+
+    ctx.textAlign =
+        "center";
+
+    ctx.fillText(
+        "WAVE " + wave + " / 10",
+        width/2,
+        25
+    );
+
+
+    ctx.textAlign =
+        "right";
+
+    ctx.fillStyle =
+        "#d2ad52";
+
+    ctx.fillText(
+        "GOLD " + gold,
+        width-20,
+        25
+    );
+
+
+    /* wall bar */
+
+    const barW =
+        Math.min(
+            300,
+            width*.30
+        );
+
+    ctx.fillStyle =
+        "#101313";
+
+    ctx.fillRect(
+        20,
+        70,
+        barW,
+        22
+    );
+
+    ctx.fillStyle =
+        wallHP < maxWallHP*.3
+        ? "#9c3b32"
+        : "#68784e";
+
+    ctx.fillRect(
+        23,
+        73,
+        (barW-6) *
+        Math.max(
+            0,
+            wallHP/maxWallHP
+        ),
+        16
+    );
+
+
+    ctx.fillStyle =
+        "#ddd";
+
+    ctx.font =
+        "bold 12px monospace";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.fillText(
+        "WALL " +
+        Math.ceil(wallHP) +
+        " / " +
+        maxWallHP,
+        20+barW/2,
+        85
+    );
+
+
+    ctx.textAlign =
+        "left";
+
+    ctx.fillStyle =
+        "#999";
+
+    ctx.fillText(
+        "KILLS " + kills,
+        20,
+        115
+    );
+
+
+    ctx.textAlign =
+        "right";
+
+    ctx.fillText(
+        "SCORE " + score,
+        width-20,
+        115
+    );
+
 }
 
 
-function flags(){}
+/* =========================================================
+   GAME OVER / WIN
+   ========================================================= */
+
+function drawEnd(){
+
+    if(!gameOver)
+        return;
 
 
-/* ================= HUD ================= */
+    ctx.fillStyle =
+        "rgba(0,0,0,.68)";
 
-function hud(){
-
-const fs=Math.max(
-8,
-Math.min(14,U*.04)
-);
-
-const pad=fs*.9;
-
-g.font=`bold ${fs}px monospace`;
-g.textBaseline='top';
-
-const T=(s,x,y,al,c)=>{
-g.textAlign=al;
-
-g.fillStyle='#000';
-g.fillText(
-s,
-x+1.5,
-y+1.5
-);
-
-g.fillStyle=c||'#d6cfb6';
-g.fillText(s,x,y)
-};
-
-const alive=
-queue.length+
-orcs.filter(o=>o.st!=='dead').length;
-
-T(
-'WAVE: '+String(wave).padStart(2,'0'),
-pad,
-pad,
-'left'
-);
-
-T(
-'ORCS SLAIN: '+kills,
-pad,
-pad+fs*1.4,
-'left',
-'#a9a48f'
-);
-
-T(
-'GOLD: '+goldTotal2(),
-pad,
-pad+fs*2.8,
-'left',
-'#d8b24c'
-);
-
-T(
-`CASTLE: ${Math.max(0,Math.ceil(hp))} / ${maxHP}`,
-W-pad,
-pad,
-'right',
-hp<maxHP*.3?'#d8553f':'#d6cfb6'
-);
-
-const bwid=Math.min(W*.3,U*.4),
-bx=W-pad-bwid,
-by=pad+fs*1.35;
-
-g.fillStyle='rgba(0,0,0,.6)';
-
-g.fillRect(
-bx-2,
-by-2,
-bwid+4,
-fs*.5+4
-);
-
-g.fillStyle=
-hp<maxHP*.3
-?'#a8352a'
-:'#7c8a54';
-
-g.fillRect(
-bx,
-by,
-bwid*clamp(hp/maxHP,0,1),
-fs*.5
-);
-
-T(
-'ORCS: '+alive,
-W-pad,
-by+fs*.9,
-'right',
-'#a9a48f'
-)
-}
-
-const goldTotal2=()=>gold;
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
 
 
-/* ================= RETICLE ================= */
+    ctx.textAlign =
+        "center";
 
-function reticle(){
+    ctx.fillStyle =
+        wallHP <= 0
+        ? "#a8453b"
+        : "#d5c28e";
 
-if(
-st==='menu'||
-st==='over'||
-st==='win'||
-st==='shop'
-)return;
+    ctx.font =
+        "bold 34px monospace";
 
-const r=U*.022*(1.5-p*.6),
-a=Math.PI*2*p;
+    ctx.fillText(
+        wallHP <= 0
+        ? "THE WALL HAS FALLEN"
+        : "THE LAST WALL STANDS",
+        width/2,
+        height*.43
+    );
 
-g.save();
 
-g.lineWidth=2;
-g.strokeStyle='rgba(0,0,0,.7)';
+    ctx.fillStyle =
+        "#ddd";
 
-g.beginPath();
-g.arc(mx,my,r,0,7);
-g.stroke();
+    ctx.font =
+        "bold 18px monospace";
 
-g.strokeStyle=
-p>=1
-?'#ffd36a'
-:'#e6dcb4';
+    ctx.fillText(
+        "WAVE " + wave,
+        width/2,
+        height*.51
+    );
 
-g.lineWidth=1.6;
+    ctx.fillText(
+        "KILLS " + kills,
+        width/2,
+        height*.56
+    );
 
-g.beginPath();
-g.arc(mx,my,r,0,7);
-g.stroke();
+    ctx.fillText(
+        "SCORE " + score,
+        width/2,
+        height*.61
+    );
 
-if(p>0){
-
-g.strokeStyle='#ffd36a';
-g.lineWidth=3;
-
-g.beginPath();
-
-g.arc(
-mx,
-my,
-r+5,
--Math.PI/2,
--Math.PI/2+a
-);
-
-g.stroke()
-}
-
-g.strokeStyle='#e6dcb4';
-g.lineWidth=1.6;
-
-g.beginPath();
-
-[
-[-1,0],
-[1,0],
-[0,-1],
-[0,1]
-].forEach(d=>{
-
-g.moveTo(
-mx+d[0]*r*.5,
-my+d[1]*r*.5
-);
-
-g.lineTo(
-mx+d[0]*r*1.5,
-my+d[1]*r*1.5
-)
-});
-
-g.stroke();
-
-g.fillStyle='#e6dcb4';
-
-g.fillRect(
-mx-1,
-my-1,
-2,
-2
-);
-
-g.restore()
 }
 
 
-/* ================= RENDER ================= */
+/* =========================================================
+   RENDER
+   ========================================================= */
 
 function render(){
 
-g.clearRect(0,0,W,H);
-
-g.save();
-
-if(shake>.2)
-g.translate(
-Math.round(rnd(-shake,shake)),
-Math.round(rnd(-shake,shake))
-);
-
-g.drawImage(bg,0,0,W,H);
-
-const os=
-orcs.slice().sort((a,b)=>b.z-a.z);
-
-let oi=0;
-
-for(const it of items){
-
-while(
-oi<os.length&&
-os[oi].z>=it.z
-)
-drawOrc(os[oi++]);
-
-drawItem(it)
-}
-
-while(oi<os.length)
-drawOrc(os[oi++]);
-
-g.drawImage(
-back,
-0,
-0,
-W,
-H
-);
-
-drawArcher();
-
-for(const a of arrows)
-drawArrow(a);
-
-g.drawImage(
-front,
-0,
-0,
-W,
-H
-);
-
-const tp=torches();
-
-tp.forEach((q,i)=>
-flame(q.x,q.y,q.s,i)
-);
-
-flags();
-
-g.save();
-
-for(const f of fogB){
-
-f.x=
-(f.x+f.v*.016+1.3)%1.6-.3;
-
-g.globalAlpha=f.a;
-
-const w=W*f.r*2;
-
-g.drawImage(
-fogS,
-f.x*W*1.0-w/2+W*.15,
-f.y*H-w*.12,
-w,
-w*.25
-)
-}
-
-g.restore();
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
 
 
-/* particles */
-
-g.save();
-
-g.globalCompositeOperation='lighter';
-
-for(const m of mot){
-
-g.fillStyle=
-`rgba(190,200,180,${.12+.1*m.s})`;
-
-g.fillRect(
-m.x*W,
-m.y*H*.9+H*.1,
-1.4,
-1.4
-)
-}
-
-g.restore();
+    drawBackground();
 
 
-for(const f of parts){
+    /* enemies behind wall */
 
-const a=f.life/f.max;
+    for(const enemy of enemies){
 
-if(f.type==='t'){
+        if(!enemy.dead)
+            drawEnemy(enemy);
 
-g.globalAlpha=a;
+    }
 
-g.font=
-`bold ${Math.max(7,U*.03*f.sz)}px monospace`;
 
-g.textAlign='center';
+    /* archer */
 
-g.fillStyle='#000';
+    if(gameStarted)
+        drawArcher();
 
-g.fillText(
-f.txt,
-f.x+1,
-f.y+1
-);
 
-g.fillStyle=f.col;
+    /* wall */
 
-g.fillText(
-f.txt,
-f.x,
-f.y
-);
+    drawWall();
 
-g.globalAlpha=1
+
+    /* arrows */
+
+    for(const arrow of arrows)
+        drawArrow(arrow);
+
+
+    drawUI();
+
+    drawEnd();
+
+
+    /* crosshair */
+
+    if(
+        gameStarted &&
+        !gameOver
+    ){
+
+        ctx.strokeStyle =
+            "#ded5b5";
+
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            mouseX,
+            mouseY,
+            11,
+            0,
+            Math.PI*2
+        );
+
+        ctx.stroke();
+
+        ctx.fillStyle =
+            "#ded5b5";
+
+        ctx.fillRect(
+            mouseX-2,
+            mouseY-2,
+            4,
+            4
+        );
+
+    }
 
 }
 
-else if(f.type==='e'){
 
-g.save();
+/* =========================================================
+   MAIN LOOP
+   ========================================================= */
 
-g.globalCompositeOperation='lighter';
+function gameLoop(now){
 
-g.fillStyle=
-`rgba(${f.col},${a})`;
+    const dt =
+        Math.min(
+            .033,
+            (now-lastTime)/1000
+        );
 
-g.fillRect(
-f.x,
-f.y,
-f.sz,
-f.sz
-);
+    lastTime = now;
 
-g.restore()
+    update(dt);
+
+    render();
+
+    requestAnimationFrame(
+        gameLoop
+    );
 
 }
 
-else{
 
-g.globalAlpha=a;
+/* =========================================================
+   START
+   ========================================================= */
 
-g.fillStyle=f.col;
-
-g.fillRect(
-f.x-f.sz/2,
-f.y-f.sz/2,
-f.sz*1.4,
-f.sz*1.4
-);
-
-g.globalAlpha=1
-}
-}
-
-g.restore();
-
-g.drawImage(
-vig,
-0,
-0,
-W,
-H
-);
-
-if(st!=='menu'){
-
-hud();
-
-if(banT>0&&banTxt){
-
-const a=Math.min(
-1,
-banT*1.5,
-(3-banT)*3+.0
-);
-
-g.save();
-
-g.globalAlpha=
-clamp(
-Math.min(banT,1),
-0,
-1
-);
-
-g.textAlign='center';
-g.textBaseline='middle';
-
-g.font=
-`bold ${Math.max(14,U*.1)}px monospace`;
-
-g.fillStyle='#000';
-
-g.fillText(
-banTxt,
-W/2+3,
-H*.2+3
-);
-
-g.fillStyle=
-banTxt==='WAVE CLEARED'||
-banTxt==='CASTLE DEFENDED'
-?'#d8c27a'
-:'#c9402e';
-
-g.fillText(
-banTxt,
-W/2,
-H*.2
-);
-
-g.restore()
-}
-}
-
-reticle();
-
-out.imageSmoothingEnabled=false;
-
-out.drawImage(
-lo,
-0,
-0,
-W,
-H,
-0,
-0,
-cv.width,
-cv.height
-)
-}
-
-
-/* ================= INPUT ================= */
-
-const keys={};
-
-addEventListener(
-'keydown',
-e=>{
-
-keys[e.code]=1;
-
-if(e.code==='KeyM'){
-
-mute=!mute;
-
-if(master)
-master.gain.value=
-mute?0:.55
-}
-
-if(
-['ArrowLeft','ArrowRight','Space']
-.includes(e.code)
-)
-e.preventDefault();
-
-if(
-e.code==='Space'&&!e.repeat
-)
-startDraw()
-}
-);
-
-addEventListener(
-'keyup',
-e=>{
-
-keys[e.code]=0;
-
-if(e.code==='Space')
-release()
-}
-);
-
-cv.addEventListener(
-'mousemove',
-e=>{
-mx=e.clientX/ps;
-my=e.clientY/ps
-}
-);
-
-cv.addEventListener(
-'mousedown',
-e=>{
-
-if(e.button===0){
-
-mx=e.clientX/ps;
-my=e.clientY/ps;
-
-startDraw()
-}
-});
-
-addEventListener(
-'mouseup',
-e=>{
-
-if(e.button===0)
-release()
-}
-);
-
-cv.addEventListener(
-'contextmenu',
-e=>e.preventDefault()
-);
-
-
-let tl=null;
-
-cv.addEventListener(
-'touchstart',
-e=>{
-
-const q=e.changedTouches[0];
-
-tl={
-id:q.identifier,
-x:q.clientX,
-y:q.clientY
-};
-
-e.preventDefault()
-
-},
-{passive:false}
-);
-
-cv.addEventListener(
-'touchmove',
-e=>{
-
-for(const q of e.changedTouches)
-
-if(tl&&q.identifier===tl.id){
-
-mx=clamp(
-mx+(q.clientX-tl.x)/ps*1.7,
-0,
-W
-);
-
-my=clamp(
-my+(q.clientY-tl.y)/ps*1.7,
-0,
-H
-);
-
-tl.x=q.clientX;
-tl.y=q.clientY
-}
-
-e.preventDefault()
-
-},
-{passive:false}
-);
-
-cv.addEventListener(
-'touchend',
-()=>{
-tl=null
-}
-);
-
-
-const hold=(id,on,off)=>{
-
-const b=$(id);
-
-b.addEventListener(
-'pointerdown',
-e=>{
-e.preventDefault();
-
-b.setPointerCapture(
-e.pointerId
-);
-
-on()
-}
-);
-
-[
-'pointerup',
-'pointercancel'
-].forEach(n=>
-b.addEventListener(n,off)
-)
-};
-
-hold(
-'bL',
-()=>touchDir=-1,
-()=>touchDir=0
-);
-
-hold(
-'bR',
-()=>touchDir=1,
-()=>touchDir=0
-);
-
-hold(
-'bF',
-startDraw,
-release
-);
-
-if(
-'ontouchstart' in window||
-navigator.maxTouchPoints>0
-)
-$('tc').style.display='flex';
-
-
-$('bStart').onclick=()=>{
-
-initAudio();
-
-$('menu').classList.remove('on');
-
-reset();
-
-startWave(1)
-};
-
-addEventListener(
-'resize',
-resize
-);
-
-document.addEventListener(
-'visibilitychange',
-()=>{
-if(document.hidden){
-
-drawing=false;
-touchDir=0
-}
-}
-);
-
-
-/* ================= LOOP ================= */
-
-buildWorld();
-buildFog();
 resize();
 
-let last=performance.now();
-
-function loop(n){
-
-const dt=Math.min(
-.05,
-(n-last)/1000
+requestAnimationFrame(
+    gameLoop
 );
 
-last=n;
 
-update(dt);
-render();
+/* =========================================================
+   DEBUG-SAFE START
+   ========================================================= */
 
-requestAnimationFrame(loop)
-}
+/*
+   Даже если GitHub загрузит страницу с задержкой,
+   обработчик кнопки уже установлен.
+*/
 
-requestAnimationFrame(loop);
+startButton.addEventListener(
+    "touchend",
+    e=>{
 
-})();
+        e.preventDefault();
+
+        startGame();
+
+    },
+    {passive:false}
+);
+
 </script>
+
 </body>
 </html>
